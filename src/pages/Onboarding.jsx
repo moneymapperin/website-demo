@@ -4,74 +4,144 @@ import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Logo } from '../components/AppShell'
+import client from '../api/client'
+import { useToast } from '../context/ToastContext'
 
 const steps = [
   {
     id: 1,
-    title: 'Identity basics',
+    title: 'Identity',
     fields: [
-      { key: 'name', label: 'Full name', placeholder: 'Rahul Sharma' },
-      { key: 'age', label: 'Age', placeholder: '28', type: 'number' },
+      { key: 'fullName', label: 'Full name', placeholder: 'Rahul Sharma' },
+      { key: 'mobile', label: 'Mobile', placeholder: '+91 98765 43210' },
       { key: 'city', label: 'City', placeholder: 'Bengaluru' },
+      { key: 'employmentType', label: 'Employment Type', placeholder: 'Salaried' },
     ],
   },
   {
     id: 2,
-    title: 'Income sources',
+    title: 'Income',
     fields: [
-      { key: 'activeIncome', label: 'Active income (₹/mo)', placeholder: '100000', type: 'number' },
-      { key: 'passiveIncome', label: 'Passive income (₹/mo)', placeholder: '25000', type: 'number' },
+      { key: 'monthlyActiveIncome', label: 'Monthly Active Income (₹)', placeholder: '100000', type: 'number' },
+      { key: 'hasPassiveIncome', label: 'Has Passive Income?', placeholder: 'true', type: 'text' },
+      { key: 'passiveIncomeAmount', label: 'Passive Income Amount (₹)', placeholder: '25000', type: 'number' },
     ],
   },
   {
     id: 3,
-    title: 'Monthly expenses',
+    title: 'Expenses',
     fields: [
-      { key: 'fixedExpenses', label: 'Fixed amount (₹)', placeholder: '42000', type: 'number' },
-      { key: 'flexibleExpenses', label: 'Flexible amount (₹)', placeholder: '26000', type: 'number' },
-      { key: 'currentSavings', label: 'Current savings (₹)', placeholder: '185000', type: 'number' },
+      { key: 'monthlyFixedExpenses', label: 'Monthly Fixed Expenses (₹)', placeholder: '42000', type: 'number' },
+      { key: 'monthlyVariableExpenses', label: 'Monthly Variable Expenses (₹)', placeholder: '26000', type: 'number' },
+      { key: 'totalEmi', label: 'Total EMI (₹)', placeholder: '25000', type: 'number' },
     ],
   },
   {
     id: 4,
-    title: 'Insurance',
+    title: 'Emergency Fund',
     fields: [
-      { key: 'termCover', label: 'Term cover (₹)', placeholder: '5000000', type: 'number' },
-      { key: 'healthCover', label: 'Health cover (₹)', placeholder: '500000', type: 'number' },
+      { key: 'hasEmergencyFund', label: 'Has Emergency Fund?', placeholder: 'true', type: 'text' },
+      { key: 'emergencyFundRange', label: 'Emergency Fund Range', placeholder: '1-3L' },
     ],
   },
   {
     id: 5,
-    title: 'Investments',
+    title: 'Protection',
     fields: [
-      { key: 'equity', label: 'Equity amount (₹)', placeholder: '552000', type: 'number' },
-      { key: 'debt', label: 'Debt amount (₹)', placeholder: '276000', type: 'number' },
-      { key: 'monthlySip', label: 'Monthly SIP (₹)', placeholder: '15000', type: 'number' },
+      { key: 'hasHealthInsurance', label: 'Has Health Insurance?', placeholder: 'true', type: 'text' },
+      { key: 'healthCover', label: 'Health cover (₹)', placeholder: '500000', type: 'number' },
+      { key: 'hasTermPlan', label: 'Has Term Plan?', placeholder: 'true', type: 'text' },
+      { key: 'termCover', label: 'Term cover (₹)', placeholder: '5000000', type: 'number' },
+    ],
+  },
+  {
+    id: 6,
+    title: 'Investment',
+    fields: [
+      { key: 'doesInvest', label: 'Do you invest?', placeholder: 'true', type: 'text' },
+      { key: 'monthlyInvestment', label: 'Monthly Investment (₹)', placeholder: '15000', type: 'number' },
+      { key: 'existingPortfolio', label: 'Existing Portfolio (₹)', placeholder: '920000', type: 'number' },
     ],
   },
 ]
 
 export default function Onboarding() {
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const [step, setStep] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
-    name: 'Rahul Sharma',
-    age: '28',
+    fullName: 'Rahul Sharma',
+    mobile: '+91 98765 43210',
     city: 'Bengaluru',
-    activeIncome: '100000',
-    passiveIncome: '25000',
-    fixedExpenses: '42000',
-    flexibleExpenses: '26000',
-    currentSavings: '185000',
-    termCover: '5000000',
+    employmentType: 'Salaried',
+    monthlyActiveIncome: '100000',
+    hasPassiveIncome: 'true',
+    passiveIncomeAmount: '25000',
+    monthlyFixedExpenses: '42000',
+    monthlyVariableExpenses: '26000',
+    totalEmi: '25000',
+    hasEmergencyFund: 'true',
+    emergencyFundRange: '1-3L',
+    hasHealthInsurance: 'true',
     healthCover: '500000',
-    equity: '552000',
-    debt: '276000',
-    monthlySip: '15000',
+    hasTermPlan: 'true',
+    termCover: '5000000',
+    doesInvest: 'true',
+    monthlyInvestment: '15000',
+    existingPortfolio: '920000',
   })
 
   const isReview = step === steps.length
   const current = steps[step]
+
+  const handleSubmit = async () => {
+    setLoading(true)
+    try {
+      // Map form values to appropriate types for the backend
+      const payload = {
+        identity: {
+          fullName: form.fullName,
+          mobile: form.mobile,
+          city: form.city,
+          employmentType: form.employmentType,
+        },
+        income: {
+          monthlyActiveIncome: Number(form.monthlyActiveIncome) || 0,
+          hasPassiveIncome: form.hasPassiveIncome === 'true',
+          passiveIncomeAmount: Number(form.passiveIncomeAmount) || 0,
+        },
+        expenses: {
+          monthlyFixedExpenses: Number(form.monthlyFixedExpenses) || 0,
+          monthlyVariableExpenses: Number(form.monthlyVariableExpenses) || 0,
+          totalEmi: Number(form.totalEmi) || 0,
+        },
+        emergencyFund: {
+          hasEmergencyFund: form.hasEmergencyFund === 'true',
+          emergencyFundRange: form.emergencyFundRange,
+        },
+        protection: {
+          hasHealthInsurance: form.hasHealthInsurance === 'true',
+          healthCover: Number(form.healthCover) || 0,
+          hasTermPlan: form.hasTermPlan === 'true',
+          termCover: Number(form.termCover) || 0,
+        },
+        investment: {
+          doesInvest: form.doesInvest === 'true',
+          monthlyInvestment: Number(form.monthlyInvestment) || 0,
+          existingPortfolio: Number(form.existingPortfolio) || 0,
+        }
+      }
+
+      await client.post('/api/monthly/onboard', payload)
+      showToast('Onboarding complete!')
+      navigate('/dashboard')
+    } catch (err) {
+      showToast('Failed to save onboarding data', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-4 py-10">
@@ -113,7 +183,7 @@ export default function Onboarding() {
           <>
             <h1 className="text-xl font-extrabold">Review & Submit</h1>
             <p className="mt-1 text-sm text-text-secondary">
-              Confirm your details. Submit navigates to dashboard (no real save).
+              Confirm your details.
             </p>
             <dl className="mt-4 space-y-2 text-sm">
               {Object.entries(form).map(([k, v]) => (
@@ -137,7 +207,9 @@ export default function Onboarding() {
           {!isReview ? (
             <Button onClick={() => setStep((s) => s + 1)}>Next</Button>
           ) : (
-            <Button onClick={() => navigate('/dashboard')}>Submit</Button>
+            <Button onClick={handleSubmit} disabled={loading}>
+              {loading ? 'Submitting...' : 'Submit'}
+            </Button>
           )}
         </div>
       </Card>

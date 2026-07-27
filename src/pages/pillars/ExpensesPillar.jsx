@@ -1,68 +1,42 @@
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { useCallback } from 'react'
 import { ScoreGauge } from '../../components/ScoreGauge'
 import { PillarLayout } from '../../components/PillarLayout'
 import { Card } from '../../components/ui/Card'
-import { pillarsData } from '../../mockData/pillars'
-import { formatINR } from '../../utils/helpers'
+import { useApi } from '../../hooks/useApi'
+import client from '../../api/client'
 
 export default function ExpensesPillar() {
-  const d = pillarsData.expenses
-  const chartData = [
-    { name: 'Fixed', value: d.fixedPct, amount: d.fixed },
-    { name: 'Flexible', value: d.flexiblePct, amount: d.flexible },
-    { name: 'Savings', value: d.savingsPct, amount: d.savings },
-  ]
+  const fetchDashboard = useCallback(() => client.get('/api/dashboard'), [])
+  const { data, loading, error, execute } = useApi(fetchDashboard)
+
+  if (loading) return <div className="flex min-h-[50vh] items-center justify-center animate-pulse">Loading pillar...</div>
+  if (error || !data) return (
+    <div className="flex flex-col items-center justify-center space-y-4 py-20">
+      <p className="font-semibold text-danger">{error || 'Failed to load'}</p>
+      <button onClick={execute} className="text-primary hover:underline">Retry</button>
+    </div>
+  )
+
+  const d = data.pillars?.expenses
+  if (!d) return <div className="py-20 text-center">Pillar data not found.</div>
 
   return (
     <PillarLayout
-      title={d.title}
-      headerColor={d.headerColor}
-      scoreRing={<ScoreGauge score={d.score} size={160} />}
-      gap={d.gap}
+      title={d.title || 'Expenses'}
+      headerColor={d.headerColor || '#8B5CF6'}
+      scoreRing={<ScoreGauge score={d.score || 0} size={160} />}
     >
       <Card>
-        <div className="text-sm font-semibold text-text-secondary">Total Monthly Expenses</div>
-        <div className="mt-1 text-3xl font-extrabold text-text-primary">
-          {formatINR(d.totalMonthlyExpenses)}
-        </div>
-      </Card>
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        {[
-          { label: 'Fixed', value: d.fixed, pct: d.fixedPct },
-          { label: 'Flexible', value: d.flexible, pct: d.flexiblePct },
-          { label: 'Savings', value: d.savings, pct: d.savingsPct },
-        ].map((item) => (
-          <Card key={item.label}>
-            <div className="text-xs font-semibold text-text-secondary">{item.label}</div>
-            <div className="mt-1 text-lg font-extrabold">{formatINR(item.value)}</div>
-            <div className="text-xs text-text-secondary">{item.pct}%</div>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <h2 className="mb-4 font-bold text-text-primary">Expense Mix</h2>
-        <div className="h-56">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip
-                formatter={(v, _n, props) => [`${v}% (${formatINR(props.payload.amount)})`, 'Share']}
-              />
-              <Bar dataKey="value" fill="#8B5CF6" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <h2 className="mb-4 font-bold text-text-primary">Expense Factors</h2>
+        <div className="space-y-4">
+          {d.factors && Object.entries(d.factors).map(([key, val]) => (
+            <div key={key}>
+              <div className="mb-1 flex justify-between text-sm">
+                <span className="font-semibold capitalize text-text-primary">{key}</span>
+                <span className="text-text-secondary">{val}/100</span>
+              </div>
+            </div>
+          ))}
         </div>
       </Card>
     </PillarLayout>

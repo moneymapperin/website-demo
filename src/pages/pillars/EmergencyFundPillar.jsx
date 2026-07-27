@@ -1,99 +1,50 @@
-import { useState } from 'react'
+import { useCallback } from 'react'
 import { ScoreGauge } from '../../components/ScoreGauge'
 import { PillarLayout } from '../../components/PillarLayout'
 import { Card } from '../../components/ui/Card'
-import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
-import { Modal } from '../../components/ui/Modal'
-import { pillarsData } from '../../mockData/pillars'
-import { formatINR } from '../../utils/helpers'
-import { useToast } from '../../context/ToastContext'
+import { useApi } from '../../hooks/useApi'
+import client from '../../api/client'
 
 export default function EmergencyFundPillar() {
-  const initial = pillarsData.emergencyFund
-  const [fund, setFund] = useState(initial.currentFund)
-  const [amount, setAmount] = useState('')
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const { showToast } = useToast()
+  const fetchDashboard = useCallback(() => client.get('/api/dashboard'), [])
+  const { data, loading, error, execute } = useApi(fetchDashboard)
 
-  const target = initial.targetFund
-  const completionPct = Math.min(Math.round((fund / target) * 100), 100)
-  const shortfall = Math.max(target - fund, 0)
+  if (loading) return <div className="flex min-h-[50vh] items-center justify-center animate-pulse">Loading pillar...</div>
+  if (error || !data) return (
+    <div className="flex flex-col items-center justify-center space-y-4 py-20">
+      <p className="font-semibold text-danger">{error || 'Failed to load'}</p>
+      <button onClick={execute} className="text-primary hover:underline">Retry</button>
+    </div>
+  )
 
-  const confirmAdd = () => {
-    const n = Number(amount)
-    if (!n || n <= 0) return
-    setFund((f) => f + n)
-    setAmount('')
-    setConfirmOpen(false)
-    showToast(`Added ${formatINR(n)} to Emergency Fund`)
-  }
+  const d = data.pillars?.emergency
+  if (!d) return <div className="py-20 text-center">Pillar data not found.</div>
 
   return (
     <PillarLayout
-      title={initial.title}
-      headerColor={initial.headerColor}
-      scoreRing={<ScoreGauge score={initial.score} size={160} />}
-      gap={`Shortfall of ${formatINR(shortfall)} to reach ${initial.targetMonths}-month cover.`}
+      title={d.title || 'Emergency Fund'}
+      headerColor={d.headerColor || '#F59E0B'}
+      scoreRing={<ScoreGauge score={d.score || 0} size={160} />}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Card>
-          <div className="text-sm font-semibold text-text-secondary">Current Estimated Fund</div>
-          <div className="mt-1 text-2xl font-extrabold">{formatINR(fund)}</div>
-          <div className="mt-1 text-xs text-text-secondary">
-            ~{((fund / (target / initial.targetMonths))).toFixed(1)} months covered
-          </div>
-        </Card>
-        <Card>
-          <div className="text-sm font-semibold text-text-secondary">Target Fund</div>
-          <div className="mt-1 text-2xl font-extrabold">{formatINR(target)}</div>
-          <div className="mt-1 text-xs text-text-secondary">{initial.targetMonths} months of expenses</div>
-        </Card>
-      </div>
-
       <Card>
-        <div className="mb-2 flex justify-between text-sm">
-          <span className="font-bold text-text-primary">Fund Completion</span>
-          <span className="font-semibold text-warning">{completionPct}%</span>
-        </div>
-        <div className="h-3 overflow-hidden rounded-full bg-border">
-          <div className="h-full rounded-full bg-warning" style={{ width: `${completionPct}%` }} />
-        </div>
-      </Card>
-
-      <Card>
-        <h2 className="mb-3 font-bold text-text-primary">Add to Emergency Fund</h2>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Input
-            label="Amount (₹)"
-            type="number"
-            placeholder="e.g. 5000"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-          <div className="flex items-end">
-            <Button className="w-full sm:w-auto" onClick={() => amount && setConfirmOpen(true)}>
-              Confirm Add
-            </Button>
+        <h2 className="mb-4 font-bold text-text-primary">Fund Factors</h2>
+        <div className="space-y-4">
+          {d.factors && Object.entries(d.factors).map(([key, val]) => (
+            <div key={key}>
+              <div className="mb-1 flex justify-between text-sm">
+                <span className="font-semibold capitalize text-text-primary">{key}</span>
+                <span className="text-text-secondary">{val}/100</span>
+              </div>
+            </div>
+          ))}
+          <div className="mt-4">
+            <div className="mb-1 flex justify-between text-sm">
+              <span className="font-semibold text-text-primary">Coverage Months</span>
+              <span className="text-text-secondary">{d.coverageMonths} months</span>
+            </div>
           </div>
         </div>
       </Card>
-
-      <Modal
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        title="Confirm contribution"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setConfirmOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={confirmAdd}>Confirm</Button>
-          </>
-        }
-      >
-        Add {formatINR(Number(amount) || 0)} to your emergency fund? (local mock only)
-      </Modal>
     </PillarLayout>
   )
 }

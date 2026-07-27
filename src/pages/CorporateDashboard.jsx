@@ -13,7 +13,9 @@ import {
 import { Card } from '../components/ui/Card'
 import { ScoreGauge } from '../components/ScoreGauge'
 import { corporateData } from '../mockData/corporate'
-import { Link } from 'react-router-dom'
+// TODO: wire to real endpoint when available
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function CorporateDashboard() {
   const d = corporateData

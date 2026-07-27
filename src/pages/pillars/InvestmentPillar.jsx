@@ -1,80 +1,44 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { useCallback } from 'react'
 import { ScoreGauge } from '../../components/ScoreGauge'
 import { PillarLayout } from '../../components/PillarLayout'
 import { Card } from '../../components/ui/Card'
-import { pillarsData } from '../../mockData/pillars'
-import { formatINR } from '../../utils/helpers'
-
-const COLORS = ['#4F46E5', '#10B981', '#F59E0B']
+import { useApi } from '../../hooks/useApi'
+import client from '../../api/client'
 
 export default function InvestmentPillar() {
-  const d = pillarsData.investment
-  const pieData = [
-    { name: 'Equity', value: d.equityPct },
-    { name: 'Debt', value: d.debtPct },
-    { name: 'Gold', value: d.goldPct },
-  ]
+  const fetchDashboard = useCallback(() => client.get('/api/dashboard'), [])
+  const { data, loading, error, execute } = useApi(fetchDashboard)
+
+  if (loading) return <div className="flex min-h-[50vh] items-center justify-center animate-pulse">Loading pillar...</div>
+  if (error || !data) return (
+    <div className="flex flex-col items-center justify-center space-y-4 py-20">
+      <p className="font-semibold text-danger">{error || 'Failed to load'}</p>
+      <button onClick={execute} className="text-primary hover:underline">Retry</button>
+    </div>
+  )
+
+  const d = data.pillars?.investment
+  if (!d) return <div className="py-20 text-center">Pillar data not found.</div>
 
   return (
     <PillarLayout
-      title={d.title}
-      headerColor={d.headerColor}
-      scoreRing={<ScoreGauge score={d.score} size={160} />}
-      gap={`Monthly SIP shortfall of ${formatINR(d.sipShortfall)}. Current SIP ${formatINR(d.monthlySip)} vs recommended ${formatINR(d.recommendedSip)}.`}
+      title={d.title || 'Investment'}
+      headerColor={d.headerColor || '#EF4444'}
+      scoreRing={<ScoreGauge score={d.score || 0} size={160} />}
     >
       <Card>
-        <div className="text-sm font-semibold text-text-secondary">Total Wealth Assets</div>
-        <div className="mt-1 text-3xl font-extrabold">{formatINR(d.totalWealth)}</div>
-      </Card>
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        {[
-          { label: 'Equity', value: d.equity, pct: d.equityPct },
-          { label: 'Debt', value: d.debt, pct: d.debtPct },
-          { label: 'Gold', value: d.gold, pct: d.goldPct },
-        ].map((item) => (
-          <Card key={item.label}>
-            <div className="text-xs font-semibold text-text-secondary">{item.label}</div>
-            <div className="mt-1 text-lg font-extrabold">{formatINR(item.value)}</div>
-            <div className="text-xs text-text-secondary">{item.pct}%</div>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <h2 className="mb-2 font-bold text-text-primary">Allocation Breakdown</h2>
-        <div className="h-56">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={3}>
-                {pieData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(v) => [`${v}%`, 'Allocation']} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex flex-wrap justify-center gap-4 text-xs font-semibold">
-          {pieData.map((p, i) => (
-            <span key={p.name} className="flex items-center gap-1.5 text-text-secondary">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLORS[i] }} />
-              {p.name} {p.value}%
-            </span>
+        <h2 className="mb-4 font-bold text-text-primary">Investment Factors</h2>
+        <div className="space-y-4">
+          {d.factors && Object.entries(d.factors).map(([key, val]) => (
+            <div key={key}>
+              <div className="mb-1 flex justify-between text-sm">
+                <span className="font-semibold capitalize text-text-primary">{key}</span>
+                <span className="text-text-secondary">{val}/100</span>
+              </div>
+            </div>
           ))}
         </div>
       </Card>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Card className="border-success/30">
-          <div className="text-xs font-bold text-success">Monthly SIP</div>
-          <div className="mt-1 text-2xl font-extrabold">{formatINR(d.monthlySip)}</div>
-        </Card>
-        <Card className="border-danger/30">
-          <div className="text-xs font-bold text-danger">Monthly Shortfall</div>
-          <div className="mt-1 text-2xl font-extrabold">{formatINR(d.sipShortfall)}</div>
-        </Card>
-      </div>
     </PillarLayout>
   )
 }

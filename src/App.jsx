@@ -1,7 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './context/ToastContext'
+import { AuthProvider } from './context/AuthContext'
+import { ProtectedRoute } from './components/ProtectedRoute'
 import { AppShell } from './components/AppShell'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { PreviewBanner } from './components/PreviewBanner'
+import NotFound from './pages/NotFound'
 
 import Dashboard from './pages/Dashboard'
 import WeeklyTracker from './pages/WeeklyTracker'
@@ -22,7 +27,6 @@ import Onboarding from './pages/Onboarding'
 import Splash from './pages/auth/Splash'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
-import VerifyOtp from './pages/auth/VerifyOtp'
 import ResetPassword from './pages/auth/ResetPassword'
 import CorporateLogin from './pages/auth/CorporateLogin'
 import CorporateDashboard from './pages/CorporateDashboard'
@@ -53,31 +57,38 @@ function AppRoutes() {
   const routes = (
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/weekly" element={<WeeklyTracker />} />
-      <Route path="/recommendations" element={<Recommendations />} />
-      <Route path="/recommendations/mutual-funds" element={<MutualFunds />} />
-      <Route path="/recommendations/insurance" element={<InsuranceRecs />} />
-      <Route path="/recommendations/savings" element={<SavingsRecs />} />
-      <Route path="/pillars/income" element={<IncomePillar />} />
-      <Route path="/pillars/expenses" element={<ExpensesPillar />} />
-      <Route path="/pillars/emergency-fund" element={<EmergencyFundPillar />} />
-      <Route path="/pillars/protection" element={<ProtectionPillar />} />
-      <Route path="/pillars/investment" element={<InvestmentPillar />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/profile/master-data" element={<MasterData />} />
-      <Route path="/achievements" element={<Achievements />} />
-      <Route path="/leaderboard" element={<Leaderboard />} />
-      <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/splash" element={<Splash />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/corporate-login" element={<CorporateLogin />} />
-      <Route path="/corporate-dashboard" element={<CorporateDashboard />} />
       <Route path="/privacy" element={<Privacy />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/weekly" element={<WeeklyTracker />} />
+        <Route path="/recommendations" element={<Recommendations />} />
+        <Route path="/recommendations/mutual-funds" element={<MutualFunds />} />
+        <Route path="/recommendations/insurance" element={<InsuranceRecs />} />
+        <Route path="/recommendations/savings" element={<SavingsRecs />} />
+        <Route path="/pillars/income" element={<IncomePillar />} />
+        <Route path="/pillars/expenses" element={<ExpensesPillar />} />
+        <Route path="/pillars/emergency-fund" element={<EmergencyFundPillar />} />
+        <Route path="/pillars/protection" element={<ProtectionPillar />} />
+        <Route path="/pillars/investment" element={<InvestmentPillar />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/master-data" element={<MasterData />} />
+        <Route path="/achievements" element={<Achievements />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+      </Route>
+
+      <Route element={<ProtectedRoute requireCorporate={true} />}>
+        <Route path="/corporate-dashboard" element={<CorporateDashboard />} />
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 
@@ -90,12 +101,17 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </ToastProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ThemeProvider>
+          <ToastProvider>
+            <BrowserRouter>
+              <PreviewBanner />
+              <AppRoutes />
+            </BrowserRouter>
+          </ToastProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }

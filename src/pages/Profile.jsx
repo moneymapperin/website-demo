@@ -1,23 +1,34 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import { DarkModeToggle } from '../components/AppShell'
-import { currentUser } from '../mockData/user'
 import { useTheme } from '../context/ThemeContext'
 import { useToast } from '../context/ToastContext'
+import { useAuth } from '../context/AuthContext'
 
 export default function Profile() {
   const { darkMode } = useTheme()
   const { showToast } = useToast()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [reminders, setReminders] = useState(true)
   const [aboutOpen, setAboutOpen] = useState(false)
-  const [exportOpen, setExportOpen] = useState(false)
   const [logoutOpen, setLogoutOpen] = useState(false)
 
   const rowClass =
     'flex w-full items-center justify-between rounded-2xl border border-border bg-card px-4 py-3.5 text-left text-sm font-semibold text-text-primary transition hover:border-primary/40'
+
+  const handleLogout = () => {
+    setLogoutOpen(false)
+    logout()
+    navigate('/login')
+  }
+
+  // Fallback if user object doesn't have some fields
+  const displayUser = user || { name: 'User', email: '', city: '' }
+  const avatarInitials = displayUser.name ? displayUser.name.substring(0, 2).toUpperCase() : 'U'
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
@@ -25,12 +36,12 @@ export default function Profile() {
 
       <Card className="flex items-center gap-4">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-xl font-extrabold text-white">
-          {currentUser.avatarInitials}
+          {avatarInitials}
         </div>
         <div>
-          <div className="text-lg font-extrabold">{currentUser.name}</div>
-          <div className="text-sm text-text-secondary">{currentUser.email}</div>
-          <div className="text-xs text-text-secondary">{currentUser.city}</div>
+          <div className="text-lg font-extrabold">{displayUser.name || 'Financial Fitness User'}</div>
+          <div className="text-sm text-text-secondary">{displayUser.email}</div>
+          <div className="text-xs text-text-secondary">{displayUser.city || 'India'}</div>
         </div>
       </Card>
 
@@ -76,10 +87,6 @@ export default function Profile() {
           <span>About MoneyMapper</span>
           <span className="text-text-secondary">→</span>
         </button>
-        <button type="button" className={rowClass} onClick={() => setExportOpen(true)}>
-          <span>Export Financial Profile</span>
-          <span className="text-text-secondary">→</span>
-        </button>
         <Link to="/privacy" className={rowClass}>
           <span>Privacy Policy</span>
           <span className="text-text-secondary">→</span>
@@ -93,39 +100,9 @@ export default function Profile() {
       <Modal open={aboutOpen} onClose={() => setAboutOpen(false)} title="About MoneyMapper">
         <p>
           MoneyMapper helps you track financial fitness across five pillars — Income, Expenses,
-          Emergency Fund, Protection, and Investment. This web UI is a static demo clone of the
-          Flutter app.
+          Emergency Fund, Protection, and Investment.
         </p>
-        <p className="mt-3">Version 1.0.0 · UI Preview</p>
-      </Modal>
-
-      <Modal
-        open={exportOpen}
-        onClose={() => setExportOpen(false)}
-        title="Export Financial Profile"
-        footer={
-          <>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setExportOpen(false)
-                showToast('CSV export queued (mock)')
-              }}
-            >
-              Export CSV
-            </Button>
-            <Button
-              onClick={() => {
-                setExportOpen(false)
-                showToast('JSON export queued (mock)')
-              }}
-            >
-              Export JSON
-            </Button>
-          </>
-        }
-      >
-        Choose a format. No real file download in this UI-only iteration.
+        <p className="mt-3">Version 1.0.0 · Production</p>
       </Modal>
 
       <Modal
@@ -137,19 +114,13 @@ export default function Profile() {
             <Button variant="ghost" onClick={() => setLogoutOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="danger"
-              onClick={() => {
-                setLogoutOpen(false)
-                showToast('Logged out (mock — still on app)', 'warning')
-              }}
-            >
+            <Button variant="danger" onClick={handleLogout}>
               Confirm Logout
             </Button>
           </>
         }
       >
-        This is a UI preview — logout will not clear a real session.
+        Are you sure you want to log out?
       </Modal>
     </div>
   )

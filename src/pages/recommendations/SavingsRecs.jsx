@@ -1,10 +1,25 @@
+import { useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
-import { savingsInstruments } from '../../mockData/recommendations'
+import { useApi } from '../../hooks/useApi'
+import client from '../../api/client'
 
 export default function SavingsRecsPage() {
+  const fetchRecs = useCallback(() => client.get('/api/ai/recommend'), [])
+  const { data, loading, error, execute } = useApi(fetchRecs)
+
+  if (loading) return <div className="flex min-h-[50vh] items-center justify-center animate-pulse">Loading AI insights...</div>
+  if (error || !data) return (
+    <div className="flex flex-col items-center justify-center space-y-4 py-20">
+      <p className="font-semibold text-danger">{error || 'Failed to load'}</p>
+      <button onClick={execute} className="text-primary hover:underline">Retry</button>
+    </div>
+  )
+
+  const { savingsInstruments = [] } = data
+
   return (
     <div className="space-y-6">
       <div>

@@ -13,9 +13,15 @@ export function AuthLayout({ title, subtitle, children, footer }) {
         <div className="rounded-3xl border border-border bg-card p-6">{children}</div>
         {footer && <div className="mt-4 text-center text-sm text-text-secondary">{footer}</div>}
         <div className="mt-6 text-center">
-          <Link to="/dashboard" className="text-xs font-semibold text-primary hover:underline">
+          <button 
+            onClick={() => {
+              localStorage.setItem('mm_preview_mode', 'true');
+              window.location.href = '/dashboard';
+            }} 
+            className="text-xs font-semibold text-primary hover:underline bg-transparent border-none cursor-pointer"
+          >
             Skip to Dashboard (UI preview)
-          </Link>
+          </button>
         </div>
       </div>
     </div>

@@ -1,9 +1,11 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AuthLayout } from '../../components/AuthLayout'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 
 export default function Register() {
+  const navigate = useNavigate()
+
   return (
     <AuthLayout
       title="Create account"
@@ -21,6 +23,7 @@ export default function Register() {
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault()
+          navigate('/dashboard')
         }}
       >
         <Input label="Full name" placeholder="Rahul Sharma" />
@@ -30,9 +33,6 @@ export default function Register() {
         <Button type="submit" className="w-full">
           Create Account
         </Button>
-        <Link to="/verify-otp" className="block text-center text-sm font-semibold text-primary hover:underline">
-          Preview OTP screen →
-        </Link>
       </form>
     </AuthLayout>
   )
