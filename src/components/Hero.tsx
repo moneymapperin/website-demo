@@ -7,7 +7,7 @@ export const Hero: React.FC = () => {
   const { openComingSoon } = useComingSoon();
 
   return (
-    <section className="relative min-h-[calc(100vh-80px)] overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
+    <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
       {/* Background Radial Glow & Ambient Lighting */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[1000px] h-[650px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/25 via-[#1a1138]/20 to-transparent blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-1/3 right-10 w-[550px] h-[550px] bg-brand-violet/15 rounded-full blur-[130px] pointer-events-none -z-10" />
@@ -116,41 +116,6 @@ export const Hero: React.FC = () => {
                     ))}
                   </div>
                   <span className="text-xs font-bold text-white/80">4.8/5</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Press Logos / FEATURED IN */}
-            <div className="w-full pt-4 border-t border-white/[0.06]">
-              <span className="block text-[11px] font-semibold uppercase tracking-widest text-white/40 mb-3">
-                FEATURED IN
-              </span>
-              <div className="flex items-center gap-3.5 sm:gap-5 lg:gap-5 xl:gap-6 flex-nowrap overflow-x-auto no-scrollbar opacity-60 hover:opacity-85 transition-opacity select-none text-white/70">
-                {/* Inc42 */}
-                <div className="flex items-baseline font-serif font-black tracking-tight text-base sm:text-lg shrink-0">
-                  <span>Inc</span>
-                  <span className="text-xs font-sans font-bold -top-1 relative ml-0.5 text-brand-purple">42</span>
-                </div>
-
-                {/* YOURSTORY */}
-                <div className="font-mono text-[11px] sm:text-xs font-bold tracking-widest border border-white/20 px-2 py-0.5 rounded-sm bg-white/5 shrink-0">
-                  [YOURSTORY]
-                </div>
-
-                {/* FINANCIAL EXPRESS */}
-                <div className="flex items-center gap-1 font-serif text-[11px] sm:text-xs font-bold tracking-wider shrink-0">
-                  <span className="text-amber-400 text-[9px]">✦</span>
-                  <span>FINANCIAL EXPRESS</span>
-                </div>
-
-                {/* moneycontrol */}
-                <div className="font-sans text-[11px] sm:text-xs font-semibold tracking-tight border border-white/20 px-2 py-0.5 rounded-full bg-white/5 shrink-0">
-                  money<span className="font-extrabold text-white">control</span>
-                </div>
-
-                {/* Bloomberg */}
-                <div className="font-sans text-xs sm:text-sm font-black tracking-tight shrink-0">
-                  Bloomberg
                 </div>
               </div>
             </div>
