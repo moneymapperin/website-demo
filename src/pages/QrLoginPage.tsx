@@ -16,8 +16,8 @@ interface WebSessionPayload {
 
 // Initialize Supabase Client
 const supabase = createClient(
-  'https://upxsmlmsqxcwknvtywgk.supabase.co', // Replace with your Supabase URL
-  'YOUR_SUPABASE_ANON_KEY'                  // Replace with your Supabase Anon Key
+  'https://upxsmlmsqxcwknvtywgk.supabase.co/rest/v1/', // Replace with your Supabase URL
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVweHNtbG1zcXhjd2tudnR5d2drIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNjc3OTQsImV4cCI6MjA5NDc0Mzc5NH0.WTim-6TNx9l8TSmKJKf5xZVN1ZAy3uMKPUyi1otCblk'                  // Replace with your Supabase Anon Key
 );
 
 export const QrLoginPage: React.FC = () => {
