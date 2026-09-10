@@ -1,7 +1,6 @@
 import { useComingSoon } from '../context/ComingSoonContext';
 import { PhoneMockup } from './PhoneMockup';
 import { FeatureCards } from './FeatureCards';
-import { Star } from 'lucide-react';
 
 export const Hero: React.FC = () => {
   const { openComingSoon } = useComingSoon();
@@ -80,44 +79,6 @@ export const Hero: React.FC = () => {
               >
                 Explore Features
               </button>
-            </div>
-
-            {/* Social Proof: Avatars + Rating */}
-            <div className="flex items-center gap-3.5 mb-12 select-none">
-              {/* Overlapping Avatars */}
-              <div className="flex items-center -space-x-2.5">
-                <img
-                  src="/images/user-avatar.jpg"
-                  alt="Member"
-                  className="w-9 h-9 rounded-full border-2 border-[#0b0a14] object-cover ring-1 ring-white/10"
-                />
-                <img
-                  src="/src/assets/mascot.png"
-                  alt="MoneyMapper Mascot"
-                  className="w-9 h-9 rounded-full border-2 border-[#0b0a14] object-contain bg-[#1c1736] p-0.5 ring-1 ring-white/10"
-                />
-                <div className="w-9 h-9 rounded-full border-2 border-[#0b0a14] bg-gradient-to-tr from-brand-violet to-brand-magenta flex items-center justify-center text-[11px] font-bold text-white ring-1 ring-white/10">
-                  +10k
-                </div>
-              </div>
-
-              {/* Text & 5-Star Row */}
-              <div className="flex flex-col text-left">
-                <span className="text-xs font-semibold text-white/90">
-                  Trusted by 10,000+ users
-                </span>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <div className="flex items-center text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-3.5 h-3.5 fill-amber-400 text-amber-400"
-                      />
-                    ))}
-                  </div>
-                  <span className="text-xs font-bold text-white/80">4.8/5</span>
-                </div>
-              </div>
             </div>
 
           </div>
