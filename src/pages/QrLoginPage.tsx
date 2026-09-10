@@ -15,10 +15,14 @@ interface WebSessionPayload {
 }
 
 // Initialize Supabase Client
-const supabase = createClient(
-  'https://upxsmlmsqxcwknvtywgk.supabase.co/rest/v1/', // Replace with your Supabase URL
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVweHNtbG1zcXhjd2tudnR5d2drIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNjc3OTQsImV4cCI6MjA5NDc0Mzc5NH0.WTim-6TNx9l8TSmKJKf5xZVN1ZAy3uMKPUyi1otCblk'                  // Replace with your Supabase Anon Key
-);
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL || 'https://upxsmlmsqxcwknvtywgk.supabase.co';
+const SUPABASE_ANON_KEY =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVweHNtbG1zcXhjd2tudnR5d2drIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNjc3OTQsImV4cCI6MjA5NDc0Mzc5NH0.WTim-6TNx9l8TSmKJKf5xZVN1ZAy3uMKPUyi1otCblk';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 
 export const QrLoginPage: React.FC = () => {
   const [sessionToken, setSessionToken] = useState<string>('');
