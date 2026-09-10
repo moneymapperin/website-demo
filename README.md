@@ -2,7 +2,7 @@
 
 A high-converting, modern, responsive fintech landing page built with **React**, **Vite**, **TypeScript**, and **Tailwind CSS**.
 
----
+--- 
 
 ## 🚀 Overview & Features
 
