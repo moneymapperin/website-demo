@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { useHasSession } from '../hooks/useHasSession';
+import { navigateTo } from '../lib/navigation';
 
 export interface ComingSoonContextType {
   isOpen: boolean;
   featureName: string;
   openComingSoon: (featureName: string) => void;
+  openLoginPrompt: (featureName: string) => void;
   closeComingSoon: () => void;
+  closeLoginPrompt: () => void;
 }
 
 export const ComingSoonContext = createContext<ComingSoonContextType | undefined>(undefined);
@@ -12,11 +16,19 @@ export const ComingSoonContext = createContext<ComingSoonContextType | undefined
 export const ComingSoonProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [featureName, setFeatureName] = useState('');
+  const hasSession = useHasSession();
 
-  const openComingSoon = useCallback((feature: string) => {
-    setFeatureName(feature || 'This feature');
-    setIsOpen(true);
-  }, []);
+  const openComingSoon = useCallback(
+    (feature: string) => {
+      if (hasSession) {
+        navigateTo('/dashboard');
+        return;
+      }
+      setFeatureName(feature || 'This feature');
+      setIsOpen(true);
+    },
+    [hasSession]
+  );
 
   const closeComingSoon = useCallback(() => {
     setIsOpen(false);
@@ -28,7 +40,9 @@ export const ComingSoonProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         isOpen,
         featureName,
         openComingSoon,
+        openLoginPrompt: openComingSoon,
         closeComingSoon,
+        closeLoginPrompt: closeComingSoon,
       }}
     >
       {children}
@@ -43,3 +57,5 @@ export const useComingSoon = (): ComingSoonContextType => {
   }
   return context;
 };
+
+export const useLoginPrompt = useComingSoon;

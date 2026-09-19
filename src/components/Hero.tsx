@@ -1,4 +1,5 @@
 import { useComingSoon } from '../context/ComingSoonContext';
+import { navigateTo } from '../lib/navigation';
 import { PhoneMockup } from './PhoneMockup';
 import { FeatureCards } from './FeatureCards';
 
@@ -67,7 +68,7 @@ export const Hero: React.FC = () => {
             <div className="flex flex-wrap items-center gap-4 mb-9 w-full sm:w-auto">
               <button
                 id="hero-get-started-btn"
-                onClick={() => openComingSoon('Get Started Free')}
+                onClick={() => navigateTo('/register')}
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold text-white bg-brand-gradient hover:opacity-95 active:scale-[0.98] shadow-xl shadow-brand-purple/30 transition-all text-base focus:outline-none cursor-pointer"
               >
                 Get Started Free

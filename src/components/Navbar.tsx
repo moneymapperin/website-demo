@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useComingSoon } from '../context/ComingSoonContext';
+import { navigateTo } from '../lib/navigation';
 import { Menu, X } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -17,6 +18,16 @@ export const Navbar: React.FC = () => {
   const handleLinkClick = (name: string) => {
     openComingSoon(name);
     setMobileMenuOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    setMobileMenuOpen(false);
+    navigateTo('/login');
+  };
+
+  const handleGetStartedClick = () => {
+    setMobileMenuOpen(false);
+    navigateTo('/register');
   };
 
   return (
@@ -54,14 +65,14 @@ export const Navbar: React.FC = () => {
         <div className="hidden sm:flex items-center gap-3">
           <button
             id="nav-login-btn"
-            onClick={() => handleLinkClick('Login')}
+            onClick={handleLoginClick}
             className="px-5 py-2 text-sm font-medium text-white/90 bg-[#161426] hover:bg-[#1f1b36] hover:text-white border border-white/10 hover:border-white/25 rounded-full transition-all duration-150 focus:outline-none cursor-pointer"
           >
             Login
           </button>
           <button
             id="nav-get-started-btn"
-            onClick={() => handleLinkClick('Get Started')}
+            onClick={handleGetStartedClick}
             className="px-5 py-2 text-sm font-medium text-white bg-brand-gradient hover:opacity-95 active:scale-95 rounded-full shadow-lg shadow-brand-purple/25 transition-all duration-150 focus:outline-none cursor-pointer"
           >
             Get Started
@@ -94,13 +105,13 @@ export const Navbar: React.FC = () => {
           ))}
           <div className="pt-4 border-t border-white/10 flex flex-col gap-2.5">
             <button
-              onClick={() => handleLinkClick('Login')}
+              onClick={handleLoginClick}
               className="w-full py-2.5 text-center text-sm font-medium text-white/90 bg-[#161426] border border-white/10 rounded-full"
             >
               Login
             </button>
             <button
-              onClick={() => handleLinkClick('Get Started')}
+              onClick={handleGetStartedClick}
               className="w-full py-2.5 text-center text-sm font-medium text-white bg-brand-gradient rounded-full shadow-md shadow-brand-purple/20"
             >
               Get Started
@@ -113,3 +124,4 @@ export const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+

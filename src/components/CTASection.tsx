@@ -1,5 +1,6 @@
 import React from 'react';
 import { useComingSoon } from '../context/ComingSoonContext';
+import { navigateTo } from '../lib/navigation';
 import { PhoneMockup } from './PhoneMockup';
 
 export const CTASection: React.FC = () => {
@@ -69,7 +70,7 @@ export const CTASection: React.FC = () => {
             <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-4">
               {/* Primary Solid Gradient Button */}
               <button
-                onClick={() => openComingSoon('Get Started Free')}
+                onClick={() => navigateTo('/register')}
                 className="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:opacity-95 text-white font-semibold text-sm shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 Get Started Free

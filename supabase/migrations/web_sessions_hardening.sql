@@ -1,0 +1,90 @@
+-- ==============================================================================
+-- Migration: web_sessions_hardening.sql
+-- Description: Hardens public.web_sessions against token harvesting and session hijacking.
+--              Adopts a zero-pending-row architecture: the web client never writes to
+--              web_sessions; authenticated mobile app users upsert directly; tokens are
+--              claimed and atomically deleted in a single statement via claim_web_session().
+-- ==============================================================================
+
+-- 1. Initial cleanup of legacy/unclaimed rows
+DELETE FROM public.web_sessions;
+
+-- 2. Remove web_sessions from Supabase Realtime publication
+--    (Eliminates public broadcast of tokens)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'web_sessions'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime DROP TABLE public.web_sessions;
+  END IF;
+END $$;
+
+-- 3. Ensure Row Level Security is active
+ALTER TABLE public.web_sessions ENABLE ROW LEVEL SECURITY;
+
+-- 4. Drop all existing permissive or legacy policies
+DO $$
+DECLARE
+  pol RECORD;
+BEGIN
+  FOR pol IN
+    SELECT policyname
+    FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'web_sessions'
+  LOOP
+    EXECUTE format('DROP POLICY IF EXISTS %I ON public.web_sessions', pol.policyname);
+  END LOOP;
+END $$;
+
+-- 5. Revoke direct table access from anon role
+--    Anon clients can never SELECT, INSERT, UPDATE, or DELETE from web_sessions directly.
+REVOKE ALL ON TABLE public.web_sessions FROM anon;
+
+-- 6. Authenticated policies: Strictly restricted to own rows
+--    Matches Flutter app's upsert: onConflict 'session_token', sets user_id = auth.uid(), status = 'AUTHENTICATED'
+CREATE POLICY "web_sessions_auth_select"
+ON public.web_sessions
+FOR SELECT
+TO authenticated
+USING (user_id = auth.uid());
+
+CREATE POLICY "web_sessions_auth_insert"
+ON public.web_sessions
+FOR INSERT
+TO authenticated
+WITH CHECK (user_id = auth.uid() AND status = 'AUTHENTICATED');
+
+CREATE POLICY "web_sessions_auth_update"
+ON public.web_sessions
+FOR UPDATE
+TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid() AND status = 'AUTHENTICATED');
+
+CREATE POLICY "web_sessions_auth_delete"
+ON public.web_sessions
+FOR DELETE
+TO authenticated
+USING (user_id = auth.uid());
+
+-- 7. Atomic One-Time Claim RPC Function
+--    Deletes stale sessions (>5 mins), returns tokens for matching authenticated session,
+--    and deletes the row atomically in a single statement.
+CREATE OR REPLACE FUNCTION public.claim_web_session(p_token text)
+RETURNS TABLE(access_token text, refresh_token text)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+  DELETE FROM public.web_sessions WHERE created_at < now() - interval '5 minutes';
+  DELETE FROM public.web_sessions w
+  WHERE w.session_token = p_token AND w.status = 'AUTHENTICATED'
+    AND w.access_token IS NOT NULL AND w.refresh_token IS NOT NULL
+  RETURNING w.access_token, w.refresh_token;
+$$;
+
+-- Grant execution to anon and authenticated
+REVOKE ALL ON FUNCTION public.claim_web_session(text) FROM public;
+GRANT EXECUTE ON FUNCTION public.claim_web_session(text) TO anon, authenticated;
