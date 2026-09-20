@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export function calculateSentimentValue(angle: any): number {
   if (angle === undefined || angle === null || angle === '') return 50;
@@ -8,18 +8,37 @@ export function calculateSentimentValue(angle: any): number {
   return Math.min(100, Math.max(0, mapped));
 }
 
-interface SentimentGaugeProps {
+export interface SentimentGaugeProps {
   value: number; // 0 to 100
   size?: number;
+  enableWiggle?: boolean;
 }
 
-export const SentimentGauge: React.FC<SentimentGaugeProps> = ({ value, size = 260 }) => {
+export const SentimentGauge: React.FC<SentimentGaugeProps> = ({
+  value,
+  size = 260,
+  enableWiggle = true,
+}) => {
   const clampedValue = Math.min(100, Math.max(0, value));
-  // Needle angle in degrees: 180 to 360 (or -180 to 0)
-  // angle = 180 + (clampedValue / 100) * 180
-  const needleAngle = 180 + (clampedValue / 100) * 180;
 
-  // 5 colored segments
+  // State for entry sweep animation (starts at 0 on mount, sweeps to clampedValue)
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    // Sweep needle to target value on mount or value change
+    const frame = requestAnimationFrame(() => {
+      setDisplayValue(clampedValue);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [clampedValue]);
+
+  // Rotation in degrees relative to vertical (up):
+  // 0 -> -90 deg (left / POOR)
+  // 50 -> 0 deg (straight up / NEUTRAL)
+  // 100 -> +90 deg (right / GOOD)
+  const targetRotation = -90 + (displayValue / 100) * 180;
+
+  // 5 colored segments matching Flutter: Red, Orange, Yellow, Light Green, Green
   const colors = [
     '#EF4444', // Red
     '#F97316', // Orange
@@ -33,10 +52,11 @@ export const SentimentGauge: React.FC<SentimentGaugeProps> = ({ value, size = 26
   const center = size / 2;
   const arcLength = Math.PI * radius;
   const segmentLength = arcLength / 5;
+  const needleLength = radius * 0.92;
 
   return (
     <div
-      className="flex flex-col items-center justify-center"
+      className="flex flex-col items-center justify-center select-none"
       data-testid="sentiment-gauge"
       style={{ width: size, height: size * 0.6 }}
     >
@@ -48,27 +68,35 @@ export const SentimentGauge: React.FC<SentimentGaugeProps> = ({ value, size = 26
         aria-label={`Market Sentiment Gauge: ${Math.round(clampedValue)}/100`}
       >
         <defs>
-          <filter id="needle-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.3" />
-          </filter>
+          <style>{`
+            @keyframes gaugeNeedleWiggle {
+              0%, 100% {
+                transform: rotate(-1.2deg);
+              }
+              50% {
+                transform: rotate(1.2deg);
+              }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .gauge-needle-wiggle-group {
+                animation: none !important;
+              }
+            }
+          `}</style>
         </defs>
 
         {/* 5 Semicircle Segments */}
-        {colors.map((color, idx) => {
-          // Dash array: segment length, remaining
-          // Dash offset: -(idx * segmentLength)
-          return (
-            <path
-              key={color}
-              d={`M ${strokeWidth / 2} ${center} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${center}`}
-              fill="none"
-              stroke={color}
-              strokeWidth={strokeWidth}
-              strokeDasharray={`${segmentLength - 1} ${arcLength * 2}`}
-              strokeDashoffset={-(idx * segmentLength)}
-            />
-          );
-        })}
+        {colors.map((color, idx) => (
+          <path
+            key={color}
+            d={`M ${strokeWidth / 2} ${center} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${center}`}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${segmentLength - 1} ${arcLength * 2}`}
+            strokeDashoffset={-(idx * segmentLength)}
+          />
+        ))}
 
         {/* Labels POOR and GOOD */}
         <text
@@ -92,27 +120,44 @@ export const SentimentGauge: React.FC<SentimentGaugeProps> = ({ value, size = 26
           GOOD
         </text>
 
-        {/* Center Pivot Base */}
-        <circle cx={center} cy={center} r="14" fill="#00000015" />
-        <circle cx={center} cy={center} r="10" fill="#9CA3AF" />
-        <circle cx={center} cy={center} r="6" fill="#1F2937" />
-
-        {/* Needle with Rotation */}
+        {/* Moving Needle Group: Outer group handles entry sweep & value rotation */}
         <g
-          transform={`rotate(${needleAngle}, ${center}, ${center})`}
-          style={{ transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-          filter="url(#needle-shadow)"
+          data-testid="sentiment-gauge-needle"
+          style={{
+            transformOrigin: `${center}px ${center}px`,
+            transform: `rotate(${targetRotation}deg)`,
+            transition: 'transform 1.4s cubic-bezier(0.34, 1.3, 0.64, 1)',
+          }}
         >
-          <line
-            x1={center}
-            y1={center}
-            x2={center + radius * 0.88}
-            y2={center}
-            stroke="#1F2937"
-            strokeWidth="4.5"
-            strokeLinecap="round"
-          />
+          {/* Inner group handles continuous subtle idle wiggle (matching Flutter 1600ms oscillation) */}
+          <g
+            className="gauge-needle-wiggle-group"
+            style={{
+              transformOrigin: `${center}px ${center}px`,
+              animation: enableWiggle ? 'gaugeNeedleWiggle 1.6s ease-in-out infinite' : 'none',
+            }}
+          >
+            {/* Needle Line with drop shadow */}
+            <line
+              x1={center}
+              y1={center}
+              x2={center}
+              y2={center - needleLength}
+              strokeWidth="5"
+              strokeLinecap="round"
+              className="stroke-slate-800 dark:stroke-slate-100"
+              style={{
+                filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.45))',
+              }}
+            />
+          </g>
         </g>
+
+        {/* Center Pivot Base (Drawn on top of the needle root, matching Flutter) */}
+        <circle cx={center} cy={center} r="14" fill="#000000" fillOpacity="0.12" />
+        <circle cx={center} cy={center} r="11" fill="#9CA3AF" />
+        <circle cx={center} cy={center} r="6" className="fill-slate-900 dark:fill-slate-950" />
+        <circle cx={center} cy={center} r="2" fill="#E2E8F0" />
       </svg>
     </div>
   );

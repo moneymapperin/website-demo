@@ -416,7 +416,7 @@ describe('TASK 7 — Dashboard (/dashboard) Component & Integration Tests', () =
     });
   });
 
-  it('12. Notification bell is a no-op with unread dot (no modal/toast opened)', async () => {
+  it('12. Notification bell is removed from header while AI Assistant, Weekly, and avatar exist', async () => {
     vi.spyOn(apiService, 'getDashboard').mockResolvedValue(fullDashboardFixture);
     vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({ data: fullProfileFixture });
     vi.spyOn(apiService, 'getGoldRate').mockResolvedValue(goldRateFixture);
@@ -427,14 +427,14 @@ describe('TASK 7 — Dashboard (/dashboard) Component & Integration Tests', () =
       expect(screen.getByTestId('dashboard-screen')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('notification-unread-dot')).toBeInTheDocument();
+    // Notification bell and unread dot are removed
+    expect(screen.queryByTestId('notifications-btn')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('notification-unread-dot')).not.toBeInTheDocument();
 
-    const bell = screen.getByTestId('notifications-btn');
-    fireEvent.click(bell);
-
-    // Pure no-op: no alert or modal is triggered
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    // Remaining header buttons remain intact
+    expect(screen.getByTestId('ai-assistant-nav-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('weekly-nav-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('dashboard-avatar-btn')).toBeInTheDocument();
   });
 
   it('13. Decorative Sparkline receives no external data series props', async () => {

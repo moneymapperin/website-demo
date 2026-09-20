@@ -1,6 +1,7 @@
 import React from 'react';
 import { useComingSoon } from '../context/ComingSoonContext';
 import { Lock, Shield } from 'lucide-react';
+import logoImg from '../assets/logo.png';
 
 // Custom Crisp SVGs matching Lucide stroke style for Brand Socials
 const TwitterIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
@@ -55,7 +56,7 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2.5">
               <img
-                src="/src/assets/logo.png"
+                src={logoImg}
                 alt="MoneyMapper"
                 className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
               />

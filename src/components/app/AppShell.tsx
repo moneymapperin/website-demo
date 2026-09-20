@@ -21,7 +21,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { effectiveTheme, toggleTheme } = useTheme();
   const isDark = effectiveTheme === 'dark';
   const { showToast } = useToast();
-  const { isPro } = usePlan();
+  const { isPro, canAccessPremium } = usePlan();
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -57,7 +57,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     const isPremium = PREMIUM_PILLAR_TITLES.includes(
       pillar.title as (typeof PREMIUM_PILLAR_TITLES)[number]
     );
-    const isLocked = isPremium && !isPro;
+    const isLocked = isPremium && !canAccessPremium;
 
     if (isLocked) {
       showToast({
@@ -164,7 +164,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 const isPremium = PREMIUM_PILLAR_TITLES.includes(
                   pillar.title as (typeof PREMIUM_PILLAR_TITLES)[number]
                 );
-                const isLocked = isPremium && !isPro;
+                const isLocked = isPremium && !canAccessPremium;
                 const active = isRouteActive(pillar.webRoute);
 
                 return (
@@ -351,7 +351,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 const isPremium = PREMIUM_PILLAR_TITLES.includes(
                   p.title as (typeof PREMIUM_PILLAR_TITLES)[number]
                 );
-                const isLocked = isPremium && !isPro;
+                const isLocked = isPremium && !canAccessPremium;
                 const active = isRouteActive(p.webRoute);
 
                 return (

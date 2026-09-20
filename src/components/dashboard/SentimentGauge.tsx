@@ -1,17 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export interface SentimentGaugeProps {
   value: number; // 0 to 100
   size?: number;
+  enableWiggle?: boolean;
 }
 
 export const SentimentGauge: React.FC<SentimentGaugeProps> = ({
   value,
   size = 200,
+  enableWiggle = true,
 }) => {
   const clamped = Math.min(100, Math.max(0, value));
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setDisplayValue(clamped);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [clamped]);
+
   // Needle angle in degrees: 0 -> -90 (left), 100 -> 90 (right)
-  const rotationDeg = -90 + (clamped / 100) * 180;
+  const rotationDeg = -90 + (displayValue / 100) * 180;
 
   const w = size;
   const h = size * 0.6;
@@ -28,7 +39,21 @@ export const SentimentGauge: React.FC<SentimentGaugeProps> = ({
     >
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible">
         <defs>
-          {/* Semi-circle colored segments */}
+          <style>{`
+            @keyframes gaugeNeedleWiggleDashboard {
+              0%, 100% {
+                transform: rotate(-1.2deg);
+              }
+              50% {
+                transform: rotate(1.2deg);
+              }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .gauge-needle-wiggle-group-dash {
+                animation: none !important;
+              }
+            }
+          `}</style>
         </defs>
 
         {/* 5 Segments: Red, Orange, Yellow, Light Green, Green */}
@@ -83,25 +108,42 @@ export const SentimentGauge: React.FC<SentimentGaugeProps> = ({
           GOOD
         </text>
 
-        {/* Pivot Center shadow */}
-        <circle cx={cx} cy={cy} r="14" fill="black" fillOpacity="0.08" />
-
-        {/* Rotating Needle */}
-        <g transform={`translate(${cx}, ${cy}) rotate(${rotationDeg})`}>
-          <line
-            x1="0"
-            y1="0"
-            x2="0"
-            y2={-radius * 0.9}
-            stroke="#1F2937"
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
+        {/* Rotating & Moving Needle */}
+        <g
+          data-testid="sentiment-gauge-needle"
+          style={{
+            transformOrigin: `${cx}px ${cy}px`,
+            transform: `rotate(${rotationDeg}deg)`,
+            transition: 'transform 1.4s cubic-bezier(0.34, 1.3, 0.64, 1)',
+          }}
+        >
+          <g
+            className="gauge-needle-wiggle-group-dash"
+            style={{
+              transformOrigin: `${cx}px ${cy}px`,
+              animation: enableWiggle ? 'gaugeNeedleWiggleDashboard 1.6s ease-in-out infinite' : 'none',
+            }}
+          >
+            <line
+              x1={cx}
+              y1={cy}
+              x2={cx}
+              y2={cy - radius * 0.9}
+              strokeWidth="5"
+              strokeLinecap="round"
+              className="stroke-slate-800 dark:stroke-slate-100"
+              style={{
+                filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.45))',
+              }}
+            />
+          </g>
         </g>
 
-        {/* Pivot Center Cap */}
+        {/* Pivot Center shadow & caps */}
+        <circle cx={cx} cy={cy} r="14" fill="black" fillOpacity="0.12" />
         <circle cx={cx} cy={cy} r="11" fill="#9CA3AF" />
-        <circle cx={cx} cy={cy} r="6" fill="#111827" />
+        <circle cx={cx} cy={cy} r="6" className="fill-slate-900 dark:fill-slate-950" />
+        <circle cx={cx} cy={cy} r="2" fill="#E2E8F0" />
       </svg>
     </div>
   );

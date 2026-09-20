@@ -11,6 +11,7 @@ export interface FinancialBreakdownSectionProps {
   sipRecommendation: number;
   isPro?: boolean;
   isFeatureAccessible?: boolean;
+  canAccessPremium?: boolean;
   onLockedClick?: (pillarTitle: string) => void;
 }
 
@@ -22,9 +23,11 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
   sipRecommendation,
   isPro = false,
   isFeatureAccessible = true,
+  canAccessPremium,
   onLockedClick,
 }) => {
   const navigate = useNavigate();
+  const effectiveCanAccess = canAccessPremium !== undefined ? canAccessPremium : (isPro || isFeatureAccessible);
 
   const incomeScore = data.pillars['income']?.score ?? 0;
   const expensesScore = data.pillars['expenses']?.score ?? 0;
@@ -69,8 +72,8 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
       subtitle: fmtSavings,
       accentColor: '#3B82F6',
       emoji: '🛡️',
-      isLocked: !isFeatureAccessible,
-      showTrialBadge: !isPro && isFeatureAccessible,
+      isLocked: !effectiveCanAccess,
+      showTrialBadge: !isPro && effectiveCanAccess,
       route: '/pillars/emergency',
     },
     {
@@ -80,8 +83,8 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
       subtitle: fmtProtection,
       accentColor: '#A855F7',
       emoji: '☂️',
-      isLocked: !isFeatureAccessible,
-      showTrialBadge: !isPro && isFeatureAccessible,
+      isLocked: !effectiveCanAccess,
+      showTrialBadge: !isPro && effectiveCanAccess,
       route: '/pillars/insurance',
     },
     {
@@ -91,8 +94,8 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
       subtitle: fmtInvestment,
       accentColor: '#F59E0B',
       emoji: '📈',
-      isLocked: !isFeatureAccessible,
-      showTrialBadge: !isPro && isFeatureAccessible,
+      isLocked: !effectiveCanAccess,
+      showTrialBadge: !isPro && effectiveCanAccess,
       route: '/pillars/investments',
     },
   ];

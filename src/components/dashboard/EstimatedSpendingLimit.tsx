@@ -1,4 +1,5 @@
 import React from 'react';
+import spendingImg from '../../assets/app/spending1.png';
 
 export interface EstimatedSpendingLimitProps {
   monthlyIncome: number;
@@ -25,19 +26,12 @@ export const EstimatedSpendingLimit: React.FC<EstimatedSpendingLimitProps> = ({
       className="mb-4 relative h-[125px] rounded-[20px] bg-white dark:bg-mm-darkCard border-[1.5px] border-mm-primary/30 shadow-[0_4px_10px_rgba(79,70,229,0.05)] overflow-hidden"
       data-testid="spending-limit-widget"
     >
-      {/* Background Graphic Accent (lines 2146-2154) */}
-      <div className="absolute -right-3 -bottom-2 opacity-20 dark:opacity-30 select-none pointer-events-none">
-        <svg width="110" height="100" viewBox="0 0 100 90" fill="none">
-          <path
-            d="M10 80 L30 50 L55 65 L90 20"
-            stroke="#4F46E5"
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="90" cy="20" r="10" fill="#4F46E5" />
-        </svg>
-      </div>
+      {/* Real Spending Graphic from Flutter Assets (lines 2146-2154) */}
+      <img
+        src={spendingImg}
+        alt="Estimated Spending Limit"
+        className="absolute -right-3 -bottom-2 h-24 w-auto object-contain select-none pointer-events-none drop-shadow-sm opacity-90 dark:opacity-80"
+      />
 
       <div className="relative z-10 h-full flex flex-col justify-center px-5 py-3">
         <span className="text-[10px] font-black tracking-wider text-gray-500 dark:text-zinc-400">

@@ -1,5 +1,6 @@
+-- NOT APPLIED — this migration assumes an RPC-based architecture that the website no longer uses. Do not run against production; it will break QR login by revoking anon access and removing the table from realtime.
 -- ==============================================================================
--- Migration: web_sessions_hardening.sql
+-- Migration: UNUSED_web_sessions_hardening.sql.txt
 -- Description: Hardens public.web_sessions against token harvesting and session hijacking.
 --              Adopts a zero-pending-row architecture: the web client never writes to
 --              web_sessions; authenticated mobile app users upsert directly; tokens are

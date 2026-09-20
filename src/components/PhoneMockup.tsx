@@ -1,4 +1,5 @@
 import { useComingSoon } from '../context/ComingSoonContext';
+import logoImg from '../assets/logo.png';
 import {
   Bell,
   HelpCircle,
@@ -55,7 +56,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style 
               className="flex items-center gap-1.5 cursor-pointer"
             >
               <img
-                src="/src/assets/logo.png"
+                src={logoImg}
                 alt="Logo"
                 className="w-5 h-5 object-contain"
               />

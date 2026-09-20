@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useLocation, Navigate, Outlet } from 'react-router-dom';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { authService } from '../services/authService';
+import { premiumService } from '../services/premiumService';
 import { navigateTo } from '../lib/navigation';
 
 export interface AuthContextType {
@@ -33,6 +34,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(currentSession?.user ?? null);
         authService.setCurrentUser(currentSession?.user ?? null);
         setIsLoading(false);
+
+        // Sync subscription if session is present on initial load
+        if (currentSession) {
+          premiumService.syncSubscriptionStatus().catch(() => {});
+        }
       })
       .catch(() => {
         if (!isMounted) return;
@@ -50,14 +56,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (event === 'SIGNED_OUT') {
         authService.clearLocalData();
+        premiumService.clearLocalPlan();
         setSession(null);
         setUser(null);
         authService.setCurrentUser(null);
-        setIsLoading(false);
-      } else if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-        setSession(newSession ?? null);
-        setUser(newSession?.user ?? null);
-        authService.setCurrentUser(newSession?.user ?? null);
         setIsLoading(false);
       } else if (event === 'PASSWORD_RECOVERY') {
         setSession(newSession ?? null);
@@ -70,6 +72,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(newSession?.user ?? null);
         authService.setCurrentUser(newSession?.user ?? null);
         setIsLoading(false);
+
+        // Trigger subscription sync on SIGNED_IN, INITIAL_SESSION, and TOKEN_REFRESHED when session is present
+        if (newSession && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
+          premiumService.syncSubscriptionStatus().catch(() => {});
+        }
       }
     });
 
@@ -85,16 +92,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   }, []);
 
+  const authContextValue = useMemo(
+    () => ({
+      user,
+      session,
+      isLoading,
+      isLoggedIn: !!session,
+      logout,
+    }),
+    [user, session, isLoading, logout]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        isLoading,
-        isLoggedIn: !!session,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );

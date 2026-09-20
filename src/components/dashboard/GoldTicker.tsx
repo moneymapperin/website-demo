@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatGoldPrice_DashboardScreen } from '../../lib/formatters';
+import goldBrickImg from '../../assets/app/gold_brick.png';
 
 export interface GoldTickerProps {
   goldData?: Record<string, any> | null;
@@ -40,32 +41,12 @@ export const GoldTicker: React.FC<GoldTickerProps> = ({ goldData, isLoading }) =
         }
       }}
     >
-      {/* Background Gold Shimmer / Brick Graphic (lines 1303-1311) */}
-      <div className="absolute -right-4 -bottom-3 select-none pointer-events-none opacity-80 dark:opacity-70">
-        <svg
-          width="130"
-          height="95"
-          viewBox="0 0 100 70"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M10 45 L40 20 L90 20 L75 55 L25 55 Z"
-            fill="url(#goldBarGrad)"
-            stroke="#D4AF37"
-            strokeWidth="1.5"
-          />
-          <path d="M40 20 L55 5 L105 5 L90 20 Z" fill="#F59E0B" fillOpacity="0.8" />
-          <path d="M90 20 L105 5 L90 40 L75 55 Z" fill="#B45309" fillOpacity="0.8" />
-          <defs>
-            <linearGradient id="goldBarGrad" x1="10" y1="20" x2="90" y2="55">
-              <stop stopColor="#FDE68A" />
-              <stop offset="0.5" stopColor="#F59E0B" />
-              <stop offset="1" stopColor="#D97706" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+      {/* Real Gold Image from Flutter Assets (lines 1303-1311) */}
+      <img
+        src={goldBrickImg}
+        alt="Gold Brick"
+        className="absolute -right-4 -bottom-1 w-36 h-auto object-contain select-none pointer-events-none drop-shadow-md"
+      />
 
       {/* Foreground Content (lines 1318-1345) */}
       <div className="relative z-10 h-full flex flex-col justify-center px-5 py-3">

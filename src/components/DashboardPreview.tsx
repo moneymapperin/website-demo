@@ -1,4 +1,5 @@
 import { useComingSoon } from '../context/ComingSoonContext';
+import logoImg from '../assets/logo.png';
 import {
   Bell,
   ChevronDown,
@@ -93,7 +94,7 @@ export const DashboardPreview: React.FC = () => {
             className="flex items-center gap-2 mb-4 px-2 cursor-pointer shrink-0"
           >
             <img
-              src="/src/assets/logo.png"
+              src={logoImg}
               alt="Logo"
               className="w-5 h-5 object-contain"
             />

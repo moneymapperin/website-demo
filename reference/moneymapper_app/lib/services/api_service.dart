@@ -611,18 +611,78 @@ class ApiService {
     try {
       final session = _supabase.auth.currentSession;
       final userId = _auth.currentUserId;
+
+      // [MOBILE_QR_DEBUG] 1. Log _supabase.auth.currentSession null or non-null
+      debugPrint('[MOBILE_QR_DEBUG] 1. _supabase.auth.currentSession is ${session == null ? "NULL" : "NON-NULL"}');
+
+      // [MOBILE_QR_DEBUG] 2 & 3. Inspect accessToken and refreshToken
+      if (session != null) {
+        final dynamic rawAcc = session.accessToken;
+        final bool isAccNull = rawAcc == null;
+        final bool isAccEmpty = rawAcc == null ? true : (rawAcc is String ? rawAcc.isEmpty : false);
+        final int accLen = rawAcc is String ? rawAcc.length : 0;
+        final String accSnippet = rawAcc is String && rawAcc.length >= 8
+            ? '${rawAcc.substring(0, 4)}...${rawAcc.substring(rawAcc.length - 4)}'
+            : '$rawAcc';
+        debugPrint('[MOBILE_QR_DEBUG] 2. session.accessToken: type=${rawAcc.runtimeType}, isNull=$isAccNull, isEmpty=$isAccEmpty, length=$accLen, snippet=$accSnippet');
+
+        final dynamic rawRef = session.refreshToken;
+        final bool isRefNull = rawRef == null;
+        final bool isRefEmpty = rawRef == null ? true : (rawRef is String ? rawRef.isEmpty : false);
+        final int refLen = rawRef is String ? rawRef.length : 0;
+        final String refSnippet = rawRef is String && rawRef.length >= 8
+            ? '${rawRef.substring(0, 4)}...${rawRef.substring(rawRef.length - 4)}'
+            : '$rawRef';
+        debugPrint('[MOBILE_QR_DEBUG] 3. session.refreshToken: type=${rawRef.runtimeType}, isNull=$isRefNull, isEmpty=$isRefEmpty, length=$refLen, snippet=$refSnippet');
+      }
+
+      // [MOBILE_QR_DEBUG] 9. Loud abort diagnostic message if tokens unavailable (letting upsert proceed)
+      final bool isSessionNull = session == null;
+      final bool isAccMissing = session == null || session.accessToken.isEmpty;
+      final bool isRefMissing = session == null || session.refreshToken == null || session.refreshToken!.isEmpty;
+      if (isSessionNull || isAccMissing || isRefMissing) {
+        debugPrint('[MOBILE_QR_DEBUG] ABORT: session tokens unavailable (currentSession: ${!isSessionNull}, accessTokenPresent: ${!isAccMissing}, refreshTokenPresent: ${!isRefMissing})');
+      }
+
       if (session == null || userId == null) throw ApiException('Not Logged In', 401);
 
-      await _supabase.from('web_sessions').upsert({
+      // [MOBILE_QR_DEBUG] 4. Log exact map/object passed to .upsert(...)
+      final Map<String, dynamic> upsertData = {
         'session_token': token,
         'user_id': userId,
         'access_token': session.accessToken,
         'refresh_token': session.refreshToken,
         'status': 'AUTHENTICATED',
         'authenticated_at': DateTime.now().toIso8601String(),
-      }, onConflict: 'session_token');
+      };
 
-    } catch (e) {
+      final Map<String, String> redactedMap = {};
+      upsertData.forEach((k, v) {
+        if (v == null) {
+          redactedMap[k] = 'NULL';
+        } else if (k == 'access_token' || k == 'refresh_token') {
+          if (v is String) {
+            redactedMap[k] = 'String(length=${v.length})';
+          } else {
+            redactedMap[k] = '${v.runtimeType}($v)';
+          }
+        } else {
+          redactedMap[k] = v.toString();
+        }
+      });
+      debugPrint('[MOBILE_QR_DEBUG] 4. Exact upsert payload structure: $redactedMap');
+
+      // [MOBILE_QR_DEBUG] 5. Log upsert call execution and response
+      debugPrint('[MOBILE_QR_DEBUG] 5. Dispatching _supabase.from("web_sessions").upsert(...)...');
+      final dynamic upsertResponse = await _supabase.from('web_sessions').upsert(
+        upsertData,
+        onConflict: 'session_token',
+      );
+      debugPrint('[MOBILE_QR_DEBUG] 5. upsert call completed successfully. Response: $upsertResponse');
+
+    } catch (e, stack) {
+      debugPrint('[MOBILE_QR_DEBUG] 5. upsert threw exception: $e');
+      debugPrint('[MOBILE_QR_DEBUG] Stack trace: $stack');
       _logErrorResilient(e, "loginWithQr");
       throw ApiException("Web Login Failed. Please try again.", 500);
     }

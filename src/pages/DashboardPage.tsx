@@ -7,6 +7,7 @@ import { usePlan } from '../hooks/usePlan';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { gamificationStore } from '../services/gamificationStore';
+import { checkAndUnlockBadges } from '../services/badgeService';
 import { DashboardSkeleton, DashboardHeaderSkeleton } from '../components/dashboard/DashboardSkeleton';
 import { FinancialPositionCard } from '../components/dashboard/FinancialPositionCard';
 import { ProBanners } from '../components/dashboard/ProBanners';
@@ -18,12 +19,13 @@ import { FinancialBreakdownSection } from '../components/dashboard/FinancialBrea
 import { QuotesSection } from '../components/dashboard/QuotesSection';
 import { DashboardFooter } from '../components/dashboard/DashboardFooter';
 import { DashboardEmptyState } from '../components/dashboard/DashboardEmptyState';
+import logo3dImg from '../assets/app/log_3d_hd.png';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const { isPro, isFeatureAccessible } = usePlan();
+  const { isPro, canAccessPremium } = usePlan();
 
   const {
     data,
@@ -54,17 +56,20 @@ export const DashboardPage: React.FC = () => {
     [showToast, navigate]
   );
 
-  // Sync loaded fitness score with gamificationStore (mirrors Flutter lines 311-314)
+  // Sync loaded fitness score and badges with gamificationStore (mirrors Flutter lines 311-314 and _checkBadges)
   useEffect(() => {
-    if (data?.fitnessScore && data.fitnessScore > 0) {
-      gamificationStore.checkScoreImprovement(data.fitnessScore);
-      if (data.pillars) {
-        Object.entries(data.pillars).forEach(([key, p]) => {
-          gamificationStore.checkPillarMastery(key, p.score);
-        });
+    if (data) {
+      if (data.fitnessScore && data.fitnessScore > 0) {
+        gamificationStore.checkScoreImprovement(data.fitnessScore);
+        if (data.pillars) {
+          Object.entries(data.pillars).forEach(([key, p]) => {
+            gamificationStore.checkPillarMastery(key, p.score);
+          });
+        }
       }
+      checkAndUnlockBadges({ dashboard: data, profile });
     }
-  }, [data]);
+  }, [data, profile]);
 
   // Derive User Name and Avatar Initials (Flutter lines 361-371)
   const rawProfile = (profile as Record<string, any>) || {};
@@ -93,9 +98,11 @@ export const DashboardPage: React.FC = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo & Title */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-xl text-white shadow-lg">
-            🧭
-          </div>
+          <img
+            src={logo3dImg}
+            alt="MoneyMapper"
+            className="h-11 w-auto object-contain select-none"
+          />
           <div>
             <h1 className="text-xl font-black tracking-tight text-white flex items-center space-x-2">
               <span>MoneyMapper</span>
@@ -133,24 +140,6 @@ export const DashboardPage: React.FC = () => {
             <span>📅</span>
             <span>Weekly</span>
           </button>
-
-          {/* Notification Bell with Red Dot Badge (Flutter lines 442-470: pure no-op onPressed: () {}) */}
-          <div className="relative">
-            <button
-              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/15 flex items-center justify-center text-white text-sm transition-colors focus:outline-none"
-              aria-label="Notifications"
-              data-testid="notifications-btn"
-              onClick={() => {
-                // Pure no-op as in Flutter Dart code (no mock notification feature)
-              }}
-            >
-              🔔
-            </button>
-            <span
-              className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-mm-danger border-2 border-[#2E1065]"
-              data-testid="notification-unread-dot"
-            />
-          </div>
 
           {/* User Profile Avatar */}
           <button
@@ -325,7 +314,7 @@ export const DashboardPage: React.FC = () => {
               data={data}
               netPosition={netPosition}
               isPro={isPro}
-              isFeatureAccessible={isFeatureAccessible}
+              isFeatureAccessible={canAccessPremium}
             />
 
             {/* 2. Pro Banners (lines 1607-1819) */}
@@ -345,7 +334,8 @@ export const DashboardPage: React.FC = () => {
               emergencyCurrent={emergencyCurrent}
               sipRecommendation={sipRecommendation}
               isPro={isPro}
-              isFeatureAccessible={isFeatureAccessible}
+              isFeatureAccessible={canAccessPremium}
+              canAccessPremium={canAccessPremium}
               onLockedClick={handleLockedPillar}
             />
 
@@ -372,8 +362,8 @@ export const DashboardPage: React.FC = () => {
               emergencyTarget={emergencyTarget}
               sipRecommendation={sipRecommendation}
               wealthAllocations={wealthAllocations}
-              isSipLocked={!isFeatureAccessible}
-              showSipTrialBadge={!isPro && isFeatureAccessible}
+              isSipLocked={!canAccessPremium}
+              showSipTrialBadge={!isPro && canAccessPremium}
             />
           </div>
         </div>

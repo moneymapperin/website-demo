@@ -289,17 +289,33 @@ export class ApiService {
     try {
       const userId = await this._getUserId();
 
-      const profileRes = await this.getMasterProfile();
-      const profile: Record<string, any> = { ...(profileRes?.data ?? {}) };
+      // Fresh DB read of master_profiles bypassing local/memory cache
+      let existingProfile: Record<string, any> = {};
+      const tableQuery = supabase.from('master_profiles') as any;
+      if (typeof tableQuery?.select === 'function') {
+        const { data: existingRow, error: fetchError } = await tableQuery
+          .select('profile_json')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (fetchError) {
+          this.logErrorResilient(fetchError, 'addEmergencySavings_fetch');
+        }
+        if (existingRow?.profile_json) {
+          existingProfile = existingRow.profile_json;
+        }
+      }
 
       const targetKey = 'emergencyFundCurrent';
-      const currentVal = ResilienceUtils.safeDouble(profile[targetKey]);
-
-      profile[targetKey] = (currentVal + amountToAdd).toFixed(0);
+      const currentVal = ResilienceUtils.safeDouble(existingProfile[targetKey]);
+      const mergedProfile = {
+        ...existingProfile,
+        [targetKey]: (currentVal + amountToAdd).toFixed(0),
+      };
 
       const { error } = await supabase.from('master_profiles').upsert({
         user_id: userId,
-        profile_json: profile,
+        profile_json: mergedProfile,
         updated_at: new Date().toISOString(),
       });
 

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import quarterlyImg from '../../assets/app/quarterly_plan.png';
+import halfYearlyImg from '../../assets/app/half_yearly_2.png';
+import yearlyImg from '../../assets/app/yearly_plan_1.png';
 
 export interface ProBannersProps {
   isPro?: boolean;
@@ -12,6 +15,7 @@ const BANNERS = [
     oldPrice: '799',
     off: '38% OFF',
     save: 'SAVE ₹897',
+    image: quarterlyImg,
   },
   {
     title: 'Half-Yearly Plan',
@@ -19,6 +23,7 @@ const BANNERS = [
     oldPrice: '799',
     off: '50% OFF',
     save: 'SAVE ₹2400',
+    image: halfYearlyImg,
   },
   {
     title: 'Yearly Plan',
@@ -26,6 +31,7 @@ const BANNERS = [
     oldPrice: '799',
     off: '63% OFF',
     save: 'SAVE ₹6000',
+    image: yearlyImg,
   },
 ];
 
@@ -60,13 +66,12 @@ export const ProBanners: React.FC<ProBannersProps> = ({ isPro = false }) => {
         }}
         className="cursor-pointer relative overflow-hidden rounded-[24px] p-5 md:p-6 bg-gradient-to-br from-[#F59E0B]/25 to-[#D97706]/25 border-[1.5px] border-[#F59E0B]/30 shadow-[0_4px_16px_rgba(245,158,11,0.08)] transition-all hover:border-[#F59E0B]/50"
       >
-        {/* Background Decorative Gradient Wave / Coins */}
-        <div className="absolute -left-4 -bottom-4 opacity-30 select-none pointer-events-none">
-          <svg width="120" height="120" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="45" stroke="#F59E0B" strokeWidth="6" strokeDasharray="8 8" />
-            <circle cx="50" cy="50" r="30" fill="#F59E0B" fillOpacity="0.4" />
-          </svg>
-        </div>
+        {/* Real Plan Image from Flutter Assets (lines 1684-1692) */}
+        <img
+          src={current.image}
+          alt={current.title}
+          className="absolute -left-2 -bottom-1 h-28 w-auto object-contain select-none pointer-events-none drop-shadow-md"
+        />
 
         {/* Content on the Right */}
         <div className="relative z-10 flex flex-col items-end text-right">

@@ -10,7 +10,7 @@ import { StockScreenerPage, calculateUpsidePct } from '../pages/StockScreenerPag
 import { MutualFundScreenerPage } from '../pages/MutualFundScreenerPage';
 import { MfRecommendationsPage } from '../pages/MfRecommendationsPage';
 import { InsuranceScreenerPage, formatCover } from '../pages/InsuranceScreenerPage';
-import { calculateSentimentValue } from '../components/market/SentimentGauge';
+import { SentimentGauge, calculateSentimentValue } from '../components/market/SentimentGauge';
 import { ScoreCardAdvisor, AdvisoryService } from '../services/marketAdvisor';
 import { MarketDataService } from '../services/marketDataService';
 import { apiService } from '../services/apiService';
@@ -518,6 +518,34 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
       expect(calculateSentimentValue(undefined)).toBe(50);
       expect(calculateSentimentValue(null)).toBe(50);
       expect(calculateSentimentValue('')).toBe(50);
+    });
+
+    it('renders SentimentGauge with moving needle, rotation angle, and idle wiggle animation', () => {
+      const { container, rerender } = render(<SentimentGauge value={50} size={240} />);
+      
+      const needle = screen.getByTestId('sentiment-gauge-needle');
+      expect(needle).toBeInTheDocument();
+
+      // Needle line element has appropriate classes
+      const line = needle.querySelector('line');
+      expect(line).toBeInTheDocument();
+      expect(line).toHaveClass('stroke-slate-800');
+      expect(line).toHaveClass('dark:stroke-slate-100');
+
+      // Wiggle animation group exists
+      const wiggleGroup = container.querySelector('.gauge-needle-wiggle-group');
+      expect(wiggleGroup).toBeInTheDocument();
+
+      // At value 50, target rotation should be 0deg (pointing straight up)
+      // At value 0, target rotation is -90deg (pointing left to POOR)
+      rerender(<SentimentGauge value={0} size={240} />);
+      const needleZero = screen.getByTestId('sentiment-gauge-needle');
+      expect(needleZero).toBeInTheDocument();
+
+      // Disabling wiggle turns animation off
+      rerender(<SentimentGauge value={100} size={240} enableWiggle={false} />);
+      const wiggleGroupDisabled = container.querySelector('.gauge-needle-wiggle-group');
+      expect(wiggleGroupDisabled?.getAttribute('style')).toContain('animation: none');
     });
 
     it('calculates upside % correctly from entry_range and target_range', () => {

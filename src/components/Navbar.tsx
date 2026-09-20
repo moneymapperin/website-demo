@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useComingSoon } from '../context/ComingSoonContext';
 import { navigateTo } from '../lib/navigation';
 import { Menu, X } from 'lucide-react';
+import logoImg from '../assets/logo.png';
 
 export const Navbar: React.FC = () => {
   const { openComingSoon } = useComingSoon();
@@ -39,7 +40,7 @@ export const Navbar: React.FC = () => {
           className="flex items-center gap-3 cursor-pointer select-none group"
         >
           <img
-            src="/src/assets/logo.png"
+            src={logoImg}
             alt="MoneyMapper"
             className="h-9 w-9 object-contain group-hover:scale-105 transition-transform duration-200"
           />

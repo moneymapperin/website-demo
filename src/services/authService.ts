@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { User, AuthResponse } from '@supabase/supabase-js';
+import { apiService } from './apiService';
 
 export interface SignUpMetadata {
   fullName: string;
@@ -160,6 +161,13 @@ export class AuthService {
       }
     }
     keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+    // Clear in-memory cache and in-flight API requests
+    try {
+      apiService.clearAllAppCache();
+    } catch {
+      // ignore
+    }
   }
 
   /**

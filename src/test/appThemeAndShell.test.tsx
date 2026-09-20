@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, renderHook } from '@testing-library/react';
 import fs from 'fs';
 import path from 'path';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
@@ -34,6 +34,7 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
   afterEach(() => {
     document.documentElement.className = 'dark';
     document.documentElement.style.colorScheme = 'dark';
+    delete (window as any).__MOCK_PLAN__;
   });
 
   /* -------------------------------------------------------------------------- */
@@ -265,9 +266,9 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
   /* -------------------------------------------------------------------------- */
   describe('Requirements 1 & 2: PillarCard & Locked Pillars', () => {
     it('usePlan returns stubbed isPro: false', () => {
-      const plan = usePlan();
-      expect(plan.isPro).toBe(false);
-      expect(plan.plan).toBe('b2c');
+      const { result } = renderHook(() => usePlan());
+      expect(result.current.isPro).toBe(false);
+      expect(result.current.plan).toBe('b2c');
     });
 
     it('PillarCard when locked displays "??" score and 0 progress', () => {
@@ -454,6 +455,15 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
     });
 
     it('shows lock on 3 premium pillars for non-pro user and clicking them triggers upgrade toast', async () => {
+      (window as any).__MOCK_PLAN__ = {
+        isPro: false,
+        isFeatureAccessible: false,
+        trialActive: false,
+        canAccessPremium: false,
+        trialDaysRemaining: 0,
+        plan: 'b2c',
+      };
+
       render(
         <MemoryRouter initialEntries={['/dashboard']}>
           <ThemeProvider>

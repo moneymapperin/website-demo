@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute, PublicOnlyRoute } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
@@ -8,7 +8,6 @@ import { ComingSoonModal } from './components/ComingSoonModal';
 import { NavigationBridge } from './components/NavigationBridge';
 import { AppShell } from './components/app/AppShell';
 import { LandingPage } from './pages/LandingPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
@@ -26,10 +25,30 @@ import { MutualFundScreenerPage } from './pages/MutualFundScreenerPage';
 import { MfRecommendationsPage } from './pages/MfRecommendationsPage';
 import { InsuranceScreenerPage } from './pages/InsuranceScreenerPage';
 import { AiAssistantPage } from './pages/AiAssistantPage';
+import { PillarGuard } from './components/common/PillarGuard';
+import { InsurancePillarPage } from './pages/pillars/InsurancePillarPage';
+import { IncomePillarPage } from './pages/pillars/IncomePillarPage';
+import { WeeklyExpensePredictorPage } from './pages/pillars/WeeklyExpensePredictorPage';
+import { MutualFundPillarPage } from './pages/pillars/MutualFundPillarPage';
+import { EmergencyFundPage } from './pages/pillars/EmergencyFundPage';
+import { SubscriptionPage } from './pages/SubscriptionPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { AchievementsPage } from './pages/AchievementsPage';
+import { ReferralPage } from './pages/ReferralPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { CorporateGuard } from './components/common/CorporateGuard';
+import { CorporateDashboardPage } from './pages/CorporateDashboardPage';
 
-export const App: React.FC = () => {
+export interface AppProps {
+  initialEntries?: string[];
+}
+
+export const App: React.FC<AppProps> = ({ initialEntries }) => {
+  const RouterComponent = initialEntries ? (MemoryRouter as any) : BrowserRouter;
+  const routerProps = initialEntries ? { initialEntries } : {};
+
   return (
-    <BrowserRouter>
+    <RouterComponent {...routerProps}>
       <AuthProvider>
         <ThemeProvider>
           <ToastProvider>
@@ -69,12 +88,7 @@ export const App: React.FC = () => {
                 />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/corporate-login" element={<CorporateLoginPage />} />
-                <Route
-                  path="/privacy"
-                  element={
-                    <PlaceholderPage title="Privacy Policy" description="MoneyMapper security and encryption terms." />
-                  }
-                />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
                 {/* 4. Canonical Redirects */}
                 <Route path="/main" element={<Navigate to="/dashboard" replace />} />
@@ -103,69 +117,56 @@ export const App: React.FC = () => {
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/insights" element={<InsightsPage />} />
                   <Route path="/ai-assistant" element={<AiAssistantPage />} />
-                  <Route
-                    path="/profile"
-                    element={
-                      <PlaceholderPage title="Profile" description="User profile and security settings." />
-                    }
-                  />
+                  <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/weekly" element={<WeeklyPage />} />
                   <Route path="/onboarding" element={<OnboardingPage />} />
                   <Route path="/master-data" element={<MasterDataPage />} />
-                  <Route
-                    path="/subscription"
-                    element={
-                      <PlaceholderPage title="Subscription" description="MoneyMapper Pro plan details (read-only)." />
-                    }
-                  />
-                  <Route
-                    path="/achievements"
-                    element={
-                      <PlaceholderPage title="Achievements" description="Gamification badges and streaks." />
-                    }
-                  />
-                  <Route
-                    path="/referral"
-                    element={
-                      <PlaceholderPage title="Referral" description="Invite friends and track referral benefits." />
-                    }
-                  />
-                  <Route
-                    path="/corporate-dashboard"
-                    element={
-                      <PlaceholderPage title="Corporate Dashboard" description="Workforce health analytics." />
-                    }
-                  />
+                  <Route path="/subscription" element={<SubscriptionPage />} />
+                  <Route path="/achievements" element={<AchievementsPage />} />
+                  <Route path="/referral" element={<ReferralPage />} />
 
-                  {/* Pillar Routes */}
-                  <Route
-                    path="/pillars/expenses"
-                    element={
-                      <PlaceholderPage title="Expense Pillar" description="Discipline scoring and expense analysis." />
-                    }
-                  />
-                  <Route
-                    path="/pillars/income"
-                    element={
-                      <PlaceholderPage title="Income Pillar" description="Active vs passive income benchmarks." />
-                    }
-                  />
+                  {/* Pillar Routes & Aliases */}
+                  <Route path="/pillars/expenses" element={<WeeklyExpensePredictorPage />} />
+                  <Route path="/pillars/weekly-expense" element={<WeeklyExpensePredictorPage />} />
+                  <Route path="/pillars/income" element={<IncomePillarPage />} />
                   <Route
                     path="/pillars/emergency"
                     element={
-                      <PlaceholderPage title="Emergency Fund Pillar" description="Runway and liquid asset analysis." />
+                      <PillarGuard pillarName="emergency">
+                        <EmergencyFundPage />
+                      </PillarGuard>
+                    }
+                  />
+                  <Route
+                    path="/pillars/emergency-fund"
+                    element={
+                      <PillarGuard pillarName="emergency">
+                        <EmergencyFundPage />
+                      </PillarGuard>
                     }
                   />
                   <Route
                     path="/pillars/insurance"
                     element={
-                      <PlaceholderPage title="Insurance Pillar" description="Life and health protection gaps." />
+                      <PillarGuard pillarName="insurance">
+                        <InsurancePillarPage />
+                      </PillarGuard>
                     }
                   />
                   <Route
                     path="/pillars/investments"
                     element={
-                      <PlaceholderPage title="Investment Pillar" description="Portfolio asset allocation and SIPs." />
+                      <PillarGuard pillarName="investments">
+                        <MutualFundPillarPage />
+                      </PillarGuard>
+                    }
+                  />
+                  <Route
+                    path="/pillars/mutual-fund"
+                    element={
+                      <PillarGuard pillarName="investments">
+                        <MutualFundPillarPage />
+                      </PillarGuard>
                     }
                   />
 
@@ -182,7 +183,19 @@ export const App: React.FC = () => {
                   <Route path="/news/:id" element={<NewsDetailPage />} />
                 </Route>
 
-                {/* 6. Unknown Route Fallback */}
+                {/* 6. Corporate Dashboard Route (Dedicated Corporate Experience) */}
+                <Route
+                  path="/corporate-dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <CorporateGuard>
+                        <CorporateDashboardPage />
+                      </CorporateGuard>
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* 7. Unknown Route Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
 
@@ -192,7 +205,7 @@ export const App: React.FC = () => {
           </ToastProvider>
         </ThemeProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </RouterComponent>
   );
 };
 

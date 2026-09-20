@@ -1,5 +1,6 @@
 import { useComingSoon } from '../context/ComingSoonContext';
 import { Sparkles, Check, ArrowRight } from 'lucide-react';
+import mascotImg from '../assets/app/mascot.png';
 
 export const AIAssistantSection: React.FC = () => {
   const { openComingSoon } = useComingSoon();
@@ -110,7 +111,7 @@ export const AIAssistantSection: React.FC = () => {
                   <span className="absolute -top-1 -left-2 text-purple-400 text-xs animate-pulse">✦</span>
                   <span className="absolute top-6 -right-2 text-pink-400 text-[10px] animate-pulse">✦</span>
                   <img
-                    src="/src/assets/mascot.png"
+                    src={mascotImg}
                     alt="MoneyMapper AI Mascot"
                     className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-[0_10px_20px_rgba(59,130,246,0.3)] transition-transform hover:scale-105 duration-200"
                   />
