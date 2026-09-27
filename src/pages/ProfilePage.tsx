@@ -191,14 +191,14 @@ export const ProfilePage: React.FC = () => {
       <div
         data-testid="profile-header"
         onClick={() => navigate('/master-data')}
-        className="cursor-pointer px-4 pt-8 pb-10 rounded-b-[32px] text-white select-none transition shadow-lg"
+        className="cursor-pointer px-4 md:px-8 pt-8 pb-10 rounded-b-[32px] text-white select-none transition shadow-lg"
         style={{
           background: isDark
             ? 'linear-gradient(to bottom, #2E1065, #1E0A45 70%, #09090B)'
             : 'linear-gradient(to bottom, #2E1065, #1E0A45 70%, #F9FAFB)',
         }}
       >
-        <div className="max-w-xl mx-auto flex flex-col items-center text-center">
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <div className="text-xs font-black uppercase tracking-widest text-indigo-300/80 mb-4">
             PROFILE
           </div>
@@ -206,14 +206,14 @@ export const ProfilePage: React.FC = () => {
           {/* Avatar Initials */}
           <div
             data-testid="user-avatar"
-            className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-white text-2xl font-black shadow-md mb-4"
+            className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-white text-2xl md:text-3xl font-black shadow-md mb-4"
           >
             {initials}
           </div>
 
           {/* Greeting & Streak Badge */}
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-medium text-white/80">{greeting} 🌟</span>
+            <span className="text-sm md:text-base font-medium text-white/80">{greeting} 🌟</span>
             <div
               data-testid="streak-badge"
               className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/15 text-white text-[11px] font-black"
@@ -225,13 +225,13 @@ export const ProfilePage: React.FC = () => {
 
           {/* User Name & PRO Badge */}
           <div className="flex items-center justify-center gap-2 mb-1">
-            <h1 data-testid="user-name" className="text-2xl font-black tracking-tight text-white">
+            <h1 data-testid="user-name" className="text-2xl md:text-3xl font-black tracking-tight text-white">
               {userName}
             </h1>
             {isPro && (
               <span
                 data-testid="pro-badge"
-                className="px-2 py-0.5 rounded-full bg-[#8B5CF6] text-white text-[10px] font-black uppercase tracking-wider"
+                className="px-2.5 py-0.5 rounded-full bg-[#8B5CF6] text-white text-[10px] font-black uppercase tracking-wider"
               >
                 PRO
               </span>
@@ -239,325 +239,333 @@ export const ProfilePage: React.FC = () => {
           </div>
 
           {/* Email */}
-          <div data-testid="user-email" className="text-xs text-white/70">
+          <div data-testid="user-email" className="text-xs md:text-sm text-white/70">
             {userEmail}
           </div>
         </div>
       </div>
 
-      <div className="max-w-xl mx-auto px-4 mt-6 space-y-6">
-        {/* 2. Subscription Card */}
-        <div
-          data-testid="subscription-card"
-          onClick={() => navigate('/subscription')}
-          className="cursor-pointer rounded-3xl p-6 text-white transition-transform hover:scale-[1.01] active:scale-[0.99] shadow-xl"
-          style={{
-            background: isPro
-              ? 'linear-gradient(135deg, #4F46E5, #8B5CF6)'
-              : 'linear-gradient(135deg, #374151, #4B5563)',
-            boxShadow: isPro
-              ? '0 10px 25px -5px rgba(79, 70, 229, 0.3)'
-              : '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-          }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <span className="px-3 py-1 rounded-full bg-white/20 text-[10px] font-black tracking-wider uppercase">
-              {isPro ? 'WEALTH SELECT (PRO)' : 'BASIC ACCESS (FREE)'}
-            </span>
-            <Award className="w-5 h-5" />
-          </div>
-
-          <h3 className="text-lg font-black mb-1">
-            {isPro ? 'MoneyMapper Pro Membership' : 'MoneyMapper Free Membership'}
-          </h3>
-          <p className="text-xs text-white/80 leading-relaxed mb-4">
-            {isPro
-              ? 'All 5 Financial Pillars, Screener Intelligence & AI Assistant Unlocked.'
-              : 'Free Tier — Upgrade to PRO to unlock full screeners, AI assistant & deep insights.'}
-          </p>
-          <div className="text-[11px] font-bold text-white/75 text-right">
-            Tap to manage membership →
-          </div>
-        </div>
-
-        {/* 3. GAMIFIED MILESTONES */}
-        <section data-testid="gamified-milestones">
-          <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
-            GAMIFIED MILESTONES
-          </div>
-          <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 divide-y divide-zinc-100 dark:divide-zinc-800 shadow-sm">
-            {/* Level & XP Banner */}
-            <div className="p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
-                    <Star className="w-5 h-5 fill-amber-500" />
-                  </div>
-                  <div>
-                    <div className="text-base font-black tracking-tight">
-                      LVL {levelInfo.level}
-                    </div>
-                    <div className="text-[10px] font-extrabold uppercase text-zinc-400">
-                      Financial Navigator
-                    </div>
-                  </div>
-                </div>
-                <div className="text-xs font-black text-[#4F46E5] dark:text-indigo-400">
-                  {totalXp} / {levelInfo.maxXp} XP
-                </div>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 mt-6 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column (5 cols on desktop: Membership & Quick Actions) */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* 2. Subscription Card */}
+            <div
+              data-testid="subscription-card"
+              onClick={() => navigate('/subscription')}
+              className="cursor-pointer rounded-3xl p-6 text-white transition-transform hover:scale-[1.01] active:scale-[0.99] shadow-xl"
+              style={{
+                background: isPro
+                  ? 'linear-gradient(135deg, #4F46E5, #8B5CF6)'
+                  : 'linear-gradient(135deg, #374151, #4B5563)',
+                boxShadow: isPro
+                  ? '0 10px 25px -5px rgba(79, 70, 229, 0.3)'
+                  : '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span className="px-3 py-1 rounded-full bg-white/20 text-[10px] font-black tracking-wider uppercase">
+                  {isPro ? 'WEALTH SELECT (PRO)' : 'BASIC ACCESS (FREE)'}
+                </span>
+                <Award className="w-5 h-5" />
               </div>
 
-              <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
+              <h3 className="text-lg font-black mb-1">
+                {isPro ? 'MoneyMapper Pro Membership' : 'MoneyMapper Free Membership'}
+              </h3>
+              <p className="text-xs text-white/80 leading-relaxed mb-4">
+                {isPro
+                  ? 'All 5 Financial Pillars, Screener Intelligence & AI Assistant Unlocked.'
+                  : 'Free Tier — Upgrade to PRO to unlock full screeners, AI assistant & deep insights.'}
+              </p>
+              <div className="text-[11px] font-bold text-white/75 text-right">
+                Tap to manage membership →
+              </div>
+            </div>
+
+            {/* 6. MY PROFILE & DATA */}
+            <section data-testid="my-profile-section">
+              <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
+                MY PROFILE & DATA
+              </div>
+              <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                {/* Master Data */}
                 <div
-                  className="h-full bg-emerald-500 rounded-full transition-all"
-                  style={{ width: `${Math.round(levelInfo.progress * 100)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Badges & Achievements link */}
-            <div
-              data-testid="link-achievements"
-              onClick={() => navigate('/achievements')}
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
-            >
-              <div className="flex items-center gap-3">
-                <Trophy className="w-5 h-5 text-[#8B5CF6]" />
-                <div>
-                  <div className="text-sm font-bold">Badges & Achievements</div>
-                  <div className="text-[11px] text-zinc-400">
-                    Review your earned financial milestones
+                  data-testid="link-master-data"
+                  onClick={() => navigate('/master-data')}
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-[#4F46E5]" />
+                    <div>
+                      <div className="text-sm font-bold">My Profile</div>
+                      <div className="text-[11px] text-zinc-400">
+                        Manage your 52 core identity & pillar data fields
+                      </div>
+                    </div>
                   </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-zinc-400" />
-            </div>
+            </section>
 
-            {/* Unlocked Badges Horizontal Row */}
-            {unlockedBadges.length > 0 && (
-              <div data-testid="unlocked-badges-row" className="p-4 flex gap-3 overflow-x-auto">
-                {unlockedBadges.map((badge) => (
-                  <div
-                    key={badge.id}
-                    title={badge.title}
-                    className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-zinc-800 border border-indigo-200 dark:border-zinc-700 flex items-center justify-center text-2xl shrink-0 shadow-sm"
-                  >
-                    {badge.emoji}
-                  </div>
-                ))}
+            {/* 7. ABOUT & COMPLIANCE */}
+            <section data-testid="compliance-section">
+              <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
+                ABOUT & COMPLIANCE
               </div>
-            )}
-
-            {/* Invite a Friend link */}
-            <div
-              data-testid="link-referral"
-              onClick={() => navigate('/referral')}
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
-            >
-              <div className="flex items-center gap-3">
-                <UserPlus className="w-5 h-5 text-[#4F46E5]" />
-                <div>
-                  <div className="text-sm font-bold">Invite a Friend</div>
-                  <div className="text-[11px] text-zinc-400">
-                    Help others improve their financial score
+              <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                <div
+                  data-testid="link-privacy-policy"
+                  onClick={() => navigate('/privacy')}
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <Info className="w-5 h-5 text-[#4F46E5]" />
+                    <div>
+                      <div className="text-sm font-bold">About MoneyMapper & Privacy Policy</div>
+                      <div className="text-[11px] text-zinc-400">
+                        Version 1.0.0 (Production build)
+                      </div>
+                    </div>
                   </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-zinc-400" />
-            </div>
-          </div>
-        </section>
+            </section>
 
-        {/* 4. SECURITY & PREFERENCES */}
-        <section data-testid="security-preferences">
-          <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
-            SECURITY & PREFERENCES
-          </div>
-          <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-            {/* Theme Selector Wired to ThemeProvider */}
-            <div className="p-4 flex items-center justify-between">
-              <div>
-                <div className="text-sm font-bold">Theme Mode</div>
-                <div className="text-[11px] text-zinc-400">
-                  Select Light, Dark, or System theme
-                </div>
-              </div>
-              <div
-                data-testid="theme-toggle-group"
-                className="flex items-center rounded-xl bg-zinc-100 dark:bg-zinc-800 p-1"
+            {/* 8. Logout Button */}
+            <div className="pt-2">
+              <button
+                data-testid="btn-logout"
+                onClick={() => setShowLogoutDialog(true)}
+                className="w-full py-3.5 px-4 rounded-2xl border-2 border-red-500 text-red-500 hover:bg-red-500/10 font-bold text-sm flex items-center justify-center gap-2 transition active:scale-[0.99]"
               >
-                {(['light', 'dark', 'system'] as ThemeMode[]).map((mode) => (
-                  <button
-                    key={mode}
-                    data-testid={`theme-btn-${mode}`}
-                    onClick={() => setThemeMode(mode)}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg capitalize transition ${
-                      themeMode === mode
-                        ? 'bg-white dark:bg-zinc-700 text-[#4F46E5] dark:text-indigo-300 shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
-                    }`}
+                <LogOut className="w-4 h-4" />
+                <span>Logout Session</span>
+              </button>
+            </div>
+
+            {/* 9. Trust Badges (Only SSL SECURED per instruction 4) */}
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <div
+                data-testid="trust-badge-ssl"
+                className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black tracking-widest uppercase"
+              >
+                SSL SECURED
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column (7 cols on desktop: Milestones, Security, Support) */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* 3. GAMIFIED MILESTONES */}
+            <section data-testid="gamified-milestones">
+              <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
+                GAMIFIED MILESTONES
+              </div>
+              <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 divide-y divide-zinc-100 dark:divide-zinc-800 shadow-sm">
+                {/* Level & XP Banner */}
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                        <Star className="w-5 h-5 fill-amber-500" />
+                      </div>
+                      <div>
+                        <div className="text-base font-black tracking-tight">
+                          LVL {levelInfo.level}
+                        </div>
+                        <div className="text-[10px] font-extrabold uppercase text-zinc-400">
+                          Financial Navigator
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs font-black text-[#4F46E5] dark:text-indigo-400">
+                      {totalXp} / {levelInfo.maxXp} XP
+                    </div>
+                  </div>
+
+                  <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all"
+                      style={{ width: `${Math.round(levelInfo.progress * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Badges & Achievements link */}
+                <div
+                  data-testid="link-achievements"
+                  onClick={() => navigate('/achievements')}
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <Trophy className="w-5 h-5 text-[#8B5CF6]" />
+                    <div>
+                      <div className="text-sm font-bold">Badges & Achievements</div>
+                      <div className="text-[11px] text-zinc-400">
+                        Review your earned financial milestones
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
+                </div>
+
+                {/* Unlocked Badges Horizontal Row */}
+                {unlockedBadges.length > 0 && (
+                  <div data-testid="unlocked-badges-row" className="p-4 flex gap-3 overflow-x-auto">
+                    {unlockedBadges.map((badge) => (
+                      <div
+                        key={badge.id}
+                        title={badge.title}
+                        className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-zinc-800 border border-indigo-200 dark:border-zinc-700 flex items-center justify-center text-2xl shrink-0 shadow-sm"
+                      >
+                        {badge.emoji}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Invite a Friend link */}
+                <div
+                  data-testid="link-referral"
+                  onClick={() => navigate('/referral')}
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <UserPlus className="w-5 h-5 text-[#4F46E5]" />
+                    <div>
+                      <div className="text-sm font-bold">Invite a Friend</div>
+                      <div className="text-[11px] text-zinc-400">
+                        Help others improve their financial score
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
+                </div>
+              </div>
+            </section>
+
+            {/* 4. SECURITY & PREFERENCES */}
+            <section data-testid="security-preferences">
+              <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
+                SECURITY & PREFERENCES
+              </div>
+              <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                {/* Theme Selector Wired to ThemeProvider */}
+                <div className="p-4 flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-bold">Theme Mode</div>
+                    <div className="text-[11px] text-zinc-400">
+                      Select Light, Dark, or System theme
+                    </div>
+                  </div>
+                  <div
+                    data-testid="theme-toggle-group"
+                    className="flex items-center rounded-xl bg-zinc-100 dark:bg-zinc-800 p-1"
                   >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. SUPPORT */}
-        <section data-testid="support-section">
-          <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
-            SUPPORT
-          </div>
-          <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 divide-y divide-zinc-100 dark:divide-zinc-800 shadow-sm">
-            {/* Help & Support modal */}
-            <div
-              data-testid="btn-support-modal"
-              onClick={() => setShowSupportModal(true)}
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
-            >
-              <div className="flex items-center gap-3">
-                <Headphones className="w-5 h-5 text-[#4F46E5]" />
-                <div>
-                  <div className="text-sm font-bold">Help & Support</div>
-                  <div className="text-[11px] text-zinc-400">
-                    Contact us via WhatsApp or Email
+                    {(['light', 'dark', 'system'] as ThemeMode[]).map((mode) => (
+                      <button
+                        key={mode}
+                        data-testid={`theme-btn-${mode}`}
+                        onClick={() => setThemeMode(mode)}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg capitalize transition ${
+                          themeMode === mode
+                            ? 'bg-white dark:bg-zinc-700 text-[#4F46E5] dark:text-indigo-300 shadow-sm'
+                            : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                        }`}
+                      >
+                        {mode}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-zinc-400" />
-            </div>
+            </section>
 
-            {/* App FAQs */}
-            <div
-              data-testid="btn-faq-modal"
-              onClick={() => setShowFaqModal(true)}
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
-            >
-              <div className="flex items-center gap-3">
-                <HelpCircle className="w-5 h-5 text-[#4F46E5]" />
-                <div>
-                  <div className="text-sm font-bold">App FAQs</div>
-                  <div className="text-[11px] text-zinc-400">
-                    Learn how MoneyMapper works
+            {/* 5. SUPPORT */}
+            <section data-testid="support-section">
+              <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
+                SUPPORT
+              </div>
+              <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 divide-y divide-zinc-100 dark:divide-zinc-800 shadow-sm">
+                {/* Help & Support modal */}
+                <div
+                  data-testid="btn-support-modal"
+                  onClick={() => setShowSupportModal(true)}
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <Headphones className="w-5 h-5 text-[#4F46E5]" />
+                    <div>
+                      <div className="text-sm font-bold">Help & Support</div>
+                      <div className="text-[11px] text-zinc-400">
+                        Contact us via WhatsApp or Email
+                      </div>
+                    </div>
                   </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
+                </div>
+
+                {/* App FAQs */}
+                <div
+                  data-testid="btn-faq-modal"
+                  onClick={() => setShowFaqModal(true)}
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <HelpCircle className="w-5 h-5 text-[#4F46E5]" />
+                    <div>
+                      <div className="text-sm font-bold">App FAQs</div>
+                      <div className="text-[11px] text-zinc-400">
+                        Learn how MoneyMapper works
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
+                </div>
+
+                {/* Share Feedback */}
+                <a
+                  data-testid="link-share-feedback"
+                  href="https://wa.me/917987469093?text=Hi+MoneyMapper+Team%2C+I+have+some+feedback+to+share%3A"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <MessageSquare className="w-5 h-5 text-[#4F46E5]" />
+                    <div>
+                      <div className="text-sm font-bold">Share your Feedback</div>
+                      <div className="text-[11px] text-zinc-400">
+                        Help us improve MoneyMapper
+                      </div>
+                    </div>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-zinc-400" />
+                </a>
+
+                {/* Rate MoneyMapper */}
+                <div
+                  data-testid="btn-rate-modal"
+                  onClick={() => setShowRatingDialog(true)}
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <Star className="w-5 h-5 text-[#4F46E5]" />
+                    <div>
+                      <div className="text-sm font-bold">Rate MoneyMapper</div>
+                      <div className="text-[11px] text-zinc-400">
+                        Help us grow by rating your experience
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-400" />
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-zinc-400" />
-            </div>
-
-            {/* Share Feedback */}
-            <a
-              data-testid="link-share-feedback"
-              href="https://wa.me/917987469093?text=Hi+MoneyMapper+Team%2C+I+have+some+feedback+to+share%3A"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
-            >
-              <div className="flex items-center gap-3">
-                <MessageSquare className="w-5 h-5 text-[#4F46E5]" />
-                <div>
-                  <div className="text-sm font-bold">Share your Feedback</div>
-                  <div className="text-[11px] text-zinc-400">
-                    Help us improve MoneyMapper
-                  </div>
-                </div>
-              </div>
-              <ExternalLink className="w-4 h-4 text-zinc-400" />
-            </a>
-
-            {/* Rate MoneyMapper */}
-            <div
-              data-testid="btn-rate-modal"
-              onClick={() => setShowRatingDialog(true)}
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
-            >
-              <div className="flex items-center gap-3">
-                <Star className="w-5 h-5 text-[#4F46E5]" />
-                <div>
-                  <div className="text-sm font-bold">Rate MoneyMapper</div>
-                  <div className="text-[11px] text-zinc-400">
-                    Help us grow by rating your experience
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-zinc-400" />
-            </div>
-          </div>
-        </section>
-
-        {/* 6. MY PROFILE & DATA */}
-        <section data-testid="my-profile-section">
-          <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
-            MY PROFILE & DATA
-          </div>
-          <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-            {/* Master Data */}
-            <div
-              data-testid="link-master-data"
-              onClick={() => navigate('/master-data')}
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
-            >
-              <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-[#4F46E5]" />
-                <div>
-                  <div className="text-sm font-bold">My Profile</div>
-                  <div className="text-[11px] text-zinc-400">
-                    Manage your 52 core identity & pillar data fields
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-zinc-400" />
-            </div>
-          </div>
-        </section>
-
-        {/* 7. ABOUT & COMPLIANCE */}
-        <section data-testid="compliance-section">
-          <div className="text-[11px] font-black tracking-wider uppercase text-zinc-400 mb-2 px-2">
-            ABOUT & COMPLIANCE
-          </div>
-          <div className="rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-            <div
-              data-testid="link-privacy-policy"
-              onClick={() => navigate('/privacy')}
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
-            >
-              <div className="flex items-center gap-3">
-                <Info className="w-5 h-5 text-[#4F46E5]" />
-                <div>
-                  <div className="text-sm font-bold">About MoneyMapper & Privacy Policy</div>
-                  <div className="text-[11px] text-zinc-400">
-                    Version 1.0.0 (Production build)
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-zinc-400" />
-            </div>
-          </div>
-        </section>
-
-        {/* 8. Logout Button */}
-        <div className="pt-2">
-          <button
-            data-testid="btn-logout"
-            onClick={() => setShowLogoutDialog(true)}
-            className="w-full py-3.5 px-4 rounded-2xl border-2 border-red-500 text-red-500 hover:bg-red-500/10 font-bold text-sm flex items-center justify-center gap-2 transition active:scale-[0.99]"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout Session</span>
-          </button>
-        </div>
-
-        {/* 9. Trust Badges (Only SSL SECURED per instruction 4) */}
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <div
-            data-testid="trust-badge-ssl"
-            className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black tracking-widest uppercase"
-          >
-            SSL SECURED
+            </section>
           </div>
         </div>
       </div>

@@ -104,7 +104,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* App Bar / Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -117,27 +117,56 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Score Header */}
-      <div
-        data-testid="weekly-score-header"
-        className="p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between"
-      >
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
-            EXPENSE DISCIPLINE SCORE
-          </span>
-          <div className="text-4xl font-black text-emerald-500 mt-1">
-            {disciplineScore.toFixed(0)}
+      {/* Top Banner & Controls Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Score Header */}
+        <div
+          data-testid="weekly-score-header"
+          className="lg:col-span-8 p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between shadow-sm"
+        >
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
+              EXPENSE DISCIPLINE SCORE
+            </span>
+            <div className="text-4xl font-black text-emerald-500 mt-1">
+              {disciplineScore.toFixed(0)}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 rounded-full border-2 border-emerald-500/40 flex items-center justify-center font-black text-emerald-500 text-sm">
+                {targetsHit}
+              </div>
+              <span className="text-[10px] font-bold text-gray-400 mt-1">Target Rate</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full border-2 border-emerald-500/40 flex items-center justify-center font-black text-emerald-500 text-sm">
-              {targetsHit}
+        {/* Previous Week Mini Overview / Quick Summary */}
+        <div className="lg:col-span-4 flex flex-col justify-center">
+          {prevWeek && currentWeek.is_current && !currentWeek.is_submitted ? (
+            <div
+              data-testid="prev-week-mini"
+              className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm flex items-center justify-between text-xs h-full"
+            >
+              <span className="text-gray-400 font-semibold">Previous Week ({prevWeek.index})</span>
+              <span
+                className={`font-black uppercase ${
+                  prevWeek.status === 'achieved' ? 'text-emerald-500' : 'text-rose-500'
+                }`}
+              >
+                {prevWeek.status === 'achieved' ? 'Target Achieved' : 'Missed'}
+              </span>
             </div>
-            <span className="text-[10px] font-bold text-gray-400 mt-1">Target Rate</span>
-          </div>
+          ) : (
+            <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm flex items-center justify-between text-xs h-full">
+              <span className="text-gray-400 font-semibold">Current Week Status</span>
+              <span className="font-black uppercase text-emerald-500">
+                {currentWeek.is_submitted ? 'Submitted ✓' : 'In Progress'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -151,7 +180,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               type="button"
               data-testid={`week-tab-${w.index}`}
               onClick={() => setCurrentViewWeekIndex(idx)}
-              className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
                 isSelected
                   ? 'bg-emerald-600 text-white shadow-md'
                   : 'bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
@@ -164,184 +193,175 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
         })}
       </div>
 
-      {/* Previous Week Mini Overview */}
-      {prevWeek && currentWeek.is_current && !currentWeek.is_submitted && (
-        <div
-          data-testid="prev-week-mini"
-          className="p-4 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border)] flex items-center justify-between text-xs"
-        >
-          <span className="text-gray-400">Previous Week ({prevWeek.index})</span>
-          <span
-            className={`font-black uppercase ${
-              prevWeek.status === 'achieved' ? 'text-emerald-500' : 'text-rose-500'
-            }`}
+      {/* 2-Column Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Target Ranges */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--color-text)]">
+                Week {currentWeek.index} Target Ranges
+              </h2>
+              <p className="text-xs text-gray-400">
+                {formatDate(currentWeek.start)} - {formatDate(currentWeek.end)}
+              </p>
+            </div>
+
+            {/* Fixed Expenses Decision Card */}
+            <div data-testid="decision-card-fixed" className="space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-[var(--color-text)]">Fixed Expenses</span>
+                <span className="text-gray-400">
+                  Target: {formatInr(currentWeek.range_fixed[0])} - {formatInr(currentWeek.range_fixed[1])}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  data-testid="fixed-achieved-btn"
+                  onClick={() => handleOpenAchievedModal('fixed')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    fixedDecision === 'achieved'
+                      ? 'bg-emerald-600 text-white shadow'
+                      : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-emerald-500'
+                  }`}
+                >
+                  {fixedDecision === 'achieved' ? `Achieved (${formatInr(actualFixed)})` : 'Achieved'}
+                </button>
+                <button
+                  type="button"
+                  data-testid="fixed-missed-btn"
+                  onClick={() => handleMarkMissed('fixed')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    fixedDecision === 'missed'
+                      ? 'bg-rose-600 text-white shadow'
+                      : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-rose-500'
+                  }`}
+                >
+                  Missed
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-[var(--color-border)]/50" />
+
+            {/* Flexible Expenses Decision Card */}
+            <div data-testid="decision-card-flexible" className="space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-[var(--color-text)]">Flexible Expenses</span>
+                <span className="text-gray-400">
+                  Target: {formatInr(currentWeek.range_flex[0])} - {formatInr(currentWeek.range_flex[1])}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  data-testid="flexible-achieved-btn"
+                  onClick={() => handleOpenAchievedModal('flexible')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    flexibleDecision === 'achieved'
+                      ? 'bg-emerald-600 text-white shadow'
+                      : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-emerald-500'
+                  }`}
+                >
+                  {flexibleDecision === 'achieved' ? `Achieved (${formatInr(actualFlex)})` : 'Achieved'}
+                </button>
+                <button
+                  type="button"
+                  data-testid="flexible-missed-btn"
+                  onClick={() => handleMarkMissed('flexible')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    flexibleDecision === 'missed'
+                      ? 'bg-rose-600 text-white shadow'
+                      : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-rose-500'
+                  }`}
+                >
+                  Missed
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-[var(--color-border)]/50" />
+
+            {/* Savings Goal Decision Card */}
+            <div data-testid="decision-card-savings" className="space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-[var(--color-text)]">Savings Goal</span>
+                <span className="text-gray-400">
+                  Target: {formatInr(currentWeek.range_save[0])} - {formatInr(currentWeek.range_save[1])}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  data-testid="savings-achieved-btn"
+                  onClick={() => handleOpenAchievedModal('savings')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    savingsDecision === 'achieved'
+                      ? 'bg-emerald-600 text-white shadow'
+                      : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-emerald-500'
+                  }`}
+                >
+                  {savingsDecision === 'achieved' ? `Achieved (${formatInr(actualSaved)})` : 'Achieved'}
+                </button>
+                <button
+                  type="button"
+                  data-testid="savings-missed-btn"
+                  onClick={() => handleMarkMissed('savings')}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    savingsDecision === 'missed'
+                      ? 'bg-rose-600 text-white shadow'
+                      : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-rose-500'
+                  }`}
+                >
+                  Missed
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Full Week Button */}
+            <button
+              type="button"
+              data-testid="submit-week-btn"
+              disabled={isSubmitting || currentWeek.is_submitted}
+              onClick={handleSubmitReport}
+              className={`w-full py-4 rounded-2xl font-bold text-sm transition-all ${
+                currentWeek.is_submitted
+                  ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg active:scale-98'
+              }`}
+            >
+              {currentWeek.is_submitted ? 'SUBMITTED' : isSubmitting ? 'Submitting...' : 'SUBMIT WEEKLY REPORT'}
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Observation & Actions */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Observation Card */}
+          <div
+            data-testid="weekly-observation-card"
+            className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-3"
           >
-            {prevWeek.status === 'achieved' ? 'Target Achieved' : 'Missed'}
-          </span>
-        </div>
-      )}
-
-      {/* Target Ranges Section */}
-      <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-6">
-        <div>
-          <h2 className="text-lg font-bold text-[var(--color-text)]">
-            Week {currentWeek.index} Target Ranges
-          </h2>
-          <p className="text-xs text-gray-400">
-            {formatDate(currentWeek.start)} - {formatDate(currentWeek.end)}
-          </p>
-        </div>
-
-        {/* Fixed Expenses Decision Card */}
-        <div data-testid="decision-card-fixed" className="space-y-2">
-          <div className="flex justify-between items-center text-xs">
-            <span className="font-bold text-[var(--color-text)]">Fixed Expenses</span>
-            <span className="text-gray-400">
-              Target: {formatInr(currentWeek.range_fixed[0])} - {formatInr(currentWeek.range_fixed[1])}
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
+              OBSERVATION
             </span>
+            <p className="text-xs text-[var(--color-text)] leading-relaxed">
+              {getFinMessage(disciplineScore, savingsDecision === 'achieved')}
+            </p>
           </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              data-testid="fixed-achieved-btn"
-              onClick={() => handleOpenAchievedModal('fixed')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                fixedDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white shadow'
-                  : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-emerald-500'
-              }`}
-            >
-              {fixedDecision === 'achieved' ? `Achieved (${formatInr(actualFixed)})` : 'Achieved'}
-            </button>
-            <button
-              type="button"
-              data-testid="fixed-missed-btn"
-              onClick={() => handleMarkMissed('fixed')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                fixedDecision === 'missed'
-                  ? 'bg-rose-600 text-white shadow'
-                  : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-rose-500'
-              }`}
-            >
-              Missed
-            </button>
-          </div>
+
+          {/* Optimize Button */}
+          <button
+            type="button"
+            data-testid="weekly-optimize-btn"
+            onClick={() => navigate('/master-data?target=expenses')}
+            className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg hover:shadow-emerald-500/25 transition-all active:scale-98 flex items-center justify-center gap-2"
+          >
+            <span>⚡</span> Optimize Now
+          </button>
         </div>
-
-        <div className="border-t border-[var(--color-border)]/50" />
-
-        {/* Flexible Expenses Decision Card */}
-        <div data-testid="decision-card-flexible" className="space-y-2">
-          <div className="flex justify-between items-center text-xs">
-            <span className="font-bold text-[var(--color-text)]">Flexible Expenses</span>
-            <span className="text-gray-400">
-              Target: {formatInr(currentWeek.range_flex[0])} - {formatInr(currentWeek.range_flex[1])}
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              data-testid="flexible-achieved-btn"
-              onClick={() => handleOpenAchievedModal('flexible')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                flexibleDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white shadow'
-                  : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-emerald-500'
-              }`}
-            >
-              {flexibleDecision === 'achieved' ? `Achieved (${formatInr(actualFlex)})` : 'Achieved'}
-            </button>
-            <button
-              type="button"
-              data-testid="flexible-missed-btn"
-              onClick={() => handleMarkMissed('flexible')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                flexibleDecision === 'missed'
-                  ? 'bg-rose-600 text-white shadow'
-                  : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-rose-500'
-              }`}
-            >
-              Missed
-            </button>
-          </div>
-        </div>
-
-        <div className="border-t border-[var(--color-border)]/50" />
-
-        {/* Savings Goal Decision Card */}
-        <div data-testid="decision-card-savings" className="space-y-2">
-          <div className="flex justify-between items-center text-xs">
-            <span className="font-bold text-[var(--color-text)]">Savings Goal</span>
-            <span className="text-gray-400">
-              Target: {formatInr(currentWeek.range_save[0])} - {formatInr(currentWeek.range_save[1])}
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              data-testid="savings-achieved-btn"
-              onClick={() => handleOpenAchievedModal('savings')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                savingsDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white shadow'
-                  : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-emerald-500'
-              }`}
-            >
-              {savingsDecision === 'achieved' ? `Achieved (${formatInr(actualSaved)})` : 'Achieved'}
-            </button>
-            <button
-              type="button"
-              data-testid="savings-missed-btn"
-              onClick={() => handleMarkMissed('savings')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                savingsDecision === 'missed'
-                  ? 'bg-rose-600 text-white shadow'
-                  : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-gray-400 hover:text-rose-500'
-              }`}
-            >
-              Missed
-            </button>
-          </div>
-        </div>
-
-        {/* Submit Full Week Button */}
-        <button
-          type="button"
-          data-testid="submit-week-btn"
-          disabled={isSubmitting || currentWeek.is_submitted}
-          onClick={handleSubmitReport}
-          className={`w-full py-4 rounded-2xl font-bold text-sm transition-all ${
-            currentWeek.is_submitted
-              ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
-              : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg active:scale-98'
-          }`}
-        >
-          {currentWeek.is_submitted ? 'SUBMITTED' : isSubmitting ? 'Submitting...' : 'SUBMIT WEEKLY REPORT'}
-        </button>
       </div>
-
-      {/* Observation Card */}
-      <div
-        data-testid="weekly-observation-card"
-        className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-2"
-      >
-        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
-          OBSERVATION
-        </span>
-        <p className="text-xs text-[var(--color-text)] leading-relaxed">
-          {getFinMessage(disciplineScore, savingsDecision === 'achieved')}
-        </p>
-      </div>
-
-      {/* Optimize Button */}
-      <button
-        type="button"
-        data-testid="weekly-optimize-btn"
-        onClick={() => navigate('/master-data?target=expenses')}
-        className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg hover:shadow-emerald-500/25 transition-all active:scale-98 flex items-center justify-center gap-2"
-      >
-        <span>⚡</span> Optimize Now
-      </button>
 
       {/* Log Exact Amount Modal */}
       {modalTarget && (

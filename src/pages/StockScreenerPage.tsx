@@ -61,6 +61,7 @@ export const StockScreenerPage: React.FC = () => {
   const [allSignals, setAllSignals] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
   // Sentiment State
   const [sentimentData, setSentimentData] = useState<any | null>(null);
@@ -137,8 +138,8 @@ export const StockScreenerPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 text-slate-900 dark:text-white" data-testid="stock-screener-page">
       {/* App Bar */}
-      <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 lg:px-8 py-3.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -148,7 +149,7 @@ export const StockScreenerPage: React.FC = () => {
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <h1 className="text-base font-black text-slate-900 dark:text-white">Stocks Score Card</h1>
+            <h1 className="text-base md:text-lg font-black text-slate-900 dark:text-white">Stocks Score Card</h1>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -173,73 +174,146 @@ export const StockScreenerPage: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-6 space-y-6">
-        {/* Search Bar (gated for Pro users) */}
-        <div className="relative">
-          <div className={`relative ${!isPro ? 'filter blur-xs select-none' : ''}`}>
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <Search className="w-4 h-4" />
+      <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-6 space-y-6">
+        {/* Top Controls Grid: Search Bar (7 cols) + Market Sentiment Card (5 cols) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div className="lg:col-span-7 space-y-4">
+            <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
+              NIFTY 500 Intelligence Engine
+            </h2>
+            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              Real-time Heikin Ashi, Bollinger & Pivot trend reversal analysis across top Indian equities.
+            </p>
+
+            {/* Search Bar (gated for Pro users) */}
+            <div className="relative pt-2">
+              <div className={`relative ${!isPro ? 'filter blur-xs select-none' : ''}`}>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Search className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  data-testid="stock-search-input"
+                  disabled={!isPro}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={isPro ? 'Search ticker (e.g. RELIANCE)...' : 'Search locked for Free users'}
+                  className="w-full pl-9 pr-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                />
+              </div>
+
+              {!isPro && (
+                <div
+                  data-testid="stock-search-locked"
+                  onClick={() => navigate('/subscription')}
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-black tracking-wider uppercase shadow-sm">
+                    <Lock className="w-3 h-3" />
+                    <span>UPGRADE TO PRO</span>
+                  </div>
+                </div>
+              )}
             </div>
-            <input
-              type="text"
-              data-testid="stock-search-input"
-              disabled={!isPro}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isPro ? 'Search ticker (e.g. RELIANCE)...' : 'Search locked for Free users'}
-              className="w-full pl-9 pr-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
           </div>
 
-          {!isPro && (
-            <div
-              data-testid="stock-search-locked"
-              onClick={() => navigate('/subscription')}
-              className="absolute inset-0 flex items-center justify-center cursor-pointer"
-            >
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-black tracking-wider uppercase shadow-sm">
-                <Lock className="w-3 h-3" />
-                <span>UPGRADE TO PRO</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Market Sentiment Gauge Card */}
-        <section
-          data-testid="sentiment-card"
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col items-center text-center"
-        >
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
-            MARKET SENTIMENT
-          </span>
-
-          <SentimentGauge value={sentimentValue} size={240} />
-
-          <span
-            data-testid="sentiment-direction-label"
-            className={`text-sm font-black tracking-wider mt-3 ${sentimentColor}`}
+          {/* Market Sentiment Gauge Card */}
+          <section
+            data-testid="sentiment-card"
+            className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col items-center text-center"
           >
-            {sentimentSubLabel}
-          </span>
-
-          {sentimentData?.updated_at && (
-            <span className="text-[10px] font-bold text-slate-400 mt-1">
-              Updated: {new Date(sentimentData.updated_at).toLocaleDateString()}
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              MARKET SENTIMENT
             </span>
-          )}
-        </section>
 
-        {/* Section Divider */}
-        <div className="flex items-center gap-4 my-4">
-          <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
-          <span className="text-xs font-black uppercase tracking-wider text-slate-400">
-            NIFTY 500 SIGNALS &amp; STOCKS
-          </span>
-          <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
+            <SentimentGauge value={sentimentValue} size={200} />
+
+            <span
+              data-testid="sentiment-direction-label"
+              className={`text-xs md:text-sm font-black tracking-wider mt-2 ${sentimentColor}`}
+            >
+              {sentimentSubLabel}
+            </span>
+
+            {sentimentData?.updated_at && (
+              <span className="text-[10px] font-bold text-slate-400 mt-1">
+                Updated: {new Date(sentimentData.updated_at).toLocaleDateString()}
+              </span>
+            )}
+          </section>
         </div>
 
-        {/* Signals List */}
+        {/* Web Analytics KPI Summary Bar */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span className="text-[10px] font-black uppercase text-slate-400">Total Tracked</span>
+            <div className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
+              {allSignals.length} <span className="text-xs font-normal text-slate-400">Equities</span>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400">High Confidence (&gt;70)</span>
+            <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {allSignals.filter((s) => ResilienceUtils.safeDouble(s.score) >= 70).length}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span className="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400">Buy Signals</span>
+            <div className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
+              {allSignals.filter((s) => s.direction === 'BUY').length}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400">Avg Market Score</span>
+            <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">
+              {allSignals.length > 0
+                ? Math.round(allSignals.reduce((a, b) => a + ResilienceUtils.safeDouble(b.score), 0) / allSignals.length)
+                : 0}
+              <span className="text-xs font-normal text-slate-400">/100</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Section Header & View Switcher */}
+        <div className="flex items-center justify-between gap-4 my-6">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
+              NIFTY 500 SIGNALS &amp; STOCKS
+            </span>
+            <span className="text-xs font-semibold text-slate-400">({filteredSignals.length} items)</span>
+          </div>
+
+          {/* Desktop Table vs Grid Toggle */}
+          <div className="hidden sm:flex items-center p-1 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              }`}
+            >
+              Grid View
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              }`}
+            >
+              Table View
+            </button>
+          </div>
+        </div>
+
+        {/* Signals List / Desktop View */}
         {loading ? (
           <div className="py-20 text-center text-slate-400" data-testid="stock-loading-state">
             <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
@@ -266,88 +340,180 @@ export const StockScreenerPage: React.FC = () => {
               </div>
             )}
 
-            {displayList.map((s, idx) => {
-              const score = Math.round(ResilienceUtils.safeDouble(s.score));
-              let direction = (s.direction || 'WAIT').toString();
-              if (direction === 'HOLD' || score === 0) direction = 'WAIT';
+            {/* Desktop Table View */}
+            {viewMode === 'table' ? (
+              <div className="overflow-x-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <th className="py-3.5 px-4">TICKER</th>
+                      <th className="py-3.5 px-4">SCORE</th>
+                      <th className="py-3.5 px-4">SIGNAL</th>
+                      <th className="py-3.5 px-4">ENTRY ZONE</th>
+                      <th className="py-3.5 px-4">TARGET RANGE</th>
+                      <th className="py-3.5 px-4">STOP LOSS</th>
+                      <th className="py-3.5 px-4">EST. RETURN</th>
+                      <th className="py-3.5 px-4 text-right">ACTION</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
+                    {displayList.map((s, idx) => {
+                      const score = Math.round(ResilienceUtils.safeDouble(s.score));
+                      let direction = (s.direction || 'WAIT').toString();
+                      if (direction === 'HOLD' || score === 0) direction = 'WAIT';
+                      const isBuy = direction === 'BUY';
+                      const isWait = direction === 'WAIT';
+                      const isLocked = !isPro && idx > 0;
+                      const upside = calculateUpsidePct(s.entry_range, s.target_range);
 
-              const isBuy = direction === 'BUY';
-              const isWait = direction === 'WAIT';
-              const isLocked = !isPro && idx > 0;
-              const upside = calculateUpsidePct(s.entry_range, s.target_range);
-
-              return (
-                <div
-                  key={s.id || idx}
-                  data-testid={`stock-card-${idx}`}
-                  onClick={() => handleStockClick(s, idx)}
-                  className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm cursor-pointer hover:border-indigo-400 transition-all"
-                >
-                  <div className={`space-y-4 ${isLocked ? 'filter blur-[5px] select-none pointer-events-none' : ''}`}>
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-black text-lg text-slate-900 dark:text-white">
-                            {s.symbol || 'Unknown'}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400 font-bold">
-                          <span>Score:</span>
-                          <span className="text-sm font-black text-slate-900 dark:text-white">
-                            {score}
-                          </span>
-                          <span>/100</span>
-                          {!isWait && upside && (
-                            <span className={isBuy ? 'text-emerald-600' : 'text-rose-600'}>
-                              • Expected Return: {upside}
+                      return (
+                        <tr
+                          key={s.id || idx}
+                          data-testid={`stock-card-${idx}`}
+                          onClick={() => handleStockClick(s, idx)}
+                          className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors ${
+                            isLocked ? 'opacity-50 select-none' : ''
+                          }`}
+                        >
+                          <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">
+                            <div className="flex items-center gap-2">
+                              <span>{s.symbol || 'Unknown'}</span>
+                              {isLocked && <Lock className="w-3 h-3 text-amber-500" data-testid={`stock-lock-overlay-${idx}`} />}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 font-black">
+                            <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black">
+                              {score}
                             </span>
-                          )}
-                        </div>
-                      </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider text-white ${
+                                isWait ? 'bg-slate-400' : isBuy ? 'bg-emerald-500' : 'bg-rose-500'
+                              }`}
+                            >
+                              {direction}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-slate-600 dark:text-slate-300">
+                            {s.entry_range || '–'}
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-emerald-600 dark:text-emerald-400">
+                            {s.target_range || '–'}
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-rose-500">
+                            {s.sl_range || '–'}
+                          </td>
+                          <td className="py-3.5 px-4 font-black">
+                            {!isWait && upside ? (
+                              <span className={isBuy ? 'text-emerald-600' : 'text-rose-600'}>
+                                +{upside}
+                              </span>
+                            ) : (
+                              '–'
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <button
+                              type="button"
+                              className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition shadow-xs"
+                            >
+                              Analyze
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              /* Desktop Grid View */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {displayList.map((s, idx) => {
+                  const score = Math.round(ResilienceUtils.safeDouble(s.score));
+                  let direction = (s.direction || 'WAIT').toString();
+                  if (direction === 'HOLD' || score === 0) direction = 'WAIT';
 
-                      <span
-                        className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider text-white ${
-                          isWait ? 'bg-slate-400' : isBuy ? 'bg-emerald-500' : 'bg-rose-500'
-                        }`}
-                      >
-                        {direction}
-                      </span>
-                    </div>
+                  const isBuy = direction === 'BUY';
+                  const isWait = direction === 'WAIT';
+                  const isLocked = !isPro && idx > 0;
+                  const upside = calculateUpsidePct(s.entry_range, s.target_range);
 
-                    {!isWait && (
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
-                        <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400">
-                          <span className="text-[9px] font-black uppercase">STOP LOSS</span>
-                          <p className="text-xs font-black mt-0.5">{s.sl_range || 'N/A'}</p>
-                        </div>
-                        <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400">
-                          <span className="text-[9px] font-black uppercase">ENTRY ZONE</span>
-                          <p className="text-xs font-black mt-0.5">{s.entry_range || 'N/A'}</p>
-                        </div>
-                        <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400">
-                          <span className="text-[9px] font-black uppercase">TARGET</span>
-                          <p className="text-xs font-black mt-0.5">{s.target_range || 'N/A'}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {isLocked && (
+                  return (
                     <div
-                      data-testid={`stock-lock-overlay-${idx}`}
-                      className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center rounded-2xl"
+                      key={s.id || idx}
+                      data-testid={`stock-card-${idx}`}
+                      onClick={() => handleStockClick(s, idx)}
+                      className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm cursor-pointer hover:border-indigo-400 transition-all"
                     >
-                      <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg">
-                        <Lock className="w-5 h-5" />
+                      <div className={`space-y-4 ${isLocked ? 'filter blur-[5px] select-none pointer-events-none' : ''}`}>
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-black text-lg text-slate-900 dark:text-white">
+                                {s.symbol || 'Unknown'}
+                              </h3>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400 font-bold">
+                              <span>Score:</span>
+                              <span className="text-sm font-black text-slate-900 dark:text-white">
+                                {score}
+                              </span>
+                              <span>/100</span>
+                              {!isWait && upside && (
+                                <span className={isBuy ? 'text-emerald-600' : 'text-rose-600'}>
+                                  • Expected Return: {upside}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <span
+                            className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider text-white ${
+                              isWait ? 'bg-slate-400' : isBuy ? 'bg-emerald-500' : 'bg-rose-500'
+                            }`}
+                          >
+                            {direction}
+                          </span>
+                        </div>
+
+                        {!isWait && (
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
+                            <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400">
+                              <span className="text-[9px] font-black uppercase">STOP LOSS</span>
+                              <p className="text-xs font-black mt-0.5">{s.sl_range || 'N/A'}</p>
+                            </div>
+                            <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400">
+                              <span className="text-[9px] font-black uppercase">ENTRY ZONE</span>
+                              <p className="text-xs font-black mt-0.5">{s.entry_range || 'N/A'}</p>
+                            </div>
+                            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400">
+                              <span className="text-[9px] font-black uppercase">TARGET</span>
+                              <p className="text-xs font-black mt-0.5">{s.target_range || 'N/A'}</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mt-1.5">
-                        PRO
-                      </span>
+
+                      {isLocked && (
+                        <div
+                          data-testid={`stock-lock-overlay-${idx}`}
+                          className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center rounded-2xl"
+                        >
+                          <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg">
+                            <Lock className="w-5 h-5" />
+                          </div>
+                          <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mt-1.5">
+                            PRO
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
 
             {/* Incremental Load More */}
             {visibleCount < filteredSignals.length && (

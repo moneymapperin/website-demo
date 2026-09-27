@@ -412,6 +412,43 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
       {/* Main Content Area */}
       <main className="flex-1 min-w-0 overflow-y-auto pb-20 md:pb-0">
+        {/* Desktop Top Header Bar */}
+        <header
+          data-testid="desktop-top-header"
+          style={{
+            backgroundColor: isDark ? APP_COLORS.darkCard : '#FFFFFF',
+            borderColor: isDark ? APP_COLORS.darkBorder : APP_COLORS.borderLight,
+          }}
+          className="hidden md:flex items-center justify-between px-8 py-3 border-b sticky top-0 z-20 select-none shadow-xs"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-zinc-400">
+              <span className="hover:text-indigo-500 cursor-pointer" onClick={() => navigate('/dashboard')}>
+                MoneyMapper
+              </span>
+              <span>/</span>
+              <span className="text-indigo-500 uppercase tracking-wider font-black">
+                {location.pathname.replace('/', '').replace(/-/g, ' ') || 'Dashboard'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-black uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>LIVE SYSTEM</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-800/10 dark:bg-zinc-800 hover:bg-zinc-800/20 transition-colors"
+            >
+              {isDark ? '☀️ Light' : '🌙 Dark'}
+            </button>
+          </div>
+        </header>
+
         {children || <Outlet />}
       </main>
 

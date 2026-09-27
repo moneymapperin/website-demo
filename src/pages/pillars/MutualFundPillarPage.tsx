@@ -77,7 +77,7 @@ export const MutualFundPillarPage: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* App Bar / Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -90,181 +90,189 @@ export const MutualFundPillarPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Score Header */}
-      <div
-        data-testid="investments-score-header"
-        className="p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between"
-      >
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
-            GLOBAL PILLAR SCORE
-          </span>
-          <div className="text-4xl font-black text-emerald-500 mt-1">
-            {p.investmentScore.toFixed(0)}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full border-2 border-blue-500/40 flex items-center justify-center font-black text-blue-500 text-sm">
-              {p.assetBalanceScore.toFixed(0)}
-            </div>
-            <span className="text-[10px] font-bold text-gray-400 mt-1">Asset Mix</span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full border-2 border-emerald-500/40 flex items-center justify-center font-black text-emerald-500 text-sm">
-              {p.sipScore.toFixed(0)}
-            </div>
-            <span className="text-[10px] font-bold text-gray-400 mt-1">SIP Health</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Portfolio Breakdown */}
-      <div className="space-y-3">
-        <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
-          PORTFOLIO BREAKDOWN
-        </h2>
-        <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-400">Total Wealth Assets</span>
-            <span className="text-xl font-black text-emerald-500">
-              {p.hasProfileData ? formatInr(p.totalInvested) : 'not available'}
-            </span>
-          </div>
-
-          <div className="border-t border-[var(--color-border)]/50" />
-
-          {assetList.map((asset) => (
-            <div key={asset.key} className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${asset.bg}`} />
-                <div>
-                  <div className="text-sm font-bold text-[var(--color-text)]">{asset.label}</div>
-                  <div className="text-xs text-gray-400">{asset.tag}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-sm font-black text-[var(--color-text)]">
-                  {p.hasProfileData ? formatInr(asset.amount) : 'not available'}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditField({
-                      title: asset.label,
-                      key: asset.key,
-                      currentVal: asset.amount,
-                    });
-                    setEditValue(asset.amount.toString());
-                  }}
-                  className={`p-1 ${asset.color} hover:opacity-75 text-sm`}
-                  title={`Edit ${asset.label}`}
-                >
-                  ✏️
-                </button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Score Header */}
+          <div
+            data-testid="investments-score-header"
+            className="p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between shadow-sm"
+          >
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
+                GLOBAL PILLAR SCORE
+              </span>
+              <div className="text-4xl font-black text-emerald-500 mt-1">
+                {p.investmentScore.toFixed(0)}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Allocation Health */}
-      <div className="space-y-3">
-        <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
-          ALLOCATION HEALTH
-        </h2>
-        <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-5">
-          {assetList.map((asset) => {
-            const pct = p.totalInvested > 0 ? (asset.amount / p.totalInvested) * 100 : 0;
-            return (
-              <div key={`alloc-${asset.key}`}>
-                <div className="flex justify-between text-xs font-bold mb-1.5">
-                  <span className="text-[var(--color-text)]">{asset.label}</span>
-                  <span className={`${asset.color} font-black`}>
-                    {p.hasProfileData ? `${pct.toFixed(1)}%` : 'not available'}
-                  </span>
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full border-2 border-blue-500/40 flex items-center justify-center font-black text-blue-500 text-sm">
+                  {p.assetBalanceScore.toFixed(0)}
                 </div>
-                <div className="h-2.5 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${asset.bg} rounded-full transition-all duration-500`}
-                    style={{ width: `${Math.min(100, Math.max(1, pct))}%` }}
-                  />
-                </div>
+                <span className="text-[10px] font-bold text-gray-400 mt-1">Asset Mix</span>
               </div>
-            );
-          })}
+
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full border-2 border-emerald-500/40 flex items-center justify-center font-black text-emerald-500 text-sm">
+                  {p.sipScore.toFixed(0)}
+                </div>
+                <span className="text-[10px] font-bold text-gray-400 mt-1">SIP Health</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Portfolio Breakdown */}
+          <div className="space-y-3">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
+              PORTFOLIO BREAKDOWN
+            </h2>
+            <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-400">Total Wealth Assets</span>
+                <span className="text-xl font-black text-emerald-500">
+                  {p.hasProfileData ? formatInr(p.totalInvested) : 'not available'}
+                </span>
+              </div>
+
+              <div className="border-t border-[var(--color-border)]/50" />
+
+              {assetList.map((asset) => (
+                <div key={asset.key} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${asset.bg}`} />
+                    <div>
+                      <div className="text-sm font-bold text-[var(--color-text)]">{asset.label}</div>
+                      <div className="text-xs text-gray-400">{asset.tag}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm font-black text-[var(--color-text)]">
+                      {p.hasProfileData ? formatInr(asset.amount) : 'not available'}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditField({
+                          title: asset.label,
+                          key: asset.key,
+                          currentVal: asset.amount,
+                        });
+                        setEditValue(asset.amount.toString());
+                      }}
+                      className={`p-1 ${asset.color} hover:opacity-75 text-sm`}
+                      title={`Edit ${asset.label}`}
+                    >
+                      ✏️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Optimize Button */}
+          <button
+            type="button"
+            data-testid="investments-optimize-btn"
+            onClick={() => navigate('/master-data?target=investment')}
+            className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg hover:shadow-emerald-500/25 transition-all active:scale-98 flex items-center justify-center gap-2"
+          >
+            <span>⚡</span> Optimize Now
+          </button>
+        </div>
+
+        {/* Right Column */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Allocation Health */}
+          <div className="space-y-3">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
+              ALLOCATION HEALTH
+            </h2>
+            <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-5">
+              {assetList.map((asset) => {
+                const pct = p.totalInvested > 0 ? (asset.amount / p.totalInvested) * 100 : 0;
+                return (
+                  <div key={`alloc-${asset.key}`}>
+                    <div className="flex justify-between text-xs font-bold mb-1.5">
+                      <span className="text-[var(--color-text)]">{asset.label}</span>
+                      <span className={`${asset.color} font-black`}>
+                        {p.hasProfileData ? `${pct.toFixed(1)}%` : 'not available'}
+                      </span>
+                    </div>
+                    <div className="h-2.5 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${asset.bg} rounded-full transition-all duration-500`}
+                        style={{ width: `${Math.min(100, Math.max(1, pct))}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SIP Analysis */}
+          <div className="space-y-3">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
+              SIP ANALYSIS
+            </h2>
+            <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-[var(--color-text)]">
+                  Monthly SIP Contribution
+                </span>
+                <span className="text-base font-black text-emerald-500">
+                  {p.hasProfileData ? formatInr(p.monthlySipTotal) : 'not available'}
+                </span>
+              </div>
+
+              <div className="border-t border-[var(--color-border)]/50" />
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">Mutual Fund SIP</span>
+                <span className="font-bold text-amber-500">
+                  {p.hasProfileData ? formatInr(p.sipDebt) : 'not available'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">Gold SIP</span>
+                <span className="font-bold text-yellow-500">
+                  {p.hasProfileData ? formatInr(p.sipGold) : 'not available'}
+                </span>
+              </div>
+
+              <div className="border-t border-[var(--color-border)]/50" />
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-rose-500">Monthly Shortfall (Gap)</span>
+                <span className="text-base font-black text-rose-500">
+                  {p.hasProfileData ? formatInr(p.sipGap) : 'not available'}
+                </span>
+              </div>
+
+              {/* SIP Progress Bar */}
+              <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    p.sipProgress >= 0.8 ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                  style={{ width: `${Math.min(100, Math.max(5, p.sipProgress * 100))}%` }}
+                />
+              </div>
+
+              <p className="text-xs italic text-[var(--color-text-secondary)]">
+                {p.sipProgress >= 1.0
+                  ? 'Excellent! You are meeting your 20% savings target.'
+                  : `Increase your monthly SIP by ${formatInr(p.sipGap)} to reach your financial potential.`}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* SIP Analysis */}
-      <div className="space-y-3">
-        <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
-          SIP ANALYSIS
-        </h2>
-        <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-bold text-[var(--color-text)]">
-              Monthly SIP Contribution
-            </span>
-            <span className="text-base font-black text-emerald-500">
-              {p.hasProfileData ? formatInr(p.monthlySipTotal) : 'not available'}
-            </span>
-          </div>
-
-          <div className="border-t border-[var(--color-border)]/50" />
-
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-400">Mutual Fund SIP</span>
-            <span className="font-bold text-amber-500">
-              {p.hasProfileData ? formatInr(p.sipDebt) : 'not available'}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-400">Gold SIP</span>
-            <span className="font-bold text-yellow-500">
-              {p.hasProfileData ? formatInr(p.sipGold) : 'not available'}
-            </span>
-          </div>
-
-          <div className="border-t border-[var(--color-border)]/50" />
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-bold text-rose-500">Monthly Shortfall (Gap)</span>
-            <span className="text-base font-black text-rose-500">
-              {p.hasProfileData ? formatInr(p.sipGap) : 'not available'}
-            </span>
-          </div>
-
-          {/* SIP Progress Bar */}
-          <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                p.sipProgress >= 0.8 ? 'bg-emerald-500' : 'bg-amber-500'
-              }`}
-              style={{ width: `${Math.min(100, Math.max(5, p.sipProgress * 100))}%` }}
-            />
-          </div>
-
-          <p className="text-xs italic text-[var(--color-text-secondary)]">
-            {p.sipProgress >= 1.0
-              ? 'Excellent! You are meeting your 20% savings target.'
-              : `Increase your monthly SIP by ${formatInr(p.sipGap)} to reach your financial potential.`}
-          </p>
-        </div>
-      </div>
-
-      {/* Optimize Button */}
-      <button
-        type="button"
-        data-testid="investments-optimize-btn"
-        onClick={() => navigate('/master-data?target=investment')}
-        className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg hover:shadow-emerald-500/25 transition-all active:scale-98 flex items-center justify-center gap-2"
-      >
-        <span>⚡</span> Optimize Now
-      </button>
 
       {/* Quick Edit Modal */}
       {editField && (

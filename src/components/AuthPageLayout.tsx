@@ -39,18 +39,18 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
       : 'max-w-md';
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-white flex flex-col selection:bg-[#4F46E5]/30 selection:text-white">
-      {/* Premium Indigo-to-Violet Header mirroring Flutter AuthPageLayout */}
-      <div className="w-full bg-gradient-to-br from-[#4F46E5] to-[#6366F1] px-6 pt-10 pb-12 rounded-b-[28px] shadow-xl relative overflow-hidden">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#09090B] text-white flex flex-col md:flex-row selection:bg-[#4F46E5]/30 selection:text-white">
+      {/* Responsive Header / Brand Side Panel */}
+      <div className="w-full md:w-5/12 lg:w-4/12 bg-gradient-to-br from-[#2E1065] via-[#4F46E5] to-[#6366F1] px-6 pt-10 pb-12 md:p-10 rounded-b-[28px] md:rounded-none shadow-xl relative overflow-hidden flex flex-col justify-between select-none shrink-0">
+        {/* Subtle decorative glows */}
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 md:w-80 h-64 md:h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-4xl mx-auto flex flex-col items-start">
+        <div className="max-w-4xl md:max-w-none mx-auto md:mx-0 w-full flex flex-col items-start my-auto">
           {showBack && (
             <button
               type="button"
               onClick={handleBack}
-              className="mb-4 inline-flex items-center gap-2 text-white/90 hover:text-white text-sm font-medium transition-colors p-1 -ml-1 rounded-lg hover:bg-white/10"
+              className="mb-4 md:mb-8 inline-flex items-center gap-2 text-white/90 hover:text-white text-sm font-medium transition-colors p-1 -ml-1 md:p-2 md:ml-0 rounded-lg hover:bg-white/10"
               aria-label="Go back"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -58,23 +58,43 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
             </button>
           )}
 
-          <span className="text-3xl font-black tracking-tight text-white drop-shadow-sm">
+          <span className="text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-sm">
             MoneyMapper
           </span>
-          <h1 className="text-xl font-bold text-white mt-2 tracking-wide">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold md:font-black text-white mt-2 md:mt-4 tracking-wide leading-tight">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-white/80 text-sm mt-1 leading-relaxed max-w-xl">
+            <p className="text-white/80 text-sm mt-1 md:mt-3 leading-relaxed max-w-xl">
               {subtitle}
             </p>
           )}
+
+          {/* Desktop Features List */}
+          <div className="hidden md:block space-y-3 pt-6 mt-6 border-t border-white/15 w-full">
+            <div className="flex items-center gap-3 text-xs font-semibold text-white/90">
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>5 Financial Pillars Evaluation</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-semibold text-white/90">
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span>AI Assistant & Market Intelligence</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-semibold text-white/90">
+              <span className="w-2 h-2 rounded-full bg-indigo-300"></span>
+              <span>256-bit Bank-Grade Encryption</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden md:block text-[11px] text-white/60 font-medium pt-8">
+          © {new Date().getFullYear()} MoneyMapper. All rights reserved.
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 px-4 py-8 flex items-center justify-center">
-        <div className={`w-full ${maxWidthClass}`}>
+      {/* Main Content Form Area */}
+      <main className="flex-1 px-4 py-8 md:p-12 lg:p-16 flex items-center justify-center min-h-[calc(100vh-140px)] md:min-h-screen">
+        <div className={`w-full ${maxWidthClass} transition-all`}>
           {children}
         </div>
       </main>

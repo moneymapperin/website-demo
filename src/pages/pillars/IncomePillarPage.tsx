@@ -66,14 +66,14 @@ export const IncomePillarPage: React.FC = () => {
   const p = data ?? calculateIncomePillar(null);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 space-y-6">
       {/* App Bar / Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 data-testid="income-page-title" className="text-2xl font-black tracking-tight text-[var(--color-text)]">
+          <h1 data-testid="income-page-title" className="text-2xl md:text-3xl font-black tracking-tight text-[var(--color-text)]">
             Income Analysis
           </h1>
-          <p className="text-xs text-[var(--color-text-secondary)]">
+          <p className="text-xs md:text-sm text-[var(--color-text-secondary)]">
             Active vs passive earnings, city benchmarks & distribution
           </p>
         </div>
@@ -82,27 +82,27 @@ export const IncomePillarPage: React.FC = () => {
       {/* Score Header */}
       <div
         data-testid="income-score-header"
-        className="p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between"
+        className="p-6 md:p-8 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between shadow-sm"
       >
         <div>
           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
             INCOME SCORE
           </span>
-          <div className="text-4xl font-black text-emerald-500 mt-1">
+          <div className="text-4xl md:text-5xl font-black text-emerald-500 mt-1">
             {p.finalPillarScore}
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full border-2 border-emerald-500/40 flex items-center justify-center font-black text-emerald-500 text-sm">
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-emerald-500/40 flex items-center justify-center font-black text-emerald-500 text-base md:text-lg">
               {p.activeScore.toFixed(0)}
             </div>
             <span className="text-[10px] font-bold text-gray-400 mt-1">Active</span>
           </div>
 
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full border-2 border-amber-500/40 flex items-center justify-center font-black text-amber-500 text-sm">
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-amber-500/40 flex items-center justify-center font-black text-amber-500 text-base md:text-lg">
               {p.passiveScore.toFixed(0)}
             </div>
             <span className="text-[10px] font-bold text-gray-400 mt-1">Passive</span>
@@ -110,173 +110,182 @@ export const IncomePillarPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Earnings Overview */}
-      <div className="space-y-3">
-        <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
-          EARNINGS OVERVIEW
-        </h2>
-        <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-400">Total Monthly Income</span>
-            <span className="text-xl font-black text-emerald-500">
-              {p.hasProfileData ? formatIncomeCompact(p.totalIncome) : 'not available'}
-            </span>
-          </div>
-
-          <div className="border-t border-[var(--color-border)]/50" />
-
-          {/* Active Income Row */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-emerald-500" />
-              <div>
-                <div className="text-sm font-bold text-[var(--color-text)]">Active Income</div>
-                <div className="text-xs text-gray-400">Salary, Business, Freelance</div>
+      {/* Desktop Responsive Grid (7 cols / 5 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column (7 Cols on desktop) */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Earnings Overview */}
+          <div className="space-y-3">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
+              EARNINGS OVERVIEW
+            </h2>
+            <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-400">Total Monthly Income</span>
+                <span className="text-xl font-black text-emerald-500">
+                  {p.hasProfileData ? formatIncomeCompact(p.totalIncome) : 'not available'}
+                </span>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm font-black text-[var(--color-text)]">
-                  {p.hasProfileData ? formatIncomeCompact(p.activeIncome) : 'not available'}
-                </div>
-                {p.hasProfileData && (
-                  <div className="text-[10px] font-bold text-emerald-500">
-                    {p.activeSharePct.toFixed(1)}%
+
+              <div className="border-t border-[var(--color-border)]/50" />
+
+              {/* Active Income Row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                  <div>
+                    <div className="text-sm font-bold text-[var(--color-text)]">Active Income</div>
+                    <div className="text-xs text-gray-400">Salary, Business, Freelance</div>
                   </div>
-                )}
-              </div>
-              <button
-                type="button"
-                data-testid="edit-active-income-btn"
-                onClick={() => {
-                  setEditField({
-                    title: 'Active Income',
-                    key: 'monthlyActiveIncome',
-                    currentVal: p.activeIncome,
-                  });
-                  setEditValue(p.activeIncome.toString());
-                }}
-                className="p-1 text-emerald-500 hover:text-emerald-400 text-sm"
-                title="Edit Active Income"
-              >
-                ✏️
-              </button>
-            </div>
-          </div>
-
-          <div className="border-t border-[var(--color-border)]/50" />
-
-          {/* Passive Income Row */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-amber-500" />
-              <div>
-                <div className="text-sm font-bold text-[var(--color-text)]">Passive Income</div>
-                <div className="text-xs text-gray-400">Rent, Dividends, Interest</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm font-black text-[var(--color-text)]">
-                  {p.hasProfileData ? formatIncomeCompact(p.passiveIncome) : 'not available'}
                 </div>
-                {p.hasProfileData && (
-                  <div className="text-[10px] font-bold text-amber-500">
-                    {p.passiveSharePct.toFixed(1)}%
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div className="text-sm font-black text-[var(--color-text)]">
+                      {p.hasProfileData ? formatIncomeCompact(p.activeIncome) : 'not available'}
+                    </div>
+                    {p.hasProfileData && (
+                      <div className="text-[10px] font-bold text-emerald-500">
+                        {p.activeSharePct.toFixed(1)}%
+                      </div>
+                    )}
                   </div>
-                )}
+                  <button
+                    type="button"
+                    data-testid="edit-active-income-btn"
+                    onClick={() => {
+                      setEditField({
+                        title: 'Active Income',
+                        key: 'monthlyActiveIncome',
+                        currentVal: p.activeIncome,
+                      });
+                      setEditValue(p.activeIncome.toString());
+                    }}
+                    className="p-1 text-emerald-500 hover:text-emerald-400 text-sm"
+                    title="Edit Active Income"
+                  >
+                    ✏️
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                data-testid="edit-passive-income-btn"
-                onClick={() => {
-                  setEditField({
-                    title: 'Passive Income',
-                    key: 'passiveIncomeAmount',
-                    currentVal: p.passiveIncome,
-                  });
-                  setEditValue(p.passiveIncome.toString());
-                }}
-                className="p-1 text-amber-500 hover:text-amber-400 text-sm"
-                title="Edit Passive Income"
-              >
-                ✏️
-              </button>
+
+              <div className="border-t border-[var(--color-border)]/50" />
+
+              {/* Passive Income Row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-amber-500" />
+                  <div>
+                    <div className="text-sm font-bold text-[var(--color-text)]">Passive Income</div>
+                    <div className="text-xs text-gray-400">Rent, Dividends, Interest</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div className="text-sm font-black text-[var(--color-text)]">
+                      {p.hasProfileData ? formatIncomeCompact(p.passiveIncome) : 'not available'}
+                    </div>
+                    {p.hasProfileData && (
+                      <div className="text-[10px] font-bold text-amber-500">
+                        {p.passiveSharePct.toFixed(1)}%
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    data-testid="edit-passive-income-btn"
+                    onClick={() => {
+                      setEditField({
+                        title: 'Passive Income',
+                        key: 'passiveIncomeAmount',
+                        currentVal: p.passiveIncome,
+                      });
+                      setEditValue(p.passiveIncome.toString());
+                    }}
+                    className="p-1 text-amber-500 hover:text-amber-400 text-sm"
+                    title="Edit Passive Income"
+                  >
+                    ✏️
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Income Mix Health */}
-      <div className="space-y-3">
-        <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
-          INCOME MIX HEALTH
-        </h2>
-        <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-5">
-          <div>
-            <div className="flex justify-between text-xs font-bold mb-1.5">
-              <span className="text-[var(--color-text)]">Active Source</span>
-              <span className="text-emerald-500 font-black">{p.activeSharePct.toFixed(1)}%</span>
-            </div>
-            <div className="h-2.5 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, Math.max(1, p.activeSharePct))}%` }}
-              />
+        {/* Right Column (5 Cols on desktop) */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Income Mix Health */}
+          <div className="space-y-3">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
+              INCOME MIX HEALTH
+            </h2>
+            <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-5">
+              <div>
+                <div className="flex justify-between text-xs font-bold mb-1.5">
+                  <span className="text-[var(--color-text)]">Active Source</span>
+                  <span className="text-emerald-500 font-black">{p.activeSharePct.toFixed(1)}%</span>
+                </div>
+                <div className="h-2.5 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(1, p.activeSharePct))}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-bold mb-1.5">
+                  <span className="text-[var(--color-text)]">Passive Source</span>
+                  <span className="text-amber-500 font-black">{p.passiveSharePct.toFixed(1)}%</span>
+                </div>
+                <div className="h-2.5 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(1, p.passiveSharePct))}%` }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div>
-            <div className="flex justify-between text-xs font-bold mb-1.5">
-              <span className="text-[var(--color-text)]">Passive Source</span>
-              <span className="text-amber-500 font-black">{p.passiveSharePct.toFixed(1)}%</span>
-            </div>
-            <div className="h-2.5 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-amber-500 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, Math.max(1, p.passiveSharePct))}%` }}
-              />
+          {/* Distribution Status */}
+          <div className="space-y-3">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
+              DISTRIBUTION STATUS
+            </h2>
+            <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-4">
+              <div className="text-sm font-bold text-[var(--color-text)]">Distribution Health</div>
+
+              {/* Gradient Track with Pin Indicator */}
+              <div className="relative py-2">
+                <div className="h-3 w-full rounded-full bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500" />
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 -ml-2.5 w-5 h-5 rounded-full bg-white border-2 border-black shadow-md transition-all duration-500"
+                  style={{
+                    left: `${Math.min(100, Math.max(0, p.finalPillarScore))}%`,
+                  }}
+                />
+              </div>
+
+              <p className="text-xs italic text-[var(--color-text-secondary)]">
+                {p.finalPillarScore >= 75
+                  ? 'Excellent! Your income streams are well diversified.'
+                  : 'Strategy: Aim for passive income to reach at least 25% of your total earnings.'}
+              </p>
             </div>
           </div>
+
+          {/* Optimize Button */}
+          <button
+            type="button"
+            data-testid="income-optimize-btn"
+            onClick={() => navigate('/master-data?target=income')}
+            className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg hover:shadow-emerald-500/25 transition-all active:scale-98 flex items-center justify-center gap-2"
+          >
+            <span>⚡</span> Optimize Now
+          </button>
         </div>
       </div>
-
-      {/* Distribution Status */}
-      <div className="space-y-3">
-        <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 px-1">
-          DISTRIBUTION STATUS
-        </h2>
-        <div className="p-6 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-4">
-          <div className="text-sm font-bold text-[var(--color-text)]">Distribution Health</div>
-
-          {/* Gradient Track with Pin Indicator */}
-          <div className="relative py-2">
-            <div className="h-3 w-full rounded-full bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500" />
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -ml-2.5 w-5 h-5 rounded-full bg-white border-2 border-black shadow-md transition-all duration-500"
-              style={{
-                left: `${Math.min(100, Math.max(0, p.finalPillarScore))}%`,
-              }}
-            />
-          </div>
-
-          <p className="text-xs italic text-[var(--color-text-secondary)]">
-            {p.finalPillarScore >= 75
-              ? 'Excellent! Your income streams are well diversified.'
-              : 'Strategy: Aim for passive income to reach at least 25% of your total earnings.'}
-          </p>
-        </div>
-      </div>
-
-      {/* Optimize Button */}
-      <button
-        type="button"
-        data-testid="income-optimize-btn"
-        onClick={() => navigate('/master-data?target=income')}
-        className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg hover:shadow-emerald-500/25 transition-all active:scale-98 flex items-center justify-center gap-2"
-      >
-        <span>⚡</span> Optimize Now
-      </button>
 
       {/* Quick Edit Modal */}
       {editField && (

@@ -129,7 +129,7 @@ export const SubscriptionPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-8">
       {/* Header / AppBar */}
       <div className="flex items-center justify-between">
         <div>
@@ -141,10 +141,10 @@ export const SubscriptionPage: React.FC = () => {
           >
             ← Back
           </button>
-          <h1 data-testid="subscription-page-title" className="text-3xl font-black tracking-tight text-[var(--color-text)]">
+          <h1 data-testid="subscription-page-title" className="text-3xl md:text-4xl font-black tracking-tight text-[var(--color-text)]">
             Wealth Select
           </h1>
-          <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+          <p className="text-xs md:text-sm text-[var(--color-text-secondary)] mt-1">
             Unlock all 5 financial health pillars and advanced market intelligence
           </p>
         </div>
@@ -153,7 +153,7 @@ export const SubscriptionPage: React.FC = () => {
       {/* Active Subscription Banner */}
       <div
         data-testid="active-subscription-banner"
-        className="p-5 rounded-3xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        className="p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
       >
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -169,7 +169,7 @@ export const SubscriptionPage: React.FC = () => {
               </span>
             )}
           </div>
-          <div data-testid="subscription-status-text" className="text-base font-bold text-[var(--color-text)]">
+          <div data-testid="subscription-status-text" className="text-base md:text-lg font-bold text-[var(--color-text)]">
             {loading ? (
               'Checking subscription...'
             ) : expiryDate ? (
@@ -187,7 +187,7 @@ export const SubscriptionPage: React.FC = () => {
           data-testid="refresh-status-btn"
           disabled={refreshing || loading}
           onClick={handleRefresh}
-          className="px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-500 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+          className="px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-500 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           title="Force refresh status from server"
         >
           <RotateCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
@@ -195,13 +195,13 @@ export const SubscriptionPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Plan Cards */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-black text-[var(--color-text)]">
+      {/* Plan Cards Grid */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-black text-[var(--color-text)]">
           Upgrade to PRO 🚀
         </h2>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const isSelected = selectedPlan.id === plan.id;
             return (
@@ -209,44 +209,59 @@ export const SubscriptionPage: React.FC = () => {
                 key={plan.id}
                 data-testid={`sub-plan-card-${plan.months}`}
                 onClick={() => setSelectedPlan(plan)}
-                className={`p-5 rounded-3xl border transition-all cursor-pointer flex items-center justify-between ${
+                className={`p-6 rounded-3xl border transition-all cursor-pointer flex flex-col justify-between relative ${
                   isSelected
-                    ? 'bg-emerald-500/5 border-emerald-500 shadow-md ring-2 ring-emerald-500/20'
+                    ? 'bg-emerald-500/5 border-emerald-500 shadow-xl ring-2 ring-emerald-500/20 scale-[1.02]'
                     : 'bg-[var(--color-card)] border-[var(--color-border)] hover:border-gray-400/50'
                 }`}
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-[var(--color-text)]">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="text-lg font-bold text-[var(--color-text)]">
                       {plan.title}
                     </span>
                     {plan.isRecommended && (
-                      <span className="px-2 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-500 text-[10px] font-black">
+                      <span className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-500 text-[10px] font-black tracking-wide">
                         BEST VALUE
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-400">
-                    Billed upfront as {plan.totalBilledPrice} • <span className="line-through">{plan.originalPrice}</span>{' '}
-                    <span className="text-emerald-500 font-bold">{plan.discount}</span>
+
+                  <div className="my-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-black text-[var(--color-text)]">
+                        {plan.storePrice}
+                      </div>
+                      <div className="text-xs font-bold text-gray-400">/ month</div>
+                    </div>
+                    <img
+                      src={plan.image}
+                      alt={plan.title}
+                      className="w-16 h-16 object-contain shrink-0 select-none pointer-events-none drop-shadow-sm"
+                    />
                   </div>
-                  <div className="text-[11px] font-black text-amber-500">
-                    {plan.savings}
+
+                  <div className="space-y-1.5 pt-2 border-t border-[var(--color-border)]/50">
+                    <div className="text-xs text-gray-400">
+                      Billed upfront as {plan.totalBilledPrice} • <span className="line-through">{plan.originalPrice}</span>{' '}
+                      <span className="text-emerald-500 font-bold">{plan.discount}</span>
+                    </div>
+                    <div className="text-xs font-black text-amber-500">
+                      {plan.savings}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="text-right">
-                    <div className="text-xl font-black text-[var(--color-text)]">
-                      {plan.storePrice}
-                    </div>
-                    <div className="text-[10px] font-bold text-gray-400">/ month</div>
+                <div className="mt-6 pt-3">
+                  <div
+                    className={`w-full py-2.5 rounded-xl text-center text-xs font-black uppercase tracking-wider ${
+                      isSelected
+                        ? 'bg-emerald-500 text-white shadow'
+                        : 'bg-zinc-800/10 dark:bg-zinc-800 text-zinc-500'
+                    }`}
+                  >
+                    {isSelected ? 'SELECTED PLAN' : 'SELECT PLAN'}
                   </div>
-                  <img
-                    src={plan.image}
-                    alt={plan.title}
-                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0 select-none pointer-events-none drop-shadow-sm"
-                  />
                 </div>
               </div>
             );

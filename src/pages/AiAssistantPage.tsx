@@ -191,7 +191,7 @@ export const AiAssistantPage: React.FC = () => {
           borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
         }}
       >
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -274,7 +274,7 @@ export const AiAssistantPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col max-w-4xl w-full mx-auto overflow-hidden">
+        <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto overflow-hidden">
           {/* Free Trial Banner for non-PRO users */}
           {!isPro && (
             <div

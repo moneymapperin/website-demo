@@ -22,7 +22,7 @@ export const MutualFundScreenerPage: React.FC = () => {
   // Incremental rendering
   const [visibleCount, setVisibleCount] = useState(50);
 
-  // Modal State
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [selectedFundForAdvice, setSelectedFundForAdvice] = useState<any | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -79,8 +79,8 @@ export const MutualFundScreenerPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 text-slate-900 dark:text-white" data-testid="mf-screener-page">
       {/* App Bar */}
-      <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 lg:px-8 py-3.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -90,7 +90,7 @@ export const MutualFundScreenerPage: React.FC = () => {
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <h1 className="text-base font-black text-slate-900 dark:text-white">Mutual Fund Score Card</h1>
+            <h1 className="text-base md:text-lg font-black text-slate-900 dark:text-white">Mutual Fund Score Card</h1>
           </div>
           <button
             type="button"
@@ -104,7 +104,44 @@ export const MutualFundScreenerPage: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-6 space-y-6">
+        {/* Web Analytics KPI Summary Bar */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span className="text-[10px] font-black uppercase text-slate-400">Total Funds</span>
+            <div className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
+              {allFunds.length} <span className="text-xs font-normal text-slate-400">Schemes</span>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400">High Final Score (&gt;75)</span>
+            <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {allFunds.filter((f) => ResilienceUtils.safeDouble(f.final_score) >= 75).length}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span className="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400">Aggressive Growth</span>
+            <div className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
+              {allFunds.filter((f) => f.cluster === 'Aggressive').length}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span className="text-[10px] font-black uppercase text-amber-500">Avg 3Y CAGR</span>
+            <div className="text-xl font-black text-amber-500 mt-0.5">
+              {allFunds.length > 0
+                ? (
+                    allFunds.reduce((a, b) => a + ResilienceUtils.safeDouble(b.cagr_3y), 0) /
+                    allFunds.length
+                  ).toFixed(1)
+                : '0.0'}
+              %
+            </div>
+          </div>
+        </div>
+
         {/* Search and Filters Bar */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
           <div className="relative">
@@ -137,38 +174,66 @@ export const MutualFundScreenerPage: React.FC = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">CLUSTER</label>
-              <select
-                data-testid="mf-cluster-select"
-                disabled={!isPro}
-                value={selectedCluster}
-                onChange={(e) => setSelectedCluster(e.target.value)}
-                className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none"
-              >
-                <option value="All">All Clusters</option>
-                <option value="Conservative">Conservative</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Aggressive">Aggressive</option>
-              </select>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:w-auto flex-1">
+              <div>
+                <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">CLUSTER</label>
+                <select
+                  data-testid="mf-cluster-select"
+                  disabled={!isPro}
+                  value={selectedCluster}
+                  onChange={(e) => setSelectedCluster(e.target.value)}
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none"
+                >
+                  <option value="All">All Clusters</option>
+                  <option value="Conservative">Conservative</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Aggressive">Aggressive</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">CATEGORY</label>
+                <select
+                  data-testid="mf-category-select"
+                  disabled={!isPro}
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none"
+                >
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">CATEGORY</label>
-              <select
-                data-testid="mf-category-select"
-                disabled={!isPro}
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none"
+            {/* Desktop Table vs Grid View Toggle */}
+            <div className="hidden sm:flex items-center p-1 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shrink-0 self-end">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
               >
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                Grid View
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  viewMode === 'table'
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                Table View
+              </button>
             </div>
           </div>
         </div>
@@ -198,88 +263,168 @@ export const MutualFundScreenerPage: React.FC = () => {
               </div>
             )}
 
-            {displayList.map((f, idx) => {
-              const isLocked = !isPro && idx > 0;
-              const confidence = f.confidence_level || 'Medium';
-              const cluster = f.cluster || 'Moderate';
-              const finalScore = Math.round(ResilienceUtils.safeDouble(f.final_score));
-              const riskScore = Math.round(ResilienceUtils.safeDouble(f.risk_score));
-              const growthScore = Math.round(ResilienceUtils.safeDouble(f.growth_score));
-              const cagr3y = ResilienceUtils.safeDouble(f.cagr_3y).toFixed(1);
+            {/* View Mode Table vs Grid */}
+            {viewMode === 'table' ? (
+              <div className="overflow-x-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <th className="py-3.5 px-4">SCHEME &amp; AMC</th>
+                      <th className="py-3.5 px-4">CLUSTER</th>
+                      <th className="py-3.5 px-4">RISK</th>
+                      <th className="py-3.5 px-4">GROWTH</th>
+                      <th className="py-3.5 px-4">3Y CAGR</th>
+                      <th className="py-3.5 px-4">SCORE</th>
+                      <th className="py-3.5 px-4 text-right">ACTION</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
+                    {displayList.map((f, idx) => {
+                      const isLocked = !isPro && idx > 0;
+                      const cluster = f.cluster || 'Moderate';
+                      const finalScore = Math.round(ResilienceUtils.safeDouble(f.final_score));
+                      const riskScore = Math.round(ResilienceUtils.safeDouble(f.risk_score));
+                      const growthScore = Math.round(ResilienceUtils.safeDouble(f.growth_score));
+                      const cagr3y = ResilienceUtils.safeDouble(f.cagr_3y).toFixed(1);
 
-              return (
-                <div
-                  key={f.id || idx}
-                  data-testid={`mf-card-${idx}`}
-                  onClick={() => handleFundClick(f, idx)}
-                  className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm cursor-pointer hover:border-indigo-400 transition-all"
-                >
-                  <div className={`space-y-4 ${isLocked ? 'filter blur-[5px] select-none pointer-events-none' : ''}`}>
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs">
-                            <PieChart className="w-4 h-4" />
+                      return (
+                        <tr
+                          key={f.id || idx}
+                          data-testid={`mf-card-${idx}`}
+                          onClick={() => handleFundClick(f, idx)}
+                          className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors ${
+                            isLocked ? 'opacity-50 select-none' : ''
+                          }`}
+                        >
+                          <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs shrink-0">
+                                <PieChart className="w-3.5 h-3.5" />
+                              </div>
+                              <div>
+                                <div className="font-black text-slate-900 dark:text-white line-clamp-1">
+                                  {f.scheme_name || 'Unknown Fund'}
+                                </div>
+                                <div className="text-[10px] text-slate-400 font-normal">
+                                  {f.category || ''} • {f.fund_house || ''}
+                                </div>
+                              </div>
+                              {isLocked && <Lock className="w-3 h-3 text-amber-500" data-testid={`mf-lock-overlay-${idx}`} />}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">
+                              {cluster}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-black text-rose-500">{riskScore}</td>
+                          <td className="py-3.5 px-4 font-black text-emerald-500">{growthScore}</td>
+                          <td className="py-3.5 px-4 font-black text-amber-500">{cagr3y}%</td>
+                          <td className="py-3.5 px-4 font-black">
+                            <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black">
+                              {finalScore}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <button
+                              type="button"
+                              className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition shadow-xs"
+                            >
+                              Analyze
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {displayList.map((f, idx) => {
+                  const isLocked = !isPro && idx > 0;
+                  const confidence = f.confidence_level || 'Medium';
+                  const cluster = f.cluster || 'Moderate';
+                  const finalScore = Math.round(ResilienceUtils.safeDouble(f.final_score));
+                  const riskScore = Math.round(ResilienceUtils.safeDouble(f.risk_score));
+                  const growthScore = Math.round(ResilienceUtils.safeDouble(f.growth_score));
+                  const cagr3y = ResilienceUtils.safeDouble(f.cagr_3y).toFixed(1);
+
+                  return (
+                    <div
+                      key={f.id || idx}
+                      data-testid={`mf-card-${idx}`}
+                      onClick={() => handleFundClick(f, idx)}
+                      className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm cursor-pointer hover:border-indigo-400 transition-all"
+                    >
+                      <div className={`space-y-4 ${isLocked ? 'filter blur-[5px] select-none pointer-events-none' : ''}`}>
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs">
+                                <PieChart className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h3 className="font-black text-base text-slate-900 dark:text-white line-clamp-1">
+                                  {f.scheme_name || 'Unknown Fund'}
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                  {f.category || ''} • {f.fund_house || ''}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-1.5 shrink-0">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
+                              {confidence}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">
+                              {cluster}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+                          <div>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase">SCORE</span>
+                            <p className="text-base font-black text-indigo-600 dark:text-indigo-400 mt-0.5">
+                              {finalScore}
+                            </p>
                           </div>
                           <div>
-                            <h3 className="font-black text-base text-slate-900 dark:text-white line-clamp-1">
-                              {f.scheme_name || 'Unknown Fund'}
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {f.category || ''} • {f.fund_house || ''}
-                            </p>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase">RISK</span>
+                            <p className="text-sm font-black text-rose-500 mt-0.5">{riskScore}</p>
+                          </div>
+                          <div>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase">GROWTH</span>
+                            <p className="text-sm font-black text-emerald-500 mt-0.5">{growthScore}</p>
+                          </div>
+                          <div>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase">3Y CAGR</span>
+                            <p className="text-sm font-black text-amber-500 mt-0.5">{cagr3y}%</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                          {confidence}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">
-                          {cluster}
-                        </span>
-                      </div>
+                      {isLocked && (
+                        <div
+                          data-testid={`mf-lock-overlay-${idx}`}
+                          className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center rounded-2xl"
+                        >
+                          <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg">
+                            <Lock className="w-5 h-5" />
+                          </div>
+                          <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mt-1.5">
+                            PRO UNLOCK
+                          </span>
+                        </div>
+                      )}
                     </div>
-
-                    <div className="grid grid-cols-4 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
-                      <div>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">SCORE</span>
-                        <p className="text-base font-black text-indigo-600 dark:text-indigo-400 mt-0.5">
-                          {finalScore}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">RISK</span>
-                        <p className="text-sm font-black text-rose-500 mt-0.5">{riskScore}</p>
-                      </div>
-                      <div>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">GROWTH</span>
-                        <p className="text-sm font-black text-emerald-500 mt-0.5">{growthScore}</p>
-                      </div>
-                      <div>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">3Y CAGR</span>
-                        <p className="text-sm font-black text-amber-500 mt-0.5">{cagr3y}%</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {isLocked && (
-                    <div
-                      data-testid={`mf-lock-overlay-${idx}`}
-                      className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center rounded-2xl"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg">
-                        <Lock className="w-5 h-5" />
-                      </div>
-                      <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mt-1.5">
-                        PRO UNLOCK
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
 
             {visibleCount < filteredFunds.length && (
               <div className="pt-2 text-center">
