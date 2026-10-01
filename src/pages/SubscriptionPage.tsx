@@ -26,8 +26,8 @@ export const SUBSCRIPTION_PLANS: SubPlan[] = [
     id: 'moneymapper_quarterly_sub',
     title: 'Quarterly Plan',
     months: 3,
-    storePrice: '₹589',
-    totalBilledPrice: '₹1,767',
+    storePrice: '₹499',
+    totalBilledPrice: '₹1,497',
     originalPrice: '₹799',
     discount: '38% OFF',
     savings: 'SAVE ₹897',
@@ -37,8 +37,8 @@ export const SUBSCRIPTION_PLANS: SubPlan[] = [
     id: 'moneymapper_halfyearly_sub',
     title: 'Half-Yearly Plan',
     months: 6,
-    storePrice: '₹469',
-    totalBilledPrice: '₹2,814',
+    storePrice: '₹399',
+    totalBilledPrice: '₹2,394',
     originalPrice: '₹799',
     discount: '50% OFF',
     savings: 'SAVE ₹2,400',
@@ -48,10 +48,10 @@ export const SUBSCRIPTION_PLANS: SubPlan[] = [
     id: 'moneymapper_yearly_sub',
     title: 'Yearly Plan',
     months: 12,
-    storePrice: '₹349',
-    totalBilledPrice: '₹4,188',
+    storePrice: '₹299',
+    totalBilledPrice: '₹3,588',
     originalPrice: '₹799',
-    discount: '63% OFF',
+    discount: '62% OFF',
     savings: 'SAVE ₹6,000',
     image: yearlyImg,
     isRecommended: true,
@@ -153,17 +153,17 @@ export const SubscriptionPage: React.FC = () => {
       {/* Active Subscription Banner */}
       <div
         data-testid="active-subscription-banner"
-        className="p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+        className="p-6 rounded-3xl bg-indigo-500/10 border border-indigo-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
       >
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
+            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
               ACTIVE SUBSCRIPTION
             </span>
             {isPro && (
               <span
                 data-testid="pro-badge"
-                className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-black uppercase tracking-wider"
+                className="px-2 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-600 dark:text-indigo-300 text-[10px] font-black uppercase tracking-wider"
               >
                 PRO
               </span>
@@ -187,7 +187,7 @@ export const SubscriptionPage: React.FC = () => {
           data-testid="refresh-status-btn"
           disabled={refreshing || loading}
           onClick={handleRefresh}
-          className="px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-500 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+          className="px-4 py-2.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           title="Force refresh status from server"
         >
           <RotateCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
@@ -211,7 +211,7 @@ export const SubscriptionPage: React.FC = () => {
                 onClick={() => setSelectedPlan(plan)}
                 className={`p-6 rounded-3xl border transition-all cursor-pointer flex flex-col justify-between relative ${
                   isSelected
-                    ? 'bg-emerald-500/5 border-emerald-500 shadow-xl ring-2 ring-emerald-500/20 scale-[1.02]'
+                    ? 'bg-indigo-500/5 border-indigo-500 shadow-xl ring-2 ring-indigo-500/20 scale-[1.02]'
                     : 'bg-[var(--color-card)] border-[var(--color-border)] hover:border-gray-400/50'
                 }`}
               >
@@ -244,7 +244,7 @@ export const SubscriptionPage: React.FC = () => {
                   <div className="space-y-1.5 pt-2 border-t border-[var(--color-border)]/50">
                     <div className="text-xs text-gray-400">
                       Billed upfront as {plan.totalBilledPrice} • <span className="line-through">{plan.originalPrice}</span>{' '}
-                      <span className="text-emerald-500 font-bold">{plan.discount}</span>
+                      <span className="text-indigo-600 dark:text-indigo-400 font-bold">{plan.discount}</span>
                     </div>
                     <div className="text-xs font-black text-amber-500">
                       {plan.savings}
@@ -256,7 +256,7 @@ export const SubscriptionPage: React.FC = () => {
                   <div
                     className={`w-full py-2.5 rounded-xl text-center text-xs font-black uppercase tracking-wider ${
                       isSelected
-                        ? 'bg-emerald-500 text-white shadow'
+                        ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white shadow-md shadow-purple-500/20'
                         : 'bg-zinc-800/10 dark:bg-zinc-800 text-zinc-500'
                     }`}
                   >

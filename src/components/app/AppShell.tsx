@@ -191,13 +191,13 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0"
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
                         style={{
                           backgroundColor: isLocked ? '#71717A20' : `${pillar.color}25`,
                           color: isLocked ? '#71717A' : pillar.color,
                         }}
                       >
-                        ●
+                        {pillar.emoji}
                       </div>
                       <div className="min-w-0">
                         <div
@@ -379,7 +379,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                           color: isLocked ? '#71717A' : p.color,
                         }}
                       >
-                        ●
+                        {p.emoji}
                       </div>
                       <div style={{ opacity: isLocked ? 0.5 : 1 }}>
                         <div className="text-xs font-black">{p.title}</div>

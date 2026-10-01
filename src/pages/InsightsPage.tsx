@@ -188,17 +188,19 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
             </div>
           ) : (
             <div className="flex gap-4 overflow-x-auto pb-3 pt-1 snap-x scrollbar-none">
-              {newsItems.map((item, idx) => (
-                <div
-                  key={item.id || idx}
-                  data-testid={`news-card-${idx}`}
-                  onClick={() =>
-                    navigate(`/news/${item.id || idx}?type=news`, {
-                      state: { item, isNews: true },
-                    })
-                  }
-                  className="min-w-[280px] md:min-w-[320px] max-w-[320px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden cursor-pointer hover:shadow-lg transition-all flex flex-col snap-start"
-                >
+              {newsItems.map((item, idx) => {
+                const safeId = item?.id != null && String(item.id).trim() ? encodeURIComponent(String(item.id)) : idx;
+                return (
+                  <div
+                    key={item.id || idx}
+                    data-testid={`news-card-${idx}`}
+                    onClick={() =>
+                      navigate(`/news/${safeId}?type=news`, {
+                        state: { item, isNews: true },
+                      })
+                    }
+                    className="min-w-[280px] md:min-w-[320px] max-w-[320px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden cursor-pointer hover:shadow-lg transition-all flex flex-col snap-start"
+                  >
                   <div className="h-36 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
                     {item.image_url ? (
                       <img
@@ -231,8 +233,9 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
+          </div>
           )}
         </section>
 
@@ -416,17 +419,19 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
             </div>
           ) : (
             <div className="flex gap-4 overflow-x-auto pb-3 pt-1 snap-x scrollbar-none">
-              {blogItems.map((item, idx) => (
-                <div
-                  key={item.id || idx}
-                  data-testid={`blog-card-${idx}`}
-                  onClick={() =>
-                    navigate(`/news/${item.id || idx}?type=blog`, {
-                      state: { item, isNews: false },
-                    })
-                  }
-                  className="min-w-[280px] md:min-w-[320px] max-w-[320px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden cursor-pointer hover:shadow-lg transition-all flex flex-col snap-start"
-                >
+              {blogItems.map((item, idx) => {
+                const safeId = item?.id != null && String(item.id).trim() ? encodeURIComponent(String(item.id)) : idx;
+                return (
+                  <div
+                    key={item.id || idx}
+                    data-testid={`blog-card-${idx}`}
+                    onClick={() =>
+                      navigate(`/news/${safeId}?type=blog`, {
+                        state: { item, isNews: false },
+                      })
+                    }
+                    className="min-w-[280px] md:min-w-[320px] max-w-[320px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden cursor-pointer hover:shadow-lg transition-all flex flex-col snap-start"
+                  >
                   <div className="h-36 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
                     {item.imageUrl || item.image_url ? (
                       <img
@@ -459,8 +464,9 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
+          </div>
           )}
         </section>
       </main>

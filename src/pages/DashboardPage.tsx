@@ -113,7 +113,7 @@ export const DashboardPage: React.FC = () => {
               )}
             </h1>
             <p className="text-[10px] font-semibold text-white/50">
-              Your Financial Navigation System
+              Your Personal Money Manager
             </p>
           </div>
         </div>

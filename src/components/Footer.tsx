@@ -64,7 +64,7 @@ export const Footer: React.FC = () => {
             </div>
 
             <p className="text-xs text-white/50 mt-3 mb-5 max-w-xs leading-relaxed">
-              Your AI-Powered Financial Navigation System
+              Your AI-Powered Personal Money Manager
             </p>
 
             {/* Circular Social Buttons */}

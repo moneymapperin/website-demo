@@ -624,15 +624,15 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
   // 8. SubscriptionPage Read-Only & Pricing Tests
   // ===========================================================================
   describe('8. SubscriptionPage (/subscription) Read-Only & Pricing', () => {
-    it('displays exact pricing: ₹589, ₹469, ₹349 and totals 1,767, 2,814, 4,188', () => {
-      expect(SUBSCRIPTION_PLANS[0].storePrice).toBe('₹589');
-      expect(SUBSCRIPTION_PLANS[0].totalBilledPrice).toBe('₹1,767');
+    it('displays exact pricing: ₹499, ₹399, ₹299 and totals 1,497, 2,394, 3,588', () => {
+      expect(SUBSCRIPTION_PLANS[0].storePrice).toBe('₹499');
+      expect(SUBSCRIPTION_PLANS[0].totalBilledPrice).toBe('₹1,497');
 
-      expect(SUBSCRIPTION_PLANS[1].storePrice).toBe('₹469');
-      expect(SUBSCRIPTION_PLANS[1].totalBilledPrice).toBe('₹2,814');
+      expect(SUBSCRIPTION_PLANS[1].storePrice).toBe('₹399');
+      expect(SUBSCRIPTION_PLANS[1].totalBilledPrice).toBe('₹2,394');
 
-      expect(SUBSCRIPTION_PLANS[2].storePrice).toBe('₹349');
-      expect(SUBSCRIPTION_PLANS[2].totalBilledPrice).toBe('₹4,188');
+      expect(SUBSCRIPTION_PLANS[2].storePrice).toBe('₹299');
+      expect(SUBSCRIPTION_PLANS[2].totalBilledPrice).toBe('₹3,588');
     });
 
     it('renders read-only buy button with "Purchase in the MoneyMapper mobile app" and exact footnote', async () => {

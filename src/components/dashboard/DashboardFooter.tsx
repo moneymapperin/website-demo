@@ -7,7 +7,7 @@ export const DashboardFooter: React.FC = () => {
         MoneyMapper
       </div>
       <div className="text-[10px] font-bold tracking-wider text-gray-400 dark:text-white/40 uppercase">
-        Your Financial Navigation System
+        Your Personal Money Manager
       </div>
     </footer>
   );

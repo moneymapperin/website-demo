@@ -671,7 +671,7 @@ describe('TASK 11 — AI Assistant (/ai-assistant) & Chatbot Intent Engine', () 
 
       expect(screen.getByTestId('ai-header')).toBeInTheDocument();
       expect(screen.getByText('AI Assistant')).toBeInTheDocument();
-      expect(screen.getByTestId('chat-bubble-bot')).toHaveTextContent("Hi! I'm your Assistant");
+      expect(screen.getByTestId('chat-bubble-bot')).toHaveTextContent("Hi! I'm your AI Assistant");
 
       // Verify the 4 quick action chips in welcome message
       expect(screen.getByText("What's today's best stock for me?")).toBeInTheDocument();

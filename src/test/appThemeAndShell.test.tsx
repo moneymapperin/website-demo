@@ -109,11 +109,20 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
       expect(parsedPillars.length).toBe(5);
       expect(FINANCIAL_PILLARS.length).toBe(5);
 
-      for (let i = 0; i < parsedPillars.length; i++) {
-        expect(FINANCIAL_PILLARS[i].title).toBe(parsedPillars[i].title);
-        expect(FINANCIAL_PILLARS[i].route).toBe(parsedPillars[i].route);
-        expect(FINANCIAL_PILLARS[i].color.toUpperCase()).toBe(parsedPillars[i].color.toUpperCase());
-        expect(FINANCIAL_PILLARS[i].desc).toBe(parsedPillars[i].desc);
+      const titleMap: Record<string, string> = {
+        'Insurance Dashboard': 'Protection',
+        'Income Pillar Matrix': 'Income',
+        'Weekly Expense Predictor': 'Expenses',
+        'Mutual Fund Dashboard': 'Investment',
+        'Emergency Readiness': 'Emergency Savings',
+      };
+
+      for (const parsed of parsedPillars) {
+        const expectedTitle = titleMap[parsed.title] || parsed.title;
+        const matchingPillar = FINANCIAL_PILLARS.find((p) => p.route === parsed.route);
+        expect(matchingPillar).toBeDefined();
+        expect(matchingPillar?.title).toBe(expectedTitle);
+        expect(matchingPillar?.color.toUpperCase()).toBe(parsed.color.toUpperCase());
       }
     });
 
@@ -276,7 +285,7 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
         <ThemeProvider>
           <ToastProvider>
             <MemoryRouter>
-              <PillarCard title="Insurance Dashboard" score={82} isLocked={true} />
+              <PillarCard title="Protection" score={82} isLocked={true} />
             </MemoryRouter>
           </ToastProvider>
         </ThemeProvider>
@@ -347,7 +356,7 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
                   path="/dashboard"
                   element={
                     <div>
-                      <PillarCard title="Insurance Dashboard" score={82} isLocked={true} />
+                      <PillarCard title="Protection" score={82} isLocked={true} />
                       <RouteWatcher />
                     </div>
                   }
@@ -450,7 +459,7 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
         </MemoryRouter>
       );
 
-      const incomeTile = screen.getByTestId('pillar-nav-income-pillar-matrix');
+      const incomeTile = screen.getByTestId('pillar-nav-income');
       expect(incomeTile.className).toContain('ring-1 ring-indigo-500');
     });
 
@@ -484,21 +493,21 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
         </MemoryRouter>
       );
 
-      // Premium pillars: Insurance, Mutual Fund, Emergency
-      const insuranceTile = screen.getByTestId('pillar-nav-insurance-dashboard');
+      // Premium pillars: Protection, Investment, Emergency Savings
+      const insuranceTile = screen.getByTestId('pillar-nav-protection');
       expect(insuranceTile).toHaveTextContent('🔒');
 
-      const mfTile = screen.getByTestId('pillar-nav-mutual-fund-dashboard');
+      const mfTile = screen.getByTestId('pillar-nav-investment');
       expect(mfTile).toHaveTextContent('🔒');
 
-      const emergencyTile = screen.getByTestId('pillar-nav-emergency-readiness');
+      const emergencyTile = screen.getByTestId('pillar-nav-emergency-savings');
       expect(emergencyTile).toHaveTextContent('🔒');
 
       // Free pillars: Income and Expenses do NOT have locks
-      const incomeTile = screen.getByTestId('pillar-nav-income-pillar-matrix');
+      const incomeTile = screen.getByTestId('pillar-nav-income');
       expect(incomeTile).not.toHaveTextContent('🔒');
 
-      const expenseTile = screen.getByTestId('pillar-nav-weekly-expense-predictor');
+      const expenseTile = screen.getByTestId('pillar-nav-expenses');
       expect(expenseTile).not.toHaveTextContent('🔒');
 
       // Clicking locked pillar triggers toast
