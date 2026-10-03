@@ -21,29 +21,37 @@ class MainActivity: FlutterFragmentActivity() {
 
         // Security Channel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            if (call.method == "setSecure") {
-                val isSecure = call.argument<Boolean>("isSecure") ?: true
-                setSecure(isSecure)
-                result.success(null)
-            } else {
-                result.notImplemented()
+            try {
+                if (call.method == "setSecure") {
+                    val isSecure = call.argument<Boolean>("isSecure") ?: true
+                    setSecure(isSecure)
+                    result.success(null)
+                } else {
+                    result.notImplemented()
+                }
+            } catch (e: Exception) {
+                result.error("SECURITY_CHANNEL_ERROR", e.message, null)
             }
         }
 
         // Play Integrity Attestation Channel Boilerplate
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, INTEGRITY_CHANNEL).setMethodCallHandler { call, result ->
-            if (call.method == "requestIntegrityToken") {
-                val nonce = call.argument<String>("nonce") ?: ""
-                val cloudProjectNumber = call.argument<String>("cloudProjectNumber") ?: ""
-                
-                // Native Play Integrity Manager dispatch
-                // Once com.google.android.play:integrity dependency is added to build.gradle.kts:
-                // IntegrityManagerFactory.create(applicationContext)...
-                
-                // Returning a mock token for local testing until GCP Cloud Project Number is wired:
-                result.success("integrity_token_attested_for_nonce_$nonce")
-            } else {
-                result.notImplemented()
+            try {
+                if (call.method == "requestIntegrityToken") {
+                    val nonce = call.argument<String>("nonce") ?: ""
+                    val cloudProjectNumber = call.argument<String>("cloudProjectNumber") ?: ""
+                    
+                    // Native Play Integrity Manager dispatch
+                    // Once com.google.android.play:integrity dependency is added to build.gradle.kts:
+                    // IntegrityManagerFactory.create(applicationContext)...
+                    
+                    // Returning a mock token for local testing until GCP Cloud Project Number is wired:
+                    result.success("integrity_token_attested_for_nonce_$nonce")
+                } else {
+                    result.notImplemented()
+                }
+            } catch (e: Exception) {
+                result.error("INTEGRITY_CHANNEL_ERROR", e.message, null)
             }
         }
     }

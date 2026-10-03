@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 import { usePlan } from '../../hooks/usePlan';
+import { useIdleLogout } from '../../hooks/useIdleLogout';
 import { authService } from '../../services/authService';
 import {
   APP_COLORS,
@@ -18,6 +19,8 @@ export interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
+  useIdleLogout();
+
   const { effectiveTheme, toggleTheme } = useTheme();
   const isDark = effectiveTheme === 'dark';
   const { showToast } = useToast();

@@ -29,7 +29,6 @@ describe('src/lib/schemaContract export integrity', () => {
 
   it('exports the exact tables in public schema', () => {
     expect(SCHEMA_TABLES.public).toEqual([
-      'market_sentiment',
       'master_profiles',
       'weekly_logs',
       'app_logs',
@@ -48,6 +47,7 @@ describe('src/lib/schemaContract export integrity', () => {
       'blogs',
       'live_metal_rates',
       'user_subscriptions',
+      'market_sentiment',
     ]);
   });
 

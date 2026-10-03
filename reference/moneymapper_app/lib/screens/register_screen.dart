@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import '../widgets/auth_page_layout.dart';
+import 'main_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,8 +26,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
+  late final StreamSubscription<AuthState> _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.signedIn) {
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+          (_) => false,
+        );
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _authSubscription.cancel();
     _fullNameController.dispose();
     _emailController.dispose();
     _mobileController.dispose();
@@ -130,6 +151,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  Future<void> _registerWithGoogle() async {
+    setState(() => _loading = true);
+    try {
+      await _auth.signInWithGoogle(); // Maps to the same Supabase OAuth flow
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      setState(() => _loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -180,6 +218,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: ElevatedButton(
                   onPressed: _loading ? null : _register,
                   child: const Text('Register'),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _loading ? null : _registerWithGoogle,
+                  icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                  label: const Text('Sign up with Google'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+                  ),
                 ),
               ),
             ],

@@ -19,6 +19,7 @@ import {
   ShoppingBag,
   Home,
   PiggyBank,
+  Lock,
   Check,
   ChevronRight,
 } from 'lucide-react';
@@ -62,10 +63,11 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
   };
 
   const currentWeek = weeks[currentViewWeekIndex];
+  const isEditable = !!currentWeek && currentWeek.is_current === true && !currentWeek.is_submitted;
   const prevWeek = currentViewWeekIndex > 0 ? weeks[currentViewWeekIndex - 1] : null;
 
   const handleOpenAchievedModal = (type: 'fixed' | 'flexible' | 'savings') => {
-    if (currentWeek?.is_submitted) return;
+    if (!isEditable) return;
     setModalTarget(type);
     const existing =
       type === 'fixed' ? actualFixed : type === 'flexible' ? actualFlex : actualSaved;
@@ -81,7 +83,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
   };
 
   const handleMarkMissed = (type: 'fixed' | 'flexible' | 'savings') => {
-    if (currentWeek?.is_submitted) return;
+    if (!isEditable) return;
     handleDecision(type, 'missed', 0);
   };
 
@@ -240,18 +242,24 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           {weeks.map((w, idx) => {
             const isSelected = idx === currentViewWeekIndex;
+            const isFuture = w.start.getTime() > Date.now();
+            const isLockedWeek = !w.is_current;
             return (
               <button
                 key={w.index}
                 type="button"
                 data-testid={`week-tab-${w.index}`}
-                onClick={() => setCurrentViewWeekIndex(idx)}
+                disabled={isFuture}
+                onClick={() => {
+                  if (!isFuture) setCurrentViewWeekIndex(idx);
+                }}
                 className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border ${
                   isSelected
                     ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/25'
                     : 'bg-white dark:bg-[#0E0B1F] border-slate-200 dark:border-indigo-500/15 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                }${isFuture ? ' opacity-40 cursor-not-allowed' : ''}`}
               >
+                {isLockedWeek && <Lock data-testid={`week-tab-lock-${w.index}`} className="w-3 h-3 inline mr-1" />}
                 Week {w.index}
                 <div className="text-[9px] font-normal opacity-80">
                   {formatDate(w.start)} - {formatDate(w.end)}
@@ -306,6 +314,12 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 </p>
               </div>
             </div>
+            {!currentWeek.is_current && (
+              <div data-testid="week-lock-notice" className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
+                <Lock className="w-3 h-3 shrink-0" />
+                <span>This week is locked. You can only log your targets for the current week.</span>
+              </div>
+            )}
 
             {/* Fixed Expenses Decision Card */}
             <div data-testid="decision-card-fixed" className="p-4 rounded-2xl bg-slate-50 dark:bg-[#14102B] border border-slate-200/80 dark:border-indigo-500/15 space-y-3">
@@ -331,12 +345,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <button
                   type="button"
                   data-testid="fixed-achieved-btn"
+                  disabled={!isEditable}
                   onClick={() => handleOpenAchievedModal('fixed')}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                     fixedDecision === 'achieved'
                       ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
                       : 'bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/20 text-slate-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400'
-                  }`}
+                  }${!isEditable ? ' opacity-60 cursor-not-allowed' : ''}`}
                 >
                   <Check className="w-3.5 h-3.5" />
                   <span>{fixedDecision === 'achieved' ? `Achieved (${formatInr(actualFixed)})` : 'Achieved'}</span>
@@ -344,12 +359,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <button
                   type="button"
                   data-testid="fixed-missed-btn"
+                  disabled={!isEditable}
                   onClick={() => handleMarkMissed('fixed')}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                     fixedDecision === 'missed'
                       ? 'bg-rose-600 text-white shadow-md shadow-rose-600/25'
                       : 'bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-rose-500/20 text-slate-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400'
-                  }`}
+                  }${!isEditable ? ' opacity-60 cursor-not-allowed' : ''}`}
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   <span>Missed</span>
@@ -381,12 +397,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <button
                   type="button"
                   data-testid="flexible-achieved-btn"
+                  disabled={!isEditable}
                   onClick={() => handleOpenAchievedModal('flexible')}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                     flexibleDecision === 'achieved'
                       ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
                       : 'bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/20 text-slate-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400'
-                  }`}
+                  }${!isEditable ? ' opacity-60 cursor-not-allowed' : ''}`}
                 >
                   <Check className="w-3.5 h-3.5" />
                   <span>{flexibleDecision === 'achieved' ? `Achieved (${formatInr(actualFlex)})` : 'Achieved'}</span>
@@ -394,12 +411,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <button
                   type="button"
                   data-testid="flexible-missed-btn"
+                  disabled={!isEditable}
                   onClick={() => handleMarkMissed('flexible')}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                     flexibleDecision === 'missed'
                       ? 'bg-rose-600 text-white shadow-md shadow-rose-600/25'
                       : 'bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-rose-500/20 text-slate-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400'
-                  }`}
+                  }${!isEditable ? ' opacity-60 cursor-not-allowed' : ''}`}
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   <span>Missed</span>
@@ -431,12 +449,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <button
                   type="button"
                   data-testid="savings-achieved-btn"
+                  disabled={!isEditable}
                   onClick={() => handleOpenAchievedModal('savings')}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                     savingsDecision === 'achieved'
                       ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
                       : 'bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/20 text-slate-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400'
-                  }`}
+                  }${!isEditable ? ' opacity-60 cursor-not-allowed' : ''}`}
                 >
                   <Check className="w-3.5 h-3.5" />
                   <span>{savingsDecision === 'achieved' ? `Achieved (${formatInr(actualSaved)})` : 'Achieved'}</span>
@@ -444,12 +463,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <button
                   type="button"
                   data-testid="savings-missed-btn"
+                  disabled={!isEditable}
                   onClick={() => handleMarkMissed('savings')}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                     savingsDecision === 'missed'
                       ? 'bg-rose-600 text-white shadow-md shadow-rose-600/25'
                       : 'bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-rose-500/20 text-slate-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400'
-                  }`}
+                  }${!isEditable ? ' opacity-60 cursor-not-allowed' : ''}`}
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   <span>Missed</span>
@@ -462,15 +482,15 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               <button
                 type="button"
                 data-testid="submit-week-btn"
-                disabled={isSubmitting || currentWeek.is_submitted}
+                disabled={isSubmitting || !isEditable}
                 onClick={handleSubmitReport}
                 className={`w-full py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
                   currentWeek.is_submitted
                     ? 'bg-slate-200 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 cursor-not-allowed'
                     : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/25 active:scale-95'
-                }`}
+                }${!isEditable ? ' opacity-60 cursor-not-allowed' : ''}`}
               >
-                <span>{currentWeek.is_submitted ? 'SUBMITTED' : isSubmitting ? 'Submitting...' : 'SUBMIT WEEKLY REPORT'}</span>
+                <span>{currentWeek.is_submitted ? 'SUBMITTED' : !currentWeek.is_current ? 'WEEK LOCKED' : isSubmitting ? 'Submitting...' : 'SUBMIT WEEKLY REPORT'}</span>
               </button>
 
               <button

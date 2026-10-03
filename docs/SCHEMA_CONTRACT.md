@@ -16,7 +16,6 @@ The backend uses three active schemas queried from application code:
 
 | Schema | Table Name | Referenced In Flutter Code |
 | :--- | :--- | :--- |
-| **`public`** | `market_sentiment` | `lib/services/api_service.dart` |
 | **`public`** | `master_profiles` | `lib/services/api_service.dart`, `screens/master_data_screen.dart`, `weekly_expense_tracker.dart`, etc. |
 | **`public`** | `weekly_logs` | `lib/services/api_service.dart`, `screens/weekly_screen.dart`, `weekly_expense_tracker.dart` |
 | **`public`** | `app_logs` | `lib/services/api_service.dart` |
@@ -30,6 +29,7 @@ The backend uses three active schemas queried from application code:
 | **`bse_data`** | `blogs` | `lib/services/api_service.dart` |
 | **`bse_data`** | `live_metal_rates` | `lib/services/market_data_service.dart` |
 | **`bse_data`** | `user_subscriptions` | `lib/services/api_service.dart`, `lib/services/premium_service.dart` |
+| **`bse_data`** | `market_sentiment` | `lib/services/api_service.dart` |
 | **`core`** | `financial_fitness_scores`| `lib/services/api_service.dart`, `lib/models/dashboard_model.dart` |
 | **`core`** | `income_scores` | `lib/services/api_service.dart`, `lib/models/dashboard_model.dart`, `income_pillar.dart` |
 | **`core`** | `expense_scores` | `lib/services/api_service.dart`, `lib/models/dashboard_model.dart`, `weekly_expense_tracker.dart` |
@@ -129,9 +129,9 @@ The backend uses three active schemas queried from application code:
     ```
   - Columns written: `user_id`, `log_level`, `context`, `message`, `metadata`
 
-#### `public.market_sentiment`
+#### `bse_data.market_sentiment`
 - **Read**:
-  - Code: `_supabase.from('market_sentiment').select().order('updated_at', ascending: false).limit(1).maybeSingle()`
+  - Code: `_supabase.schema('bse_data').from('market_sentiment').select().order('updated_at', ascending: false).limit(1).maybeSingle()`
   - Columns read: all (`sentiment_score`, `label`, `updated_at`, etc.)
 
 ---

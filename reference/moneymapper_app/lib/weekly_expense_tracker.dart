@@ -110,18 +110,55 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
 
         if (isCurrent) _activeCalendarWeekIndex = i;
 
+        // --- PROGRESSIVE ADAPTIVE TARGET ENGINE ---
+        List<double> rFixed;
+        List<double> rFlex;
+        List<double> rSave;
+
+        if (i == 0) {
+          // Week 1 Base Ranges
+          rFixed = [weeklyIncome * (xMid - 0.02), weeklyIncome * (xMid + 0.02)];
+          rFlex = [weeklyIncome * (fMid - 0.02), weeklyIncome * (fMid + 0.02)];
+          rSave = [weeklyIncome * (sMid - 0.02), weeklyIncome * (sMid + 0.02)];
+        } else {
+          // Week N Progressive Adaptation based on Week N-1 performance
+          final prevWeek = tempWeeks[i - 1];
+          final prevFixedRange = prevWeek['range_fixed'] as List<double>;
+          final prevFlexRange = prevWeek['range_flex'] as List<double>;
+          final prevSaveRange = prevWeek['range_save'] as List<double>;
+
+          final String? pFixedStat = prevWeek['fixed_status'];
+          final String? pFlexStat = prevWeek['flexible_status'];
+          final String? pSaveStat = prevWeek['savings_status'];
+
+          // Fixed expenses adjustment (Tighten slightly if missed)
+          double fixedMult = pFixedStat == 'missed' ? 0.95 : 1.0;
+          rFixed = [prevFixedRange[0] * fixedMult, prevFixedRange[1] * fixedMult];
+
+          // Flexible expenses adjustment (Tighten budget by 10% if missed)
+          double flexMult = pFlexStat == 'missed' ? 0.90 : 1.0;
+          rFlex = [prevFlexRange[0] * flexMult, prevFlexRange[1] * flexMult];
+
+          // Savings goal adjustment (+8% if achieved, -8% if missed)
+          double saveMult = pSaveStat == 'achieved' ? 1.08 : (pSaveStat == 'missed' ? 0.92 : 1.0);
+          rSave = [prevSaveRange[0] * saveMult, prevSaveRange[1] * saveMult];
+        }
+
         tempWeeks.add({
           'index': i + 1,
           'start': wStart,
           'end': wEnd,
-          'range_fixed': [weeklyIncome * (xMid - 0.02), weeklyIncome * (xMid + 0.02)],
-          'range_flex': [weeklyIncome * (fMid - 0.02), weeklyIncome * (fMid + 0.02)],
-          'range_save': [weeklyIncome * (sMid - 0.02), weeklyIncome * (sMid + 0.02)],
+          'range_fixed': rFixed,
+          'range_flex': rFlex,
+          'range_save': rSave,
           'status': log?['status'],
           'fixed_status': log?['fixed_status'],
           'flexible_status': log?['flexible_status'],
           'savings_status': log?['savings_status'],
-          'is_locked': isFuture || (isPast && log == null),
+          'spent_fixed': (log?['spent_fixed'] ?? log?['spentFixed'] ?? log?['fixed_expenses'] ?? log?['fixed_spend'] ?? 0.0).toDouble(),
+          'spent_flexible': (log?['spent_flexible'] ?? log?['spentFlexible'] ?? log?['flexible_expenses'] ?? log?['flex_spend'] ?? 0.0).toDouble(),
+          'spent_savings': (log?['spent_savings'] ?? log?['spentSavings'] ?? log?['savings'] ?? 0.0).toDouble(),
+          'is_locked': !isCurrent && log == null && (i + 1 > 3),
           'is_current': isCurrent,
           'is_submitted': log != null,
         });
@@ -140,28 +177,47 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
     }
   }
 
+  Map<String, dynamic> get _reportingWeek {
+    if (_weeks.isEmpty) return {};
+    final cur = _weeks[_currentViewWeekIndex];
+    if (cur['is_current'] && _currentViewWeekIndex > 0) {
+      return _weeks[_currentViewWeekIndex - 1];
+    }
+    return cur;
+  }
+
   void _updateViewDecisions() {
     if (_weeks.isEmpty) return;
-    final cur = _weeks[_currentViewWeekIndex];
-    _fixedDecision = cur['fixed_status'];
-    _flexibleDecision = cur['flexible_status'];
-    _savingsDecision = cur['savings_status'];
+    final target = _reportingWeek;
+    _fixedDecision = target['fixed_status'];
+    _flexibleDecision = target['flexible_status'];
+    _savingsDecision = target['savings_status'];
+
+    _actualFixed = (target['spent_fixed'] ?? 0.0).toDouble();
+    _actualFlex = (target['spent_flexible'] ?? 0.0).toDouble();
+    _actualSaved = (target['spent_savings'] ?? 0.0).toDouble();
 
     // Reset local scores based on existing submission
     if (_fixedDecision == 'achieved') {
-       _fixedScore = 15; // Minimum base if no amount data
+       _fixedScore = _actualFixed > 0
+           ? _calculateCategoryScore(_actualFixed, target['range_fixed'][0], target['range_fixed'][1], 'fixed')
+           : 15;
     } else {
        _fixedScore = 0;
     }
 
     if (_flexibleDecision == 'achieved') {
-       _flexScore = 15;
+       _flexScore = _actualFlex > 0
+           ? _calculateCategoryScore(_actualFlex, target['range_flex'][0], target['range_flex'][1], 'flexible')
+           : 15;
     } else {
        _flexScore = 0;
     }
 
     if (_savingsDecision == 'achieved') {
-       _saveScore = 10;
+       _saveScore = _actualSaved > 0
+           ? _calculateCategoryScore(_actualSaved, target['range_save'][0], target['range_save'][1], 'savings')
+           : 10;
     } else {
        _saveScore = 0;
     }
@@ -227,11 +283,11 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
     final controller = TextEditingController();
     String label = "";
     List<double> range = [];
-    final cur = _weeks[_currentViewWeekIndex];
+    final targetWeek = _reportingWeek;
 
-    if (type == 'fixed') { label = "Fixed Expenses"; range = cur['range_fixed']; }
-    if (type == 'flexible') { label = "Flexible Expenses"; range = cur['range_flex']; }
-    if (type == 'savings') { label = "Savings"; range = cur['range_save']; }
+    if (type == 'fixed') { label = "Fixed Expenses"; range = targetWeek['range_fixed']; }
+    if (type == 'flexible') { label = "Flexible Expenses"; range = targetWeek['range_flex']; }
+    if (type == 'savings') { label = "Savings"; range = targetWeek['range_save']; }
 
     final amountStr = await showModalBottomSheet<String>(
       context: context,
@@ -243,9 +299,9 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Log $label", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text("Log $label (Week ${targetWeek['index']})", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text("Enter the exact amount for $label this week:", style: const TextStyle(fontSize: 14, color: Colors.grey)),
+            Text("Enter the exact amount for $label for Week ${targetWeek['index']}:", style: const TextStyle(fontSize: 14, color: Colors.grey)),
             const SizedBox(height: 16),
             TextField(
               controller: controller,
@@ -299,7 +355,7 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
       return;
     }
 
-    final cur = _weeks[_currentViewWeekIndex];
+    final targetWeek = _reportingWeek;
     String overallStatus = (_fixedDecision == 'achieved' && _flexibleDecision == 'achieved' && _savingsDecision == 'achieved') 
         ? 'achieved' 
         : 'missed';
@@ -308,7 +364,7 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
     setState(() => _loading = true);
     try {
       await _api.updateWeeklyStatus(
-        weekIndex: cur['index'],
+        weekIndex: targetWeek['index'],
         month: now.month,
         year: now.year,
         status: overallStatus,
@@ -327,7 +383,7 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
 
       await _loadWeeklyData();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Weekly report submitted!'), backgroundColor: AppColors.success),
+        SnackBar(content: Text('Weekly report for Week ${targetWeek['index']} submitted!'), backgroundColor: AppColors.success),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -347,6 +403,8 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
 
     final currentWeek = _weeks[_currentViewWeekIndex];
     final prevWeek = _currentViewWeekIndex > 0 ? _weeks[_currentViewWeekIndex - 1] : null;
+    final reportingWeek = _reportingWeek;
+    final isTargetWeekSubmitted = reportingWeek['is_submitted'] == true;
     final dateFormat = DateFormat('MMM d');
 
     return Scaffold(
@@ -368,13 +426,13 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
             _buildWeekStrip(isDark),
             SizedBox(height: context.hp(3)),
 
-            // --- PREVIOUS WEEK MINI OVERVIEW ---
-            if (prevWeek != null && currentWeek['is_current'] && !currentWeek['is_submitted'])
-              _buildPreviousWeekMini(prevWeek, isDark),
-
-            SizedBox(height: context.hp(3)),
+            // --- CURRENT WEEK TARGET OVERVIEW (TOP CARD) ---
+            if (currentWeek['is_current']) ...[
+              _buildCurrentWeekOverviewCard(currentWeek, isDark),
+              SizedBox(height: context.hp(2.5)),
+            ],
             
-            // --- TARGET RANGE SECTION ---
+            // --- TARGET RANGE REPORTING SECTION (BOTTOM CARD) ---
             Container(
               padding: EdgeInsets.all(context.wp(5)),
               decoration: BoxDecoration(
@@ -385,15 +443,15 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Week ${currentWeek['index']} Target Ranges", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text("${dateFormat.format(currentWeek['start'])} - ${dateFormat.format(currentWeek['end'])}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text("Week ${reportingWeek['index']} Target Ranges", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("${dateFormat.format(reportingWeek['start'])} - ${dateFormat.format(reportingWeek['end'])}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   const SizedBox(height: 24),
                   
-                  _buildDecisionCard("Fixed Expenses", currentWeek['range_fixed'], _fixedDecision, (v) => _handleDecision('fixed', v), currentWeek['is_submitted']),
+                  _buildDecisionCard("Fixed Expenses", reportingWeek['range_fixed'], _fixedDecision, _actualFixed, (v) => _handleDecision('fixed', v), isTargetWeekSubmitted),
                   const Divider(height: 32),
-                  _buildDecisionCard("Flexible Expenses", currentWeek['range_flex'], _flexibleDecision, (v) => _handleDecision('flexible', v), currentWeek['is_submitted']),
+                  _buildDecisionCard("Flexible Expenses", reportingWeek['range_flex'], _flexibleDecision, _actualFlex, (v) => _handleDecision('flexible', v), isTargetWeekSubmitted),
                   const Divider(height: 32),
-                  _buildDecisionCard("Savings Goal", currentWeek['range_save'], _savingsDecision, (v) => _handleDecision('savings', v), currentWeek['is_submitted']),
+                  _buildDecisionCard("Savings Goal", reportingWeek['range_save'], _savingsDecision, _actualSaved, (v) => _handleDecision('savings', v), isTargetWeekSubmitted),
                   
                   const SizedBox(height: 32),
 
@@ -401,14 +459,14 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: (currentWeek['is_submitted'] || !currentWeek['is_current']) ? null : _submitFullWeek,
+                      onPressed: isTargetWeekSubmitted ? null : _submitFullWeek,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: Text(
-                        currentWeek['is_submitted'] ? "SUBMITTED" : "SUBMIT WEEKLY REPORT", 
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                        isTargetWeekSubmitted ? "SUBMITTED FOR WEEK ${reportingWeek['index']}" : "SUBMIT REPORT FOR WEEK ${reportingWeek['index']}",
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -426,6 +484,62 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
       ),
     ),
   );
+  }
+
+  Widget _buildCurrentWeekOverviewCard(Map<String, dynamic> week, bool isDark) {
+    final dateFormat = DateFormat('MMM d');
+    final fixedRange = week['range_fixed'] as List<double>;
+    final flexRange = week['range_flex'] as List<double>;
+    final saveRange = week['range_save'] as List<double>;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Week ${week['index']} Target Overview", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+                child: const Text("CURRENT WEEK", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text("${dateFormat.format(week['start'])} - ${dateFormat.format(week['end'])}", style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          const SizedBox(height: 16),
+          _overviewRangeRow("Fixed Expenses", fixedRange, AppColors.primary),
+          const Divider(height: 20),
+          _overviewRangeRow("Flexible Expenses", flexRange, AppColors.warning),
+          const Divider(height: 20),
+          _overviewRangeRow("Savings Goal", saveRange, AppColors.success),
+        ],
+      ),
+    );
+  }
+
+  Widget _overviewRangeRow(String label, List<double> range, Color color) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Container(width: 8, height: 8, decoration: BoxDecoration(shape: BoxShape.circle, color: color)),
+            const SizedBox(width: 8),
+            Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          ],
+        ),
+        Text("Range: ₹${range[0].round()} - ₹${range[1].round()}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+      ],
+    );
   }
 
   Widget _buildOptimizeButton(BuildContext context) {
@@ -481,7 +595,7 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
     );
   }
 
-  Widget _buildDecisionCard(String label, List<double> range, String? decision, ValueChanged<String> onSelect, bool submitted) {
+  Widget _buildDecisionCard(String label, List<double> range, String? decision, double spentAmount, ValueChanged<String> onSelect, bool submitted) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -489,7 +603,16 @@ class _WeeklyExpensePredictorState extends State<WeeklyExpensePredictor> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-            Text("Range: ₹${range[0].round()} - ₹${range[1].round()}", style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text("Range: ₹${range[0].round()} - ₹${range[1].round()}", style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                if (spentAmount > 0) ...[
+                  const SizedBox(height: 2),
+                  Text("Logged: ₹${spentAmount.round()}", style: const TextStyle(fontSize: 11, color: AppColors.success, fontWeight: FontWeight.bold)),
+                ],
+              ],
+            ),
           ],
         ),
         const SizedBox(height: 12),

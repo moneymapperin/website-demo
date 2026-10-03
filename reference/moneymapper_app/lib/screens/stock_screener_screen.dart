@@ -88,14 +88,27 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
     try {
       final data = await _api.getMarketSentiment();
       if (data.isNotEmpty) {
-        double angle = ResilienceUtils.safeDouble(data['needle_angle']);
-        double mappedValue = (angle + 90) / 180 * 100;
+        // Log exactly what came back from Supabase to debug parsing issues
+        debugPrint("Raw Sentiment Data from DB: $data");
+
+        // Use direct double parsing rather than safeDouble to see if that's stripping negatives
+        final dynamic rawAngle = data['needle_angle'];
+        double angle = 0.0;
+        
+        if (rawAngle is num) {
+          angle = rawAngle.toDouble();
+        } else if (rawAngle is String) {
+          angle = double.tryParse(rawAngle) ?? 0.0;
+        }
+
+        // Map angle (-90 to +90) into a percentage (0 to 100) for the gauge
+        double mappedValue = ((angle + 90) / 180) * 100;
 
         if (mounted) {
           setState(() {
             _sentimentData = data;
             _sentimentValue = mappedValue.clamp(0.0, 100.0);
-            _sentimentDirection = data['master_direction'] ?? "NEUTRAL";
+            _sentimentDirection = data['master_direction']?.toString().toUpperCase().trim() ?? "NEUTRAL";
           });
         }
       }
@@ -266,26 +279,34 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
       accentColor = Colors.red;
     }
 
+    final double gaugeSize = context.wp(60).clamp(180.0, 240.0);
+
     return Container(
-      margin: EdgeInsets.all(context.wp(5)),
-      padding: EdgeInsets.all(context.wp(6)),
+      margin: EdgeInsets.symmetric(horizontal: context.wp(4), vertical: 8),
+      padding: EdgeInsets.all(context.wp(5)),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.borderLight),
       ),
       child: Column(
         children: [
           const Text("MARKET SENTIMENT", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.5)),
-          const SizedBox(height: 24),
-          SentimentGauge(value: _sentimentValue, size: context.wp(65)),
+          const SizedBox(height: 16),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SentimentGauge(value: _sentimentValue, size: gaugeSize),
+          ),
           const SizedBox(height: 12),
-          Text(
-            subLabel,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
-              color: accentColor,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              subLabel,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: accentColor,
+              ),
             ),
           ),
           if (_sentimentData != null) ...[
@@ -312,22 +333,26 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.auto_graph_rounded,
                   size: 16,
                   color: AppColors.primary,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  "NIFTY 500 SIGNALS & STOCKS",
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                const SizedBox(width: 6),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    "NIFTY 500 SIGNALS & STOCKS",
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    ),
                   ),
                 ),
               ],
@@ -421,7 +446,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                 children: [
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: isDark ? AppColors.darkCard : Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -434,8 +459,8 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        BrandLogo(name: s['symbol'] ?? '', size: 40),
-                        const SizedBox(width: 12),
+                        BrandLogo(name: s['symbol'] ?? '', size: 36),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: ImageFiltered(
                             imageFilter: isLocked ? ImageFilter.blur(sigmaX: 5, sigmaY: 5) : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
@@ -443,75 +468,95 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(s['symbol'] ?? 'Unknown', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-                                            if (!_isPro && !isLocked) ...[
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                decoration: BoxDecoration(color: Colors.orange.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
-                                                child: Text("$_trialDaysLeft-day trial", style: const TextStyle(color: Colors.orange, fontSize: 8, fontWeight: FontWeight.bold)),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Wrap(
+                                            crossAxisAlignment: WrapCrossAlignment.center,
+                                            spacing: 6,
+                                            runSpacing: 4,
+                                            children: [
+                                              Text(
+                                                s['symbol'] ?? 'Unknown',
+                                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                                               ),
+                                              if (!_isPro && !isLocked)
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.orange.withOpacity(0.2),
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                  child: Text(
+                                                    "$_trialDaysLeft-day trial",
+                                                    style: const TextStyle(color: Colors.orange, fontSize: 8, fontWeight: FontWeight.bold),
+                                                  ),
+                                                ),
                                             ],
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            RichText(
-                                              text: TextSpan(
-                                                style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold),
-                                                children: [
-                                                  const TextSpan(text: "Score: "),
-                                                  TextSpan(
-                                                    text: "$score",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.w900,
-                                                      color: isDark ? Colors.white : Colors.black87,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Wrap(
+                                            crossAxisAlignment: WrapCrossAlignment.center,
+                                            spacing: 6,
+                                            runSpacing: 2,
+                                            children: [
+                                              RichText(
+                                                text: TextSpan(
+                                                  style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold),
+                                                  children: [
+                                                    const TextSpan(text: "Score: "),
+                                                    TextSpan(
+                                                      text: "$score",
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight: FontWeight.w900,
+                                                        color: isDark ? Colors.white : Colors.black87,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  const TextSpan(text: "/100"),
-                                                ],
+                                                    const TextSpan(text: "/100"),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                            if (!isWait) ...[
-                                              Builder(builder: (context) {
-                                                final upside = _calculateUpsidePct(
-                                                  s['entry_range']?.toString() ?? '',
-                                                  s['target_range']?.toString() ?? '',
-                                                );
-                                                if (upside.isEmpty) return const SizedBox.shrink();
-                                                return Text(
-                                                  "  •  Expected Return: $upside",
-                                                  style: TextStyle(
-                                                    color: isBuy ? AppColors.success : AppColors.danger,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                );
-                                              }),
+                                              if (!isWait)
+                                                Builder(builder: (context) {
+                                                  final upside = _calculateUpsidePct(
+                                                    s['entry_range']?.toString() ?? '',
+                                                    s['target_range']?.toString() ?? '',
+                                                  );
+                                                  if (upside.isEmpty) return const SizedBox.shrink();
+                                                  return Text(
+                                                    "• Return: $upside",
+                                                    style: TextStyle(
+                                                      color: isBuy ? AppColors.success : AppColors.danger,
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  );
+                                                }),
                                             ],
-                                          ],
-                                        ),
-                                      ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
+                                    const SizedBox(width: 6),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
                                         color: isWait ? Colors.grey : (isBuy ? AppColors.success : AppColors.danger),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: Text(direction, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                      child: Text(
+                                        direction,
+                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                                      ),
                                     ),
                                   ],
                                 ),
                                 if (!isWait) ...[
-                                  const Divider(height: 24),
+                                  const Divider(height: 20),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
@@ -573,14 +618,20 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
   Widget _rangeBox(String label, String value, Color color) {
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
         child: Column(
           children: [
-            Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: color)),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: color)),
+            ),
             const SizedBox(height: 4),
-            Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
+            ),
           ],
         ),
       ),

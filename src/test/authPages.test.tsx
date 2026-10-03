@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { LoginPage } from '../pages/LoginPage';
@@ -24,6 +24,10 @@ describe('Task 3: Auth Pages (Mirroring Flutter screens)', () => {
     };
     vi.spyOn(supabase, 'channel').mockReturnValue(mockChannel as any);
     vi.spyOn(supabase, 'removeChannel').mockResolvedValue('ok' as any);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe('1. LoginPage (/login)', () => {
@@ -119,6 +123,149 @@ describe('Task 3: Auth Pages (Mirroring Flutter screens)', () => {
 
       const alert = await screen.findByRole('alert');
       expect(alert).toHaveTextContent('Incorrect email or password. Please try again.');
+    });
+
+    it('disables Login and shows a 30-second countdown for incorrect credentials', async () => {
+      vi.useFakeTimers();
+      vi.spyOn(authService, 'signIn').mockRejectedValue(
+        new Error('Incorrect email or password. Please try again.'),
+      );
+
+      render(
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>,
+      );
+
+      fireEvent.change(screen.getByLabelText(/^Email$/i), {
+        target: { value: 'bad@example.com' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Password$/i), {
+        target: { value: 'badpass' },
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /^Login$/i }));
+        await Promise.resolve();
+      });
+
+      const loginButton = screen.getByRole('button', { name: 'Try again in 30s' });
+      expect(loginButton).toBeDisabled();
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Incorrect email or password. Please try again.',
+      );
+    });
+
+    it('enables Login again when the 30-second cooldown expires', async () => {
+      vi.useFakeTimers();
+      vi.spyOn(authService, 'signIn').mockRejectedValue(
+        new Error('Incorrect email or password. Please try again.'),
+      );
+
+      render(
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>,
+      );
+
+      fireEvent.change(screen.getByLabelText(/^Email$/i), {
+        target: { value: 'bad@example.com' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Password$/i), {
+        target: { value: 'badpass' },
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /^Login$/i }));
+        await Promise.resolve();
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(30_000);
+      });
+
+      const loginButton = screen.getByRole('button', { name: /^Login$/i });
+      expect(loginButton).toBeEnabled();
+      expect(localStorage.getItem('mm_login_cooldown_until')).toBeNull();
+    });
+
+    it('does not call signIn again when the form is submitted during cooldown', async () => {
+      vi.useFakeTimers();
+      const signInSpy = vi.spyOn(authService, 'signIn').mockRejectedValue(
+        new Error('Incorrect email or password. Please try again.'),
+      );
+
+      render(
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>,
+      );
+
+      fireEvent.change(screen.getByLabelText(/^Email$/i), {
+        target: { value: 'bad@example.com' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Password$/i), {
+        target: { value: 'badpass' },
+      });
+
+      const form = screen.getByLabelText(/^Email$/i).closest('form')!;
+      await act(async () => {
+        fireEvent.submit(form);
+        await Promise.resolve();
+      });
+      expect(signInSpy).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        fireEvent.submit(form);
+        await Promise.resolve();
+      });
+      expect(signInSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not start a cooldown for a network error', async () => {
+      vi.spyOn(authService, 'signIn').mockRejectedValue(new Error('Network unavailable'));
+
+      render(
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>,
+      );
+
+      fireEvent.change(screen.getByLabelText(/^Email$/i), {
+        target: { value: 'test@example.com' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Password$/i), {
+        target: { value: 'password123' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /^Login$/i }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Network unavailable');
+      expect(screen.getByRole('button', { name: /^Login$/i })).toBeEnabled();
+      expect(localStorage.getItem('mm_login_cooldown_until')).toBeNull();
+    });
+
+    it('clears the cooldown key after a successful login', async () => {
+      localStorage.setItem('mm_login_cooldown_until', String(Date.now() - 1000));
+      vi.spyOn(authService, 'signIn').mockResolvedValue({ user: { id: 'u-1' } } as any);
+
+      render(
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>,
+      );
+
+      fireEvent.change(screen.getByLabelText(/^Email$/i), {
+        target: { value: 'test@example.com' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Password$/i), {
+        target: { value: 'password123' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /^Login$/i }));
+
+      await waitFor(() => {
+        expect(authService.signIn).toHaveBeenCalledWith('test@example.com', 'password123');
+      });
+      expect(localStorage.getItem('mm_login_cooldown_until')).toBeNull();
     });
 
     it('renders status message with role="status" when passed in location state', () => {

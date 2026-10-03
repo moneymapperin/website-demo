@@ -770,14 +770,13 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
     it('invokes exact tables and schemas matching SCHEMA_CONTRACT', async () => {
       const mockQueryChain = {
         select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: [], error: null }),
+        order: vi.fn().mockReturnThis(),
         limit: vi.fn().mockReturnThis(),
         maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
       };
 
-      const schemaSpy = vi.spyOn(supabase, 'schema').mockReturnValue({
-        from: vi.fn().mockReturnValue(mockQueryChain),
-      } as any);
+      const fromMock = vi.fn().mockReturnValue(mockQueryChain);
+      const schemaSpy = vi.spyOn(supabase, 'schema').mockReturnValue({ from: fromMock } as any);
 
       const fromSpy = vi.spyOn(supabase, 'from').mockReturnValue(mockQueryChain as any);
 
@@ -793,9 +792,10 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
       await apiService.getInsurancePlans();
       expect(schemaSpy).toHaveBeenCalledWith('bse_data');
 
-      // 4. getMarketSentiment -> public.market_sentiment (no schema called)
+      // 4. getMarketSentiment -> bse_data.market_sentiment
       await apiService.getMarketSentiment();
-      expect(fromSpy).toHaveBeenCalledWith('market_sentiment');
+      expect(schemaSpy).toHaveBeenCalledWith('bse_data');
+      expect(fromMock).toHaveBeenCalledWith('market_sentiment');
     });
   });
 });

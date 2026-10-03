@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, renderHook, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ToastProvider } from '../context/ToastContext';
@@ -8,6 +8,8 @@ import { apiService } from '../services/apiService';
 import { gamificationStore } from '../services/gamificationStore';
 import { DashboardData } from '../models/dashboard';
 import { WeeklyPage } from '../pages/WeeklyPage';
+import { WeeklyExpensePredictorPage } from '../pages/pillars/WeeklyExpensePredictorPage';
+import { useWeeklyTracker } from '../hooks/useWeeklyTracker';
 import {
   calculateDynamicWeekCount,
   calculateTargetRanges,
@@ -755,5 +757,159 @@ describe('Task 9: WeeklyPage Component & Flow Tests', () => {
       expect(screen.getByText('Network error')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
     });
+  });
+});
+
+describe('Task 9: Weekly Expense Predictor current-week lock behavior', () => {
+  const pastWeekLog = {
+    week_index: 1,
+    status: 'achieved',
+    fixed_status: 'achieved',
+    flexible_status: 'missed',
+    savings_status: 'achieved',
+    spent_fixed: 4500,
+    spent_flexible: 0,
+    spent_savings: 2500,
+  };
+
+  const setupWeeklyApiMocks = () => {
+    vi.spyOn(apiService, 'getDashboard').mockResolvedValue({
+      financial_fitness_scores: { expense_pillar_score: 70 },
+      expense_scores: { discipline_message: 'Keep tracking your expenses.' },
+    } as any);
+    vi.spyOn(apiService, 'getWeeklyCurrent').mockResolvedValue({ data: [pastWeekLog] } as any);
+    vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({
+      data: { monthlyActiveIncome: 100000 },
+    } as any);
+  };
+
+  const renderPredictor = () =>
+    render(
+      <MemoryRouter>
+        <ToastProvider>
+          <WeeklyExpensePredictorPage />
+        </ToastProvider>
+      </MemoryRouter>,
+    );
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    localStorage.clear();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 8, 16, 12, 0, 0));
+    setupWeeklyApiMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it('keeps current-week decisions editable and enables submit after all decisions are chosen', async () => {
+    renderPredictor();
+
+    await screen.findByRole('heading', { name: 'Week 3 Target Ranges' });
+    const achievedButton = screen.getByTestId('fixed-achieved-btn');
+    const missedButton = screen.getByTestId('fixed-missed-btn');
+
+    expect(achievedButton).toBeEnabled();
+    expect(missedButton).toBeEnabled();
+    expect(screen.queryByTestId('week-lock-notice')).not.toBeInTheDocument();
+
+    fireEvent.click(achievedButton);
+    expect(screen.getByTestId('log-amount-modal')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    fireEvent.click(missedButton);
+    expect(missedButton.className).toContain('bg-rose-600');
+    fireEvent.click(screen.getByTestId('flexible-missed-btn'));
+    fireEvent.click(screen.getByTestId('savings-missed-btn'));
+
+    expect(screen.getByTestId('submit-week-btn')).toBeEnabled();
+  });
+
+  it('locks all decisions and submit when a past week is selected', async () => {
+    renderPredictor();
+
+    await screen.findByRole('heading', { name: 'Week 3 Target Ranges' });
+    fireEvent.click(screen.getByTestId('week-tab-2'));
+
+    await screen.findByRole('heading', { name: 'Week 2 Target Ranges' });
+    const decisionButtonIds = [
+      'fixed-achieved-btn',
+      'fixed-missed-btn',
+      'flexible-achieved-btn',
+      'flexible-missed-btn',
+      'savings-achieved-btn',
+      'savings-missed-btn',
+    ];
+
+    for (const testId of decisionButtonIds) {
+      const button = screen.getByTestId(testId);
+      expect(button).toBeDisabled();
+      fireEvent.click(button);
+    }
+
+    expect(screen.queryByTestId('log-amount-modal')).not.toBeInTheDocument();
+    expect(screen.getByTestId('submit-week-btn')).toBeDisabled();
+    expect(screen.getByTestId('submit-week-btn')).toHaveTextContent('WEEK LOCKED');
+    expect(screen.getByTestId('week-lock-notice')).toBeVisible();
+  });
+
+  it('disables future week tabs and does not change the selected week when clicked', async () => {
+    renderPredictor();
+
+    await screen.findByRole('heading', { name: 'Week 3 Target Ranges' });
+    const futureTab = screen.getByTestId('week-tab-4');
+
+    expect(futureTab).toBeDisabled();
+    expect(screen.getByTestId('week-tab-lock-4')).toBeInTheDocument();
+    fireEvent.click(futureTab);
+
+    expect(screen.getByRole('heading', { name: 'Week 3 Target Ranges' })).toBeInTheDocument();
+  });
+
+  it('shows a lock icon on every non-current week tab only', async () => {
+    renderPredictor();
+
+    await screen.findByRole('heading', { name: 'Week 3 Target Ranges' });
+
+    for (const weekIndex of [1, 2, 4, 5]) {
+      expect(screen.getByTestId(`week-tab-lock-${weekIndex}`)).toBeInTheDocument();
+    }
+    expect(screen.queryByTestId('week-tab-lock-3')).not.toBeInTheDocument();
+  });
+
+  it('blocks hook decisions and submission for a non-current week', async () => {
+    const updateWeeklyStatusSpy = vi.spyOn(apiService, 'updateWeeklyStatus');
+    const { result } = renderHook(() => useWeeklyTracker());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => result.current.setCurrentViewWeekIndex(1));
+    const decisionsBefore = {
+      fixed: result.current.fixedDecision,
+      flexible: result.current.flexibleDecision,
+      savings: result.current.savingsDecision,
+    };
+
+    act(() => result.current.handleDecision('fixed', 'missed'));
+
+    expect(result.current.fixedDecision).toBe(decisionsBefore.fixed);
+    expect(result.current.flexibleDecision).toBe(decisionsBefore.flexible);
+    expect(result.current.savingsDecision).toBe(decisionsBefore.savings);
+
+    act(() => result.current.setCurrentViewWeekIndex(0));
+    let submitResult: { success: boolean; error?: string } | undefined;
+    await act(async () => {
+      submitResult = await result.current.submitWeek();
+    });
+
+    expect(submitResult).toEqual({
+      success: false,
+      error: 'Only the current week can be submitted.',
+    });
+    expect(updateWeeklyStatusSpy).not.toHaveBeenCalled();
   });
 });

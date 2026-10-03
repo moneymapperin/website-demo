@@ -43,7 +43,7 @@ export const Footer: React.FC = () => {
 
   const productLinks = ['Features', 'Insights', 'AI Assistant', 'Pricing'];
   const companyLinks = ['About Us', 'Careers', 'Blog', 'Contact Us'];
-  const supportLinks = ['Help Center', 'FAQs', 'Privacy Policy', 'Terms of Service'];
+  const supportLinks = ['Help Center', 'FAQs', 'Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Grievance Redressal Policy'];
 
   return (
     <footer className="relative bg-[#06040f] border-t border-white/[0.08] text-white">
@@ -94,12 +94,21 @@ export const Footer: React.FC = () => {
               <ul className="space-y-2">
                 {productLinks.map((link) => (
                   <li key={link}>
-                    <button
-                      onClick={() => openComingSoon(link)}
-                      className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                    >
-                      {link}
-                    </button>
+                    {link === 'Pricing' ? (
+                      <a
+                        href="/moneymapper-pricing.html"
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                      >
+                        {link}
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => openComingSoon(link)}
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                      >
+                        {link}
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -128,12 +137,42 @@ export const Footer: React.FC = () => {
               <ul className="space-y-2">
                 {supportLinks.map((link) => (
                   <li key={link}>
-                    <button
-                      onClick={() => openComingSoon(link)}
-                      className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                    >
-                      {link}
-                    </button>
+                    {link === 'Privacy Policy' ? (
+                      <a
+                        href="/privacy-policy.html"
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                      >
+                        {link}
+                      </a>
+                    ) : link === 'Terms of Service' ? (
+                      <a
+                        href="/terms-and-conditions.html"
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                      >
+                        {link}
+                      </a>
+                    ) : link === 'Cookie Policy' ? (
+                      <a
+                        href="/cookie-policy.html"
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                      >
+                        {link}
+                      </a>
+                    ) : link === 'Grievance Redressal Policy' ? (
+                      <a
+                        href="/grievance-redressal-policy.html"
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                      >
+                        {link}
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => openComingSoon(link)}
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                      >
+                        {link}
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

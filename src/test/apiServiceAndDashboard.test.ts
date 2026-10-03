@@ -408,7 +408,7 @@ describe('TASK 6 — Data Layer (ApiService, DashboardModel, ResilienceUtils)', 
       expect(blogs).toEqual([{ id: 'blog-1', title: 'SIP Guide' }]);
     });
 
-    it('getMarketSentiment: public.market_sentiment, order(updated_at, desc), limit(1), maybeSingle()', async () => {
+    it('getMarketSentiment: bse_data.market_sentiment, order(updated_at, desc), limit(1), maybeSingle()', async () => {
       const maybeSingleMock = vi.fn().mockResolvedValue({
         data: { mood: 'BULLISH', score: 82 },
         error: null,
@@ -416,15 +416,59 @@ describe('TASK 6 — Data Layer (ApiService, DashboardModel, ResilienceUtils)', 
       const limitMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
       const orderMock = vi.fn().mockReturnValue({ limit: limitMock });
       const selectMock = vi.fn().mockReturnValue({ order: orderMock });
-      const fromSpy = vi.spyOn(supabase, 'from').mockReturnValue({ select: selectMock } as any);
+      const fromMock = vi.fn().mockReturnValue({ select: selectMock });
+      const schemaSpy = vi.spyOn(supabase, 'schema').mockReturnValue({ from: fromMock } as any);
 
       const sentiment = await apiService.getMarketSentiment();
 
-      expect(fromSpy).toHaveBeenCalledWith('market_sentiment');
+      expect(schemaSpy).toHaveBeenCalledWith('bse_data');
+      expect(fromMock).toHaveBeenCalledWith('market_sentiment');
       expect(orderMock).toHaveBeenCalledWith('updated_at', { ascending: false });
       expect(limitMock).toHaveBeenCalledWith(1);
-      expect(maybeSingleMock).toHaveBeenCalled();
+      expect(maybeSingleMock).toHaveBeenCalledWith();
       expect(sentiment).toEqual({ mood: 'BULLISH', score: 82 });
+    });
+
+    it('getMarketSentiment queries live on each call without a cache short-circuit', async () => {
+      const firstSentiment = { mood: 'BULLISH', score: 82 };
+      const secondSentiment = { mood: 'BEARISH', score: 31 };
+      const maybeSingleMock = vi.fn()
+        .mockResolvedValueOnce({ data: firstSentiment, error: null })
+        .mockResolvedValueOnce({ data: secondSentiment, error: null });
+      const limitMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
+      const orderMock = vi.fn().mockReturnValue({ limit: limitMock });
+      const selectMock = vi.fn().mockReturnValue({ order: orderMock });
+      const fromMock = vi.fn().mockReturnValue({ select: selectMock });
+      const schemaSpy = vi.spyOn(supabase, 'schema').mockReturnValue({ from: fromMock } as any);
+
+      const first = await apiService.getMarketSentiment();
+      const second = await apiService.getMarketSentiment();
+
+      expect(schemaSpy).toHaveBeenCalledTimes(2);
+      expect(schemaSpy).toHaveBeenCalledWith('bse_data');
+      expect(fromMock).toHaveBeenCalledTimes(2);
+      expect(maybeSingleMock).toHaveBeenCalledTimes(2);
+      expect(first).toEqual(firstSentiment);
+      expect(second).toEqual(secondSentiment);
+    });
+
+    it('getMarketSentiment falls back to the last successful cache value after failure', async () => {
+      const lastSuccessfulSentiment = { mood: 'BULLISH', score: 82 };
+      const maybeSingleMock = vi.fn()
+        .mockResolvedValueOnce({ data: lastSuccessfulSentiment, error: null })
+        .mockRejectedValue(new Error('Network failure'));
+      const limitMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
+      const orderMock = vi.fn().mockReturnValue({ limit: limitMock });
+      const selectMock = vi.fn().mockReturnValue({ order: orderMock });
+      const fromMock = vi.fn().mockReturnValue({ select: selectMock });
+      vi.spyOn(supabase, 'schema').mockReturnValue({ from: fromMock } as any);
+      vi.spyOn(apiService, 'logErrorResilient').mockImplementation(() => {});
+
+      await apiService.getMarketSentiment();
+      await expect(apiService.getMarketSentiment()).resolves.toEqual(lastSuccessfulSentiment);
+
+      apiService.clearAllAppCache();
+      await expect(apiService.getMarketSentiment()).resolves.toEqual({});
     });
 
     it('getCorporateWorkforceStats: checks admin, then queries corporate_analytics & workforce_intelligence', async () => {

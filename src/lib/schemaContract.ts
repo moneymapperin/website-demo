@@ -22,7 +22,6 @@ export interface TableContract {
 
 export const SCHEMA_TABLES: Record<SchemaName, readonly string[]> = {
   public: [
-    'market_sentiment',
     'master_profiles',
     'weekly_logs',
     'app_logs',
@@ -38,6 +37,7 @@ export const SCHEMA_TABLES: Record<SchemaName, readonly string[]> = {
     'blogs',
     'live_metal_rates',
     'user_subscriptions',
+    'market_sentiment',
   ],
   core: [
     'financial_fitness_scores',
@@ -53,14 +53,6 @@ export const SCHEMA_TABLES: Record<SchemaName, readonly string[]> = {
 
 export const TABLE_CONTRACTS: TableContract[] = [
   // --- public schema ---
-  {
-    schema: 'public',
-    table: 'market_sentiment',
-    operations: ['SELECT'],
-    columnsRead: ['*'],
-    columnsWritten: [],
-    notes: 'Ordered by updated_at descending, limit 1',
-  },
   {
     schema: 'public',
     table: 'master_profiles',
@@ -208,6 +200,14 @@ export const TABLE_CONTRACTS: TableContract[] = [
     columnsRead: ['*'],
     columnsWritten: [],
     filters: ['user_id=eq'],
+  },
+  {
+    schema: 'bse_data',
+    table: 'market_sentiment',
+    operations: ['SELECT'],
+    columnsRead: ['*'],
+    columnsWritten: [],
+    notes: 'Ordered by updated_at descending, limit 1. Always live; cache only as fallback.',
   },
 
   // --- core schema ---

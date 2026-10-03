@@ -849,12 +849,11 @@ export class ApiService {
     });
   }
 
+  // Reads bse_data.market_sentiment (same as the mobile app); always live, cache only as fallback on failure
   async getMarketSentiment(): Promise<Record<string, any>> {
-    const cached = this.readCache('market_sentiment', TTL_MEDIUM_MS);
-    if (cached !== null && cached !== undefined) return cached;
-
     try {
       const { data, error } = await supabase
+        .schema('bse_data')
         .from('market_sentiment')
         .select()
         .order('updated_at', { ascending: false })
@@ -869,6 +868,8 @@ export class ApiService {
       return res;
     } catch (e) {
       this.logErrorResilient(e, 'getMarketSentiment');
+      const cached = this.readCache('market_sentiment', TTL_LONG_MS);
+      if (cached !== null && cached !== undefined) return cached;
       return {};
     }
   }

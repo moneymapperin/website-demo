@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, Briefcase } from 'lucide-react';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 import { authService } from '../services/authService';
 import { QrLoginPanel } from '../components/QrLoginPanel';
+
+const LOGIN_COOLDOWN_SECONDS = 30;
+const LOGIN_COOLDOWN_KEY = 'mm_login_cooldown_until';
 
 export const LoginPage: React.FC = () => {
   const location = useLocation();
@@ -14,12 +17,47 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    try {
+      const until = Number(localStorage.getItem(LOGIN_COOLDOWN_KEY));
+      if (until > Date.now()) {
+        setCooldown(Math.ceil((until - Date.now()) / 1000));
+      }
+    } catch {
+      return;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const interval = window.setInterval(() => {
+      try {
+        const until = Number(localStorage.getItem(LOGIN_COOLDOWN_KEY));
+        const remaining = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+        setCooldown(remaining);
+        if (remaining === 0) {
+          localStorage.removeItem(LOGIN_COOLDOWN_KEY);
+          setErrorMessage((message) =>
+            message === 'Incorrect email or password' ? null : message,
+          );
+        }
+      } catch {
+        setCooldown(0);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [cooldown]);
 
   // Status message passed via location state (e.g. post password reset)
   const statusMessage = (location.state as any)?.message as string | undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown > 0) return;
     setErrorMessage(null);
 
     const trimmedEmail = email.trim();
@@ -31,9 +69,21 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await authService.signIn(trimmedEmail, password);
+      try {
+        localStorage.removeItem(LOGIN_COOLDOWN_KEY);
+      } catch {}
       const destination = (location.state as any)?.from?.pathname || '/dashboard';
       navigate(destination, { replace: true });
     } catch (err: any) {
+      if (typeof err.message === 'string' && err.message.startsWith('Incorrect email or password')) {
+        try {
+          localStorage.setItem(
+            LOGIN_COOLDOWN_KEY,
+            String(Date.now() + LOGIN_COOLDOWN_SECONDS * 1000),
+          );
+        } catch {}
+        setCooldown(LOGIN_COOLDOWN_SECONDS);
+      }
       setErrorMessage(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -139,11 +189,13 @@ export const LoginPage: React.FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || cooldown > 0}
               className="w-full mt-2 py-3.5 px-4 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-[16px] transition-all duration-200 shadow-lg shadow-[#4F46E5]/25 disabled:opacity-60 flex items-center justify-center text-sm"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : cooldown > 0 ? (
+                `Try again in ${cooldown}s`
               ) : (
                 'Login'
               )}

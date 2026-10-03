@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'resilience_utils.dart';
 
@@ -10,45 +11,42 @@ class AuthService {
   static const _profileCacheKey = 'master_profile_data';
 
   final SupabaseClient _supabase = Supabase.instance.client;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
 
   Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token);
+    await _secureStorage.write(key: _tokenKey, value: token);
   }
 
   Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tokenKey);
+    return await _secureStorage.read(key: _tokenKey);
   }
 
   Future<void> saveUser(Map<String, dynamic> user) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_nameKey, user['name']?.toString() ?? '');
-    await prefs.setString(_emailKey, user['email']?.toString() ?? '');
-    final currentPlan = prefs.getString(_planKey);
+    await _secureStorage.write(key: _nameKey, value: user['name']?.toString() ?? '');
+    await _secureStorage.write(key: _emailKey, value: user['email']?.toString() ?? '');
+    final currentPlan = await _secureStorage.read(key: _planKey);
     if (currentPlan == null || currentPlan.isEmpty) {
-      await prefs.setString(_planKey, user['plan']?.toString() ?? 'b2c');
+      await _secureStorage.write(key: _planKey, value: user['plan']?.toString() ?? 'b2c');
     }
   }
 
   Future<void> savePlan(String plan) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_planKey, plan);
+    await _secureStorage.write(key: _planKey, value: plan);
   }
 
   Future<String?> getUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_nameKey);
+    return await _secureStorage.read(key: _nameKey);
   }
 
   Future<String?> getUserEmail() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_emailKey);
+    return await _secureStorage.read(key: _emailKey);
   }
 
   Future<String?> getUserPlan() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_planKey);
+    return await _secureStorage.read(key: _planKey);
   }
 
   Future<void> logout() async {
@@ -57,8 +55,9 @@ class AuthService {
     } catch (e) {
       // Local cleanup even if network sign-out fails
     }
+    await _secureStorage.deleteAll();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs.clear(); // Clear non-sensitive caches too
   }
 
   Future<bool> isLoggedIn() async {
@@ -125,6 +124,17 @@ class AuthService {
     }
   }
 
+  Future<void> signInWithGoogle() async {
+    try {
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'moneymapper://login-callback/',
+      );
+    } catch (e) {
+      throw ResilienceUtils.sanitizeErrorMessage(e);
+    }
+  }
+
   Future<void> resetPassword(String email) async {
     try {
       await _supabase.auth.resetPasswordForEmail(email, redirectTo: 'moneymapper://reset-callback');
@@ -146,8 +156,7 @@ class AuthService {
   Future<void> syncMetadata() async {
     final user = _supabase.auth.currentUser;
     if (user != null) {
-      final prefs = await SharedPreferences.getInstance();
-      final existingPlan = prefs.getString(_planKey);
+      final existingPlan = await _secureStorage.read(key: _planKey);
 
       final metadata = user.userMetadata ?? {};
       await saveUser({

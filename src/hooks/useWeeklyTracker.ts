@@ -247,6 +247,7 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
     ) => {
       if (weeks.length === 0 || currentViewWeekIndex >= weeks.length) return;
       const cur = weeks[currentViewWeekIndex];
+      if (!cur.is_current || cur.is_submitted) return;
 
       let newFixedDec = fixedDecision;
       let newFlexDec = flexibleDecision;
@@ -323,6 +324,7 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
     }
 
     const cur = weeks[currentViewWeekIndex];
+  if (!cur.is_current) return { success: false, error: 'Only the current week can be submitted.' };
     const overallStatus =
       fixedDecision === 'achieved' &&
       flexibleDecision === 'achieved' &&
