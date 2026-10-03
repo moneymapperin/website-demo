@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Heart, Home, Car, Plus, ChevronRight, Sparkles, AlertCircle, TrendingUp, Edit3, ArrowRight } from 'lucide-react';
+import { Shield, Heart, Home, Car, Plus, ChevronRight, Sparkles, AlertCircle, TrendingUp, ArrowRight } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 import {
   calculateInsurancePillar,

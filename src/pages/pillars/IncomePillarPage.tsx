@@ -15,8 +15,6 @@ import {
   PieChart,
   Edit3,
   ArrowRight,
-  ShieldAlert,
-  Zap,
   CheckCircle2,
   AlertTriangle,
   Layers,

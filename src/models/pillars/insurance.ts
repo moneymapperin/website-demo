@@ -7,9 +7,16 @@ export interface InsurancePillarData {
   annualIncome: number;
   termCover: number;
   lifeCover: number;
+  lifeTermCover: number;
   healthCover: number;
+  vehicleCover: number;
+  assetCover: number;
+  shortfall: number;
   lifeTarget: number;
   totalLifeCover: number;
+  healthRatioPct: number;
+  lifeTermRatioPct: number;
+  vehicleRatioPct: number;
   termGap: number;
   healthTarget: number;
   healthGap: number;
@@ -55,19 +62,33 @@ export function calculateInsurancePillar(
   // Life & Term Gap: 15x Annual Income - Total Life/Term
   const lifeTarget = annualIncome * 15;
   const totalLifeCover = termCover + lifeCover;
+  const lifeTermCover = totalLifeCover;
   const termGap = Math.max(0, lifeTarget - totalLifeCover);
 
   // Health Gap: 10x Annual Income - Health Cover
   const healthTarget = annualIncome * 10;
   const healthGap = Math.max(0, healthTarget - healthCover);
+  const shortfall = termGap + healthGap;
+  const healthRatioPct = healthTarget > 0 ? (healthCover / healthTarget) * 100 : 0;
+  const lifeTermRatioPct = lifeTarget > 0 ? (totalLifeCover / lifeTarget) * 100 : 0;
+  const vehicleCover = 0;
+  const assetCover = 0;
+  const vehicleRatioPct = 0;
 
   return {
     annualIncome,
     termCover,
     lifeCover,
+    lifeTermCover,
     healthCover,
+    vehicleCover,
+    assetCover,
+    shortfall,
     lifeTarget,
     totalLifeCover,
+    healthRatioPct,
+    lifeTermRatioPct,
+    vehicleRatioPct,
     termGap,
     healthTarget,
     healthGap,

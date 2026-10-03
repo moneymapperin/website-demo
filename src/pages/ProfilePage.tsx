@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme, ThemeMode } from '../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
 import { usePlan } from '../hooks/usePlan';
 import { authService } from '../services/authService';
@@ -9,10 +9,8 @@ import { gamificationStore } from '../services/gamificationStore';
 import { ALL_BADGES, checkAndUnlockBadges } from '../services/badgeService';
 import { APP_COLORS } from '../theme/tokens';
 import mascotImg from '../assets/app/mascot.png';
-import crownImg from '../assets/app/quarterly_plan.png';
 import {
   Flame,
-  Award,
   Trophy,
   User,
   Mail,
@@ -25,15 +23,11 @@ import {
   ChevronDown,
   Info,
   LogOut,
-  Moon,
-  Sun,
-  Laptop,
   Headphones,
   HelpCircle,
   MessageSquare,
   Star,
   ExternalLink,
-  Lock,
   UserPlus,
 } from 'lucide-react';
 

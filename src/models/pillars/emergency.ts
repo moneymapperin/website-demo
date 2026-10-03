@@ -8,6 +8,7 @@ export interface EmergencyFundPillarData {
   readinessScore: number;
   efTarget: number;
   efCurrent: number;
+  monthsCoverage: number;
   shortfall: number;
   progressPct: number;
   parkedLocation: string;
@@ -79,6 +80,10 @@ export function calculateEmergencyFundPillar(
     ? profile.emergencyFundCurrent
     : savScores.ef_current_estimated;
   const efCurrent = Number(rawEfCurrent ?? 0);
+  const monthlyExpenses = Number(profile?.monthlyFixedExpenses ?? 0) || 0;
+  const monthsCoverage = monthlyExpenses > 0
+    ? Number((efCurrent / monthlyExpenses).toFixed(1))
+    : 0;
 
   const shortfall = Math.max(0, efTarget - efCurrent);
   const progressPct = efTarget > 0 ? (efCurrent / efTarget) * 100 : 0;
@@ -91,6 +96,7 @@ export function calculateEmergencyFundPillar(
     readinessScore,
     efTarget,
     efCurrent,
+    monthsCoverage,
     shortfall,
     progressPct,
     parkedLocation,

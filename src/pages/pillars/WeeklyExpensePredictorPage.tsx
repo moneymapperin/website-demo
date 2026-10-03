@@ -5,17 +5,14 @@ import { useToast } from '../../context/ToastContext';
 import { getFinMessage } from '../../models/weekly';
 import {
   Calendar,
-  Award,
   Target,
   Percent,
   CheckCircle2,
   XCircle,
-  TrendingUp,
   PieChart,
   Lightbulb,
   BookOpen,
   ArrowRight,
-  Zap,
   ShoppingBag,
   Home,
   PiggyBank,
@@ -63,6 +60,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
   };
 
   const currentWeek = weeks[currentViewWeekIndex];
+  const [targetsHitCountValue, targetCountValue] = targetsHit.split('/');
+  const targetsHitCount = Number.parseInt(targetsHitCountValue, 10) || 0;
+  const targetCount = Number.parseInt(targetCountValue, 10) || 0;
+  const targetHitPct = targetCount > 0 ? (targetsHitCount / targetCount) * 100 : 0;
   const isEditable = !!currentWeek && currentWeek.is_current === true && !currentWeek.is_submitted;
   const prevWeek = currentViewWeekIndex > 0 ? weeks[currentViewWeekIndex - 1] : null;
 
@@ -174,7 +175,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 />
                 <path
                   className="text-indigo-600 dark:text-indigo-500 transition-all duration-1000 ease-out"
-                  strokeDasharray={`${Math.min(100, Math.max(0, (targetsHit / 5) * 100))}, 100`}
+                  strokeDasharray={`${Math.min(100, Math.max(0, targetHitPct))}, 100`}
                   strokeWidth="3.5"
                   strokeLinecap="round"
                   stroke="currentColor"
@@ -183,7 +184,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{targetsHit}/5</span>
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{targetsHitCount}/{targetCount}</span>
                 <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-300 uppercase">Score</span>
               </div>
             </div>
@@ -193,7 +194,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 Let&apos;s build better spending habits!
               </div>
               <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed max-w-sm">
-                Hit at least 5 targets this week to improve your expense discipline.
+                Hit your weekly targets to improve your expense discipline.
               </p>
             </div>
           </div>
@@ -212,7 +213,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               <div className="w-7 h-7 mx-auto mb-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
                 <Target className="w-4 h-4" />
               </div>
-              <div className="text-lg font-black text-slate-900 dark:text-white">5</div>
+              <div className="text-lg font-black text-slate-900 dark:text-white">{targetCount}</div>
               <div className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase">Total Targets</div>
             </div>
 
@@ -220,7 +221,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               <div className="w-7 h-7 mx-auto mb-1.5 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
                 <Percent className="w-4 h-4" />
               </div>
-              <div className="text-lg font-black text-amber-600 dark:text-amber-400">{((targetsHit / 5) * 100).toFixed(0)}%</div>
+              <div className="text-lg font-black text-amber-600 dark:text-amber-400">{targetHitPct.toFixed(0)}%</div>
               <div className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase">Success Rate</div>
             </div>
 

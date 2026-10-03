@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Search, Lock, Shield, X, Heart, Star, ChevronRight, CheckCircle2, Award } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Search, Lock, Shield, X, Heart, Star, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
 import { useToast } from '../context/ToastContext';

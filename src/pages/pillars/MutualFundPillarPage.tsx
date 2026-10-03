@@ -10,7 +10,6 @@ import {
 import {
   PieChart,
   Award,
-  Layers,
   TrendingUp,
   Edit3,
   ArrowRight,
@@ -20,7 +19,6 @@ import {
   Coins,
   BarChart3,
   ChevronRight,
-  Zap,
 } from 'lucide-react';
 
 export const MutualFundPillarPage: React.FC = () => {

@@ -10,7 +10,6 @@ import {
   Lock,
   Menu,
   ChevronRight,
-  Search,
   Bell,
   Paperclip,
   Mic,
@@ -18,11 +17,9 @@ import {
   PieChart,
   Shield,
   Calendar,
-  Sparkles,
   ArrowRight,
   FileText,
   DollarSign,
-  HelpCircle,
 } from 'lucide-react';
 
 /**

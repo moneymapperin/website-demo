@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Info, TrendingUp } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Info } from 'lucide-react';
 import { marketDataService, GoldRateData } from '../services/marketDataService';
 import { ResilienceUtils } from '../services/resilienceUtils';
 import goldBrickImg from '../assets/app/gold_brick.png';

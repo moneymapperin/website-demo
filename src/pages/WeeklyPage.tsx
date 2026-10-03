@@ -13,7 +13,6 @@ import {
   ShoppingCart,
   PiggyBank,
   Send,
-  Sparkles,
   ChevronDown,
 } from 'lucide-react';
 
@@ -30,7 +29,6 @@ export const WeeklyPage: React.FC = () => {
     weeklyIncome,
     disciplineScore,
     targetsHit,
-    heatmapDays,
     streakCount,
     fixedDecision,
     flexibleDecision,

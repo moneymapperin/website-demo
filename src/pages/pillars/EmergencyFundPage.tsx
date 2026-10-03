@@ -9,12 +9,10 @@ import {
   EmergencyFundPillarData,
 } from '../../models/pillars/emergency';
 import {
-  ShieldAlert,
   Award,
   Wallet,
   Target,
   Calendar,
-  CheckCircle2,
   AlertTriangle,
   ArrowRight,
   Edit3,
@@ -22,7 +20,6 @@ import {
   ShieldCheck,
   TrendingUp,
   RefreshCw,
-  Zap,
   ChevronRight,
 } from 'lucide-react';
 

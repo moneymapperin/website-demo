@@ -778,8 +778,6 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
       const fromMock = vi.fn().mockReturnValue(mockQueryChain);
       const schemaSpy = vi.spyOn(supabase, 'schema').mockReturnValue({ from: fromMock } as any);
 
-      const fromSpy = vi.spyOn(supabase, 'from').mockReturnValue(mockQueryChain as any);
-
       // 1. getStockSignals -> bse_data.stock_signals
       await apiService.getStockSignals();
       expect(schemaSpy).toHaveBeenCalledWith('bse_data');
