@@ -1,9 +1,6 @@
-import { useComingSoon } from '../context/ComingSoonContext';
 import { Sparkles, LayoutGrid, TrendingUp, Lock } from 'lucide-react';
 
 export const FeatureCards: React.FC = () => {
-  const { openComingSoon } = useComingSoon();
-
   const features = [
     {
       id: 'ai-assistant',
@@ -44,8 +41,7 @@ export const FeatureCards: React.FC = () => {
       {features.map((feature) => (
         <div
           key={feature.id}
-          onClick={() => openComingSoon(feature.title)}
-          className={`group p-3.5 sm:p-4 rounded-2xl bg-[#151322]/80 backdrop-blur-sm border border-white/[0.08] ${feature.hoverBorder} flex items-center gap-3.5 shadow-lg shadow-black/40 transition-all duration-200 hover:translate-x-1.5 active:scale-[0.98] cursor-pointer`}
+          className={`group p-3.5 sm:p-4 rounded-2xl bg-[#151322]/80 backdrop-blur-sm border border-white/[0.08] ${feature.hoverBorder} flex items-center gap-3.5 shadow-lg shadow-black/40 transition-all duration-200 hover:translate-x-1.5`}
         >
           {/* Icon in colored rounded-square */}
           <div

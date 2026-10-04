@@ -1,10 +1,7 @@
-import { useComingSoon } from '../context/ComingSoonContext';
 import { DashboardPreview } from './DashboardPreview';
 import { TrendingUp, LayoutGrid, Shield, Wallet, Target } from 'lucide-react';
 
 export const PillarsSection: React.FC = () => {
-  const { openComingSoon } = useComingSoon();
-
   const pillarCards = [
     {
       id: 'stocks',
@@ -59,7 +56,7 @@ export const PillarsSection: React.FC = () => {
   ];
 
   return (
-    <section className="relative py-16 lg:py-24 overflow-hidden">
+    <section id="features" className="scroll-mt-24 relative py-16 lg:py-24 overflow-hidden">
       {/* Background Subtle Radial Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-brand-purple/10 blur-[140px] pointer-events-none -z-10" />
 
@@ -83,8 +80,7 @@ export const PillarsSection: React.FC = () => {
           {pillarCards.map((card) => (
             <div
               key={card.id}
-              onClick={() => openComingSoon(card.title)}
-              className={`rounded-2xl p-5 text-center flex flex-col items-center justify-start bg-[#141124]/90 backdrop-blur-sm border transition-all duration-200 hover:-translate-y-1 active:scale-[0.98] cursor-pointer shadow-lg ${card.borderStyle}`}
+              className={`rounded-2xl p-5 text-center flex flex-col items-center justify-start bg-[#141124]/90 backdrop-blur-sm border transition-all duration-200 hover:-translate-y-1 shadow-lg ${card.borderStyle}`}
             >
               {/* Top Colored Icon Badge */}
               <div

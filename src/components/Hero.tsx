@@ -1,13 +1,10 @@
-import { useComingSoon } from '../context/ComingSoonContext';
-import { navigateTo } from '../lib/navigation';
+import { navigateTo, scrollToLandingSection } from '../lib/navigation';
 import { PhoneMockup } from './PhoneMockup';
 import { FeatureCards } from './FeatureCards';
 
 export const Hero: React.FC = () => {
-  const { openComingSoon } = useComingSoon();
-
   return (
-    <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
+    <section id="home" className="scroll-mt-24 relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
       {/* Background Radial Glow & Ambient Lighting */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[1000px] h-[650px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/25 via-[#1a1138]/20 to-transparent blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-1/3 right-10 w-[550px] h-[550px] bg-brand-violet/15 rounded-full blur-[130px] pointer-events-none -z-10" />
@@ -44,8 +41,7 @@ export const Hero: React.FC = () => {
             
             {/* Pill Badge */}
             <div
-              onClick={() => openComingSoon('AI Financial Navigation')}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#171329] border border-brand-purple/30 text-xs font-medium text-purple-300 shadow-sm shadow-brand-purple/20 mb-6 cursor-pointer hover:border-brand-purple/50 transition-all backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#171329] border border-brand-purple/30 text-xs font-medium text-purple-300 shadow-sm shadow-brand-purple/20 mb-6 backdrop-blur-sm"
             >
               <span className="text-brand-magenta text-sm leading-none">✦</span>
               <span>AI-Powered Financial Navigation</span>
@@ -75,7 +71,7 @@ export const Hero: React.FC = () => {
               </button>
               <button
                 id="hero-explore-features-btn"
-                onClick={() => openComingSoon('Explore Features')}
+                onClick={() => scrollToLandingSection('features')}
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold text-white bg-[#151322] border border-white/15 hover:border-white/30 hover:bg-[#1c1930] active:scale-[0.98] transition-all text-base focus:outline-none cursor-pointer"
               >
                 Explore Features

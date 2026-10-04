@@ -1,11 +1,8 @@
 import React from 'react';
-import { useComingSoon } from '../context/ComingSoonContext';
-import { navigateTo } from '../lib/navigation';
+import { navigateTo, scrollToLandingSection } from '../lib/navigation';
 import { PhoneMockup } from './PhoneMockup';
 
 export const CTASection: React.FC = () => {
-  const { openComingSoon } = useComingSoon();
-
   return (
     <section className="relative pt-16 sm:pt-20 lg:pt-24 pb-12 lg:pb-0 overflow-hidden bg-gradient-to-b from-[#090714] via-[#0d0a1c] to-[#070511]">
       {/* Background Ambient Glow & Wavy Accent Lines */}
@@ -78,7 +75,7 @@ export const CTASection: React.FC = () => {
 
               {/* Secondary Outline Button */}
               <button
-                onClick={() => openComingSoon('Explore Features')}
+                onClick={() => scrollToLandingSection('features')}
                 className="px-7 py-3.5 rounded-2xl bg-[#141026] hover:bg-[#1a1532] border border-white/15 hover:border-white/30 text-white font-semibold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 Explore Features

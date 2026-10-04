@@ -5,6 +5,7 @@ import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
 import { useToast } from '../context/ToastContext';
 import { SentimentGauge, calculateSentimentValue } from '../components/market/SentimentGauge';
+import { LockedCardPlaceholder, LockedRowPlaceholder, ProLockOverlay, ProSearchLock, ProUpsellBlock } from '../components/market/ProAccessComponents';
 import { ScoreCardAdvisor } from '../services/marketAdvisor';
 import { ResilienceUtils } from '../services/resilienceUtils';
 
@@ -80,21 +81,25 @@ export const StockScreenerPage: React.FC = () => {
     try {
       const [signals, sentiment] = await Promise.all([
         apiService.getStockSignals(),
-        apiService.getMarketSentiment(),
+        isPro ? apiService.getMarketSentiment() : Promise.resolve(null),
       ]);
 
       setAllSignals(signals || []);
-      if (sentiment && Object.keys(sentiment).length > 0) {
+      if (isPro && sentiment && Object.keys(sentiment).length > 0) {
         setSentimentData(sentiment);
         setSentimentValue(calculateSentimentValue(sentiment.needle_angle));
         setSentimentDirection(sentiment.master_direction || 'NEUTRAL');
+      } else if (!isPro) {
+        setSentimentData(null);
+        setSentimentValue(50);
+        setSentimentDirection('NEUTRAL');
       }
     } catch (e) {
       console.error('Failed to fetch stock screener data:', e);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isPro]);
 
   useEffect(() => {
     fetchData();
@@ -107,6 +112,7 @@ export const StockScreenerPage: React.FC = () => {
   });
 
   const displayList = filteredSignals.slice(0, visibleCount);
+  const visibleSignals = isPro ? displayList : displayList.slice(0, 1);
 
   // Sentiment Label
   let sentimentSubLabel = 'STABLE MARKET';
@@ -187,32 +193,27 @@ export const StockScreenerPage: React.FC = () => {
 
             {/* Search Bar (gated for Pro users) */}
             <div className="relative pt-2">
-              <div className={`relative ${!isPro ? 'filter blur-xs select-none' : ''}`}>
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                  <Search className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  data-testid="stock-search-input"
-                  disabled={!isPro}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={isPro ? 'Search ticker (e.g. RELIANCE)...' : 'Search locked for Free users'}
-                  className="w-full pl-9 pr-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
-                />
-              </div>
-
-              {!isPro && (
-                <div
-                  data-testid="stock-search-locked"
-                  onClick={() => navigate('/subscription')}
-                  className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-black tracking-wider uppercase shadow-sm">
-                    <Lock className="w-3 h-3" />
-                    <span>UPGRADE TO PRO</span>
+              {isPro ? (
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Search className="w-4 h-4" />
                   </div>
+                  <input
+                    type="text"
+                    data-testid="stock-search-input"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search ticker (e.g. RELIANCE)..."
+                    className="w-full pl-9 pr-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                  />
                 </div>
+              ) : (
+                <ProSearchLock
+                  inputTestId="stock-search-input"
+                  lockTestId="stock-search-locked"
+                  placeholder="Search NIFTY 500 stocks..."
+                  ariaLabel="NIFTY 500 stocks"
+                />
               )}
             </div>
           </div>
@@ -220,25 +221,41 @@ export const StockScreenerPage: React.FC = () => {
           {/* Market Sentiment Gauge Card */}
           <section
             data-testid="sentiment-card"
-            className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col items-center text-center"
+            onClick={!isPro ? () => navigate('/subscription') : undefined}
+            className={`relative lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col items-center text-center ${!isPro ? 'cursor-pointer' : ''}`}
           >
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
               MARKET SENTIMENT
             </span>
 
-            <SentimentGauge value={sentimentValue} size={200} />
-
-            <span
-              data-testid="sentiment-direction-label"
-              className={`text-xs md:text-sm font-black tracking-wider mt-2 ${sentimentColor}`}
-            >
-              {sentimentSubLabel}
-            </span>
-
-            {sentimentData?.updated_at && (
-              <span className="text-[10px] font-bold text-slate-400 mt-1">
-                Updated: {new Date(sentimentData.updated_at).toLocaleDateString()}
-              </span>
+            {isPro ? (
+              <>
+                <SentimentGauge value={sentimentValue} size={200} />
+                <span
+                  data-testid="sentiment-direction-label"
+                  className={`text-xs md:text-sm font-black tracking-wider mt-2 ${sentimentColor}`}
+                >
+                  {sentimentSubLabel}
+                </span>
+                {sentimentData?.updated_at && (
+                  <span className="text-[10px] font-bold text-slate-400 mt-1">
+                    Updated: {new Date(sentimentData.updated_at).toLocaleDateString()}
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <div aria-hidden="true" className="pointer-events-none blur-md opacity-70">
+                  <SentimentGauge value={50} size={200} />
+                </div>
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/20 p-3 dark:bg-slate-950/25">
+                  <ProLockOverlay
+                    testId="sentiment-lock-overlay"
+                    size="card"
+                    description="Unlock live market mood"
+                  />
+                </div>
+              </>
             )}
           </section>
         </div>
@@ -334,9 +351,8 @@ export const StockScreenerPage: React.FC = () => {
                 className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-center gap-3 cursor-pointer"
               >
                 <Lock className="w-4 h-4 shrink-0" />
-                <p className="text-xs font-bold">
-                  Free users see only 1 daily signal. Upgrade to PRO! 🚀
-                </p>
+                <p className="flex-1 text-xs font-bold">Free users see only 1 daily signal.</p>
+                <button type="button" onClick={(event) => { event.stopPropagation(); navigate('/subscription'); }} className="rounded-lg bg-brand-gradient px-3 py-2 text-[10px] font-black text-white shadow-sm">Upgrade</button>
               </div>
             )}
 
@@ -357,13 +373,12 @@ export const StockScreenerPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
-                    {displayList.map((s, idx) => {
+                    {visibleSignals.map((s, idx) => {
                       const score = Math.round(ResilienceUtils.safeDouble(s.score));
                       let direction = (s.direction || 'WAIT').toString();
                       if (direction === 'HOLD' || score === 0) direction = 'WAIT';
                       const isBuy = direction === 'BUY';
                       const isWait = direction === 'WAIT';
-                      const isLocked = !isPro && idx > 0;
                       const upside = calculateUpsidePct(s.entry_range, s.target_range);
 
                       return (
@@ -371,15 +386,10 @@ export const StockScreenerPage: React.FC = () => {
                           key={s.id || idx}
                           data-testid={`stock-card-${idx}`}
                           onClick={() => handleStockClick(s, idx)}
-                          className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors ${
-                            isLocked ? 'opacity-50 select-none' : ''
-                          }`}
+                          className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
                         >
                           <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">
-                            <div className="flex items-center gap-2">
-                              <span>{s.symbol || 'Unknown'}</span>
-                              {isLocked && <Lock className="w-3 h-3 text-amber-500" data-testid={`stock-lock-overlay-${idx}`} />}
-                            </div>
+                            <span>{s.symbol || 'Unknown'}</span>
                           </td>
                           <td className="py-3.5 px-4 font-black">
                             <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black">
@@ -424,20 +434,27 @@ export const StockScreenerPage: React.FC = () => {
                         </tr>
                       );
                     })}
+                    {!isPro && Array.from({ length: 5 }, (_, index) => (
+                      <LockedRowPlaceholder
+                        key={`locked-stock-${index}`}
+                        kind="stock"
+                        index={index + 1}
+                        onClick={() => handleStockClick(null, index + 1)}
+                      />
+                    ))}
                   </tbody>
                 </table>
               </div>
             ) : (
               /* Desktop Grid View */
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {displayList.map((s, idx) => {
+                {visibleSignals.map((s, idx) => {
                   const score = Math.round(ResilienceUtils.safeDouble(s.score));
                   let direction = (s.direction || 'WAIT').toString();
                   if (direction === 'HOLD' || score === 0) direction = 'WAIT';
 
                   const isBuy = direction === 'BUY';
                   const isWait = direction === 'WAIT';
-                  const isLocked = !isPro && idx > 0;
                   const upside = calculateUpsidePct(s.entry_range, s.target_range);
 
                   return (
@@ -447,7 +464,7 @@ export const StockScreenerPage: React.FC = () => {
                       onClick={() => handleStockClick(s, idx)}
                       className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm cursor-pointer hover:border-indigo-400 transition-all"
                     >
-                      <div className={`space-y-4 ${isLocked ? 'filter blur-[5px] select-none pointer-events-none' : ''}`}>
+                      <div className="space-y-4">
                         <div className="flex items-start justify-between gap-4">
                           <div>
                             <div className="flex items-center gap-2">
@@ -496,27 +513,24 @@ export const StockScreenerPage: React.FC = () => {
                         )}
                       </div>
 
-                      {isLocked && (
-                        <div
-                          data-testid={`stock-lock-overlay-${idx}`}
-                          className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center rounded-2xl"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg">
-                            <Lock className="w-5 h-5" />
-                          </div>
-                          <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mt-1.5">
-                            PRO
-                          </span>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
+                {!isPro && Array.from({ length: 5 }, (_, index) => (
+                  <LockedCardPlaceholder
+                    key={`locked-stock-card-${index}`}
+                    kind="stock"
+                    index={index + 1}
+                    onClick={() => handleStockClick(null, index + 1)}
+                  />
+                ))}
               </div>
             )}
 
+            {!isPro && <ProUpsellBlock count={filteredSignals.length} itemLabel="signals" />}
+
             {/* Incremental Load More */}
-            {visibleCount < filteredSignals.length && (
+            {isPro && visibleCount < filteredSignals.length && (
               <div className="pt-2 text-center">
                 <button
                   type="button"

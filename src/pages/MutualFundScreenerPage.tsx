@@ -4,6 +4,7 @@ import { ArrowLeft, RefreshCw, Search, Lock, X, PieChart } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
 import { useToast } from '../context/ToastContext';
+import { LockedCardPlaceholder, LockedRowPlaceholder, ProSearchLock, ProUpsellBlock } from '../components/market/ProAccessComponents';
 import { ScoreCardAdvisor } from '../services/marketAdvisor';
 import { ResilienceUtils } from '../services/resilienceUtils';
 
@@ -29,10 +30,12 @@ export const MutualFundScreenerPage: React.FC = () => {
     setLoading(true);
     try {
       const funds = await apiService.getMutualFundSignals();
-      setAllFunds(funds || []);
+      const availableFunds = funds || [];
+      setAllFunds(availableFunds);
+      const filterFunds = isPro ? availableFunds : availableFunds.slice(0, 1);
 
       const uniqueCats = Array.from(
-        new Set((funds || []).map((f: any) => f.category?.toString() || 'Uncategorised'))
+        new Set(filterFunds.map((f: any) => f.category?.toString() || 'Uncategorised'))
       ).sort() as string[];
       setCategories(['All', ...uniqueCats]);
     } catch (e) {
@@ -40,7 +43,7 @@ export const MutualFundScreenerPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isPro]);
 
   useEffect(() => {
     fetchData();
@@ -59,6 +62,7 @@ export const MutualFundScreenerPage: React.FC = () => {
   });
 
   const displayList = filteredFunds.slice(0, visibleCount);
+  const visibleFunds = isPro ? displayList : displayList.slice(0, 1);
 
   const handleFundClick = (fund: any, index: number) => {
     const isLocked = !isPro && index > 0;
@@ -145,32 +149,27 @@ export const MutualFundScreenerPage: React.FC = () => {
         {/* Search and Filters Bar */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
           <div className="relative">
-            <div className={`relative ${!isPro ? 'filter blur-xs select-none' : ''}`}>
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                <Search className="w-4 h-4" />
-              </div>
-              <input
-                type="text"
-                data-testid="mf-search-input"
-                disabled={!isPro}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={isPro ? 'Search fund or AMC...' : 'Search locked for Free users'}
-                className="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            {!isPro && (
-              <div
-                data-testid="mf-search-locked"
-                onClick={() => navigate('/subscription')}
-                className="absolute inset-0 flex items-center justify-center cursor-pointer"
-              >
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-black tracking-wider uppercase shadow-sm">
-                  <Lock className="w-3 h-3" />
-                  <span>PRO SEARCH</span>
+            {isPro ? (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Search className="w-4 h-4" />
                 </div>
+                <input
+                  type="text"
+                  data-testid="mf-search-input"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search fund or AMC..."
+                  className="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
               </div>
+            ) : (
+              <ProSearchLock
+                inputTestId="mf-search-input"
+                lockTestId="mf-search-locked"
+                placeholder="Search fund or AMC..."
+                ariaLabel="Funds"
+              />
             )}
           </div>
 
@@ -178,35 +177,41 @@ export const MutualFundScreenerPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:w-auto flex-1">
               <div>
                 <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">CLUSTER</label>
-                <select
-                  data-testid="mf-cluster-select"
-                  disabled={!isPro}
-                  value={selectedCluster}
-                  onChange={(e) => setSelectedCluster(e.target.value)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none"
-                >
-                  <option value="All">All Clusters</option>
-                  <option value="Conservative">Conservative</option>
-                  <option value="Moderate">Moderate</option>
-                  <option value="Aggressive">Aggressive</option>
-                </select>
+                <div className="relative">
+                  <select
+                    data-testid="mf-cluster-select"
+                    disabled={!isPro}
+                    value={selectedCluster}
+                    onChange={(e) => setSelectedCluster(e.target.value)}
+                    className={`w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none ${!isPro ? 'pointer-events-none pr-9 opacity-60' : ''}`}
+                  >
+                    <option value="All">All Clusters</option>
+                    <option value="Conservative">Conservative</option>
+                    <option value="Moderate">Moderate</option>
+                    <option value="Aggressive">Aggressive</option>
+                  </select>
+                  {!isPro && <button type="button" title="PRO feature" aria-label="PRO feature: Cluster filter" onClick={() => navigate('/subscription')} className="absolute inset-0 flex items-center justify-end px-3 text-amber-600 dark:text-amber-400"><Lock className="h-3.5 w-3.5" /></button>}
+                </div>
               </div>
 
               <div>
                 <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">CATEGORY</label>
-                <select
-                  data-testid="mf-category-select"
-                  disabled={!isPro}
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none"
-                >
-                  {categories.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    data-testid="mf-category-select"
+                    disabled={!isPro}
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className={`w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none ${!isPro ? 'pointer-events-none pr-9 opacity-60' : ''}`}
+                  >
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  {!isPro && <button type="button" title="PRO feature" aria-label="PRO feature: Category filter" onClick={() => navigate('/subscription')} className="absolute inset-0 flex items-center justify-end px-3 text-amber-600 dark:text-amber-400"><Lock className="h-3.5 w-3.5" /></button>}
+                </div>
               </div>
             </div>
 
@@ -257,9 +262,8 @@ export const MutualFundScreenerPage: React.FC = () => {
                 className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-center gap-3 cursor-pointer"
               >
                 <Lock className="w-4 h-4 shrink-0" />
-                <p className="text-xs font-bold">
-                  Free users see only 1 daily pick. Upgrade to PRO to see all Mutual Fund Score Card signals! 🚀
-                </p>
+                <p className="flex-1 text-xs font-bold">Free users see only 1 daily pick.</p>
+                <button type="button" onClick={(event) => { event.stopPropagation(); navigate('/subscription'); }} className="rounded-lg bg-brand-gradient px-3 py-2 text-[10px] font-black text-white shadow-sm">Upgrade</button>
               </div>
             )}
 
@@ -279,8 +283,7 @@ export const MutualFundScreenerPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
-                    {displayList.map((f, idx) => {
-                      const isLocked = !isPro && idx > 0;
+                    {visibleFunds.map((f, idx) => {
                       const cluster = f.cluster || 'Moderate';
                       const finalScore = Math.round(ResilienceUtils.safeDouble(f.final_score));
                       const riskScore = Math.round(ResilienceUtils.safeDouble(f.risk_score));
@@ -292,9 +295,7 @@ export const MutualFundScreenerPage: React.FC = () => {
                           key={f.id || idx}
                           data-testid={`mf-card-${idx}`}
                           onClick={() => handleFundClick(f, idx)}
-                          className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors ${
-                            isLocked ? 'opacity-50 select-none' : ''
-                          }`}
+                          className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
                         >
                           <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">
                             <div className="flex items-center gap-2">
@@ -309,7 +310,6 @@ export const MutualFundScreenerPage: React.FC = () => {
                                   {f.category || ''} • {f.fund_house || ''}
                                 </div>
                               </div>
-                              {isLocked && <Lock className="w-3 h-3 text-amber-500" data-testid={`mf-lock-overlay-${idx}`} />}
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
@@ -336,13 +336,20 @@ export const MutualFundScreenerPage: React.FC = () => {
                         </tr>
                       );
                     })}
+                    {!isPro && Array.from({ length: 5 }, (_, index) => (
+                      <LockedRowPlaceholder
+                        key={`locked-fund-${index}`}
+                        kind="fund"
+                        index={index + 1}
+                        onClick={() => handleFundClick(null, index + 1)}
+                      />
+                    ))}
                   </tbody>
                 </table>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {displayList.map((f, idx) => {
-                  const isLocked = !isPro && idx > 0;
+                {visibleFunds.map((f, idx) => {
                   const confidence = f.confidence_level || 'Medium';
                   const cluster = f.cluster || 'Moderate';
                   const finalScore = Math.round(ResilienceUtils.safeDouble(f.final_score));
@@ -357,7 +364,7 @@ export const MutualFundScreenerPage: React.FC = () => {
                       onClick={() => handleFundClick(f, idx)}
                       className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm cursor-pointer hover:border-indigo-400 transition-all"
                     >
-                      <div className={`space-y-4 ${isLocked ? 'filter blur-[5px] select-none pointer-events-none' : ''}`}>
+                      <div className="space-y-4">
                         <div className="flex items-start justify-between gap-4">
                           <div>
                             <div className="flex items-center gap-2">
@@ -407,26 +414,23 @@ export const MutualFundScreenerPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {isLocked && (
-                        <div
-                          data-testid={`mf-lock-overlay-${idx}`}
-                          className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center rounded-2xl"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg">
-                            <Lock className="w-5 h-5" />
-                          </div>
-                          <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mt-1.5">
-                            PRO UNLOCK
-                          </span>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
+                {!isPro && Array.from({ length: 5 }, (_, index) => (
+                  <LockedCardPlaceholder
+                    key={`locked-fund-card-${index}`}
+                    kind="fund"
+                    index={index + 1}
+                    onClick={() => handleFundClick(null, index + 1)}
+                  />
+                ))}
               </div>
             )}
 
-            {visibleCount < filteredFunds.length && (
+            {!isPro && <ProUpsellBlock count={filteredFunds.length} itemLabel="fund scores" />}
+
+            {isPro && visibleCount < filteredFunds.length && (
               <div className="pt-2 text-center">
                 <button
                   type="button"

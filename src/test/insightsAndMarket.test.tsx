@@ -555,8 +555,8 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
       expect(calculateUpsidePct('', '')).toBe('');
     });
 
-    it('renders signals list, filters by search, and displays verbatim stock disclaimer', async () => {
-      vi.spyOn(apiService, 'getMarketSentiment').mockResolvedValue({
+    it('renders the first free signal and locks market sentiment', async () => {
+      const sentimentSpy = vi.spyOn(apiService, 'getMarketSentiment').mockResolvedValue({
         needle_angle: 0,
         master_direction: 'BUY',
         updated_at: '2026-09-19T08:00:00Z',
@@ -573,13 +573,83 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
         expect(screen.getByTestId('stock-card-0')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('BULLISH / GREED')).toBeInTheDocument();
+      expect(screen.getByTestId('sentiment-lock-overlay')).toBeInTheDocument();
+      expect(screen.queryByTestId('sentiment-direction-label')).not.toBeInTheDocument();
+      expect(screen.queryByText(/Updated:/)).not.toBeInTheDocument();
+      expect(screen.queryByText('BULLISH / GREED')).not.toBeInTheDocument();
+      expect(sentimentSpy).not.toHaveBeenCalled();
       expect(screen.getByText('RELIANCE')).toBeInTheDocument();
 
       // Verbatim stock screener disclaimer
       expect(screen.getByTestId('stock-disclaimer')).toHaveTextContent(
         'Scores above 70 indicate high-confidence signals. Always follow the Stop Loss range for risk management.'
       );
+    });
+
+    it('free stock views render one real row and data-free locked placeholders', async () => {
+      const privateSignals = [
+        { symbol: 'VISIBLE_STOCK', score: 88, direction: 'BUY', entry_range: '100' },
+        ...Array.from({ length: 6 }, (_, index) => ({
+          symbol: `HIDDEN_STOCK_${index}`,
+          score: 9000 + index,
+          direction: `HIDDEN_SIGNAL_${index}`,
+          entry_range: `SECRET_ENTRY_${index}`,
+          target_range: `SECRET_TARGET_${index}`,
+          sl_range: `SECRET_STOP_${index}`,
+        })),
+      ];
+      const sentimentSpy = vi.spyOn(apiService, 'getMarketSentiment').mockResolvedValue({
+        needle_angle: 80,
+        master_direction: 'SELL',
+        updated_at: '2026-10-01T08:00:00Z',
+      });
+      vi.spyOn(apiService, 'getStockSignals').mockResolvedValue(privateSignals);
+
+      renderWithContext(<StockScreenerPage />);
+      await waitFor(() => expect(screen.getByTestId('stock-card-0')).toBeInTheDocument());
+
+      expect(screen.getByText('VISIBLE_STOCK')).toBeInTheDocument();
+      expect(screen.getByTestId('stock-lock-overlay-1')).toBeInTheDocument();
+      for (let index = 1; index <= 5; index += 1) {
+        expect(screen.getByTestId(`stock-card-${index}`)).toBeInTheDocument();
+      }
+      expect(screen.queryByTestId('load-more-stocks')).not.toBeInTheDocument();
+      expect(screen.queryByText(/HIDDEN_STOCK_|HIDDEN_SIGNAL_|SECRET_ENTRY_|SECRET_TARGET_|SECRET_STOP_/)).not.toBeInTheDocument();
+      expect(screen.queryByText('9000')).not.toBeInTheDocument();
+      expect(screen.getByTestId('stock-search-input')).toBeDisabled();
+      expect(screen.getByTestId('stock-search-locked')).toBeInTheDocument();
+      expect(sentimentSpy).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Grid View' }));
+      expect(screen.getByTestId('stock-card-1')).toBeInTheDocument();
+      expect(screen.getByTestId('stock-lock-overlay-1')).toBeInTheDocument();
+      expect(screen.queryByText(/HIDDEN_STOCK_|HIDDEN_SIGNAL_|SECRET_ENTRY_/)).not.toBeInTheDocument();
+    });
+
+    it('Pro stock users see the real sentiment and all displayed signal details', async () => {
+      (window as any).__MOCK_PLAN__ = {
+        isPro: true,
+        isFeatureAccessible: true,
+        trialDaysRemaining: 365,
+        plan: 'pro',
+      };
+      vi.spyOn(apiService, 'getMarketSentiment').mockResolvedValue({
+        needle_angle: 80,
+        master_direction: 'SELL',
+        updated_at: '2026-10-01T08:00:00Z',
+      });
+      vi.spyOn(apiService, 'getStockSignals').mockResolvedValue([
+        { symbol: 'VISIBLE_STOCK', score: 88, direction: 'BUY' },
+        { symbol: 'SECOND_PRO_STOCK', score: 77, direction: 'SELL' },
+      ]);
+
+      renderWithContext(<StockScreenerPage />);
+      await waitFor(() => expect(screen.getByText('SECOND_PRO_STOCK')).toBeInTheDocument());
+
+      expect(screen.getByText('BEARISH / FEAR')).toBeInTheDocument();
+      expect(screen.getByTestId('sentiment-direction-label')).toBeInTheDocument();
+      expect(screen.getByText(/Updated:/)).toBeInTheDocument();
+      expect(screen.getByTestId('stock-search-input')).toBeEnabled();
     });
   });
 
@@ -597,6 +667,12 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
 
       vi.spyOn(apiService, 'getStockSignals').mockResolvedValue(mock70Stocks);
       vi.spyOn(apiService, 'getMarketSentiment').mockResolvedValue({});
+      (window as any).__MOCK_PLAN__ = {
+        isPro: true,
+        isFeatureAccessible: true,
+        trialDaysRemaining: 365,
+        plan: 'pro',
+      };
 
       renderWithContext(<StockScreenerPage />);
 
@@ -641,11 +717,60 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
         expect(screen.getByTestId('mf-card-0')).toBeInTheDocument();
       });
 
+      expect(screen.getByText('Nippon Small Cap Fund')).toBeInTheDocument();
+      expect(screen.getByText('ICICI Prudential Liquid')).toBeInTheDocument();
+
       // Select Aggressive cluster
       fireEvent.change(screen.getByTestId('mf-cluster-select'), { target: { value: 'Aggressive' } });
 
       expect(screen.getByText('Nippon Small Cap Fund')).toBeInTheDocument();
       expect(screen.queryByText('HDFC Mid-Cap Opportunities')).not.toBeInTheDocument();
+    });
+
+    it('free mutual-fund views render one real fund and hide locked fund data', async () => {
+      const privateFunds = [
+        { id: 'visible', scheme_name: 'Visible Fund', category: 'Visible Category', fund_house: 'Visible AMC', cluster: 'Moderate', final_score: 82, risk_score: 41, growth_score: 76, cagr_3y: 13.4 },
+        ...Array.from({ length: 7 }, (_, index) => ({
+          id: `hidden-${index}`,
+          scheme_name: `HIDDEN_FUND_${index}`,
+          category: `HIDDEN_CATEGORY_${index}`,
+          fund_house: `HIDDEN_AMC_${index}`,
+          cluster: `HIDDEN_CLUSTER_${index}`,
+          final_score: 9100 + index,
+          risk_score: 9200 + index,
+          growth_score: 9300 + index,
+          cagr_3y: 9400 + index,
+        })),
+      ];
+      vi.spyOn(apiService, 'getMutualFundSignals').mockResolvedValue(privateFunds);
+
+      renderWithContext(<MutualFundScreenerPage />);
+      await waitFor(() => expect(screen.getByTestId('mf-card-0')).toBeInTheDocument());
+
+      expect(screen.getByText('Visible Fund')).toBeInTheDocument();
+      expect(screen.getByTestId('mf-lock-overlay-1')).toBeInTheDocument();
+      for (let index = 1; index <= 5; index += 1) {
+        expect(screen.getByTestId(`mf-card-${index}`)).toBeInTheDocument();
+      }
+      expect(screen.queryByTestId('load-more-mf')).not.toBeInTheDocument();
+      expect(screen.queryAllByText(/HIDDEN_FUND_|HIDDEN_CATEGORY_|HIDDEN_AMC_|HIDDEN_CLUSTER_/)).toHaveLength(0);
+      expect(screen.queryByText('9100')).not.toBeInTheDocument();
+      expect(screen.queryByText('Visible Category • Visible AMC')).toBeInTheDocument();
+
+      const clusterSelect = screen.getByTestId('mf-cluster-select');
+      const categorySelect = screen.getByTestId('mf-category-select');
+      expect(clusterSelect).toBeDisabled();
+      expect(categorySelect).toBeDisabled();
+      expect(clusterSelect).toHaveValue('All');
+      expect(categorySelect).toHaveValue('All');
+      expect(screen.getByRole('button', { name: 'PRO feature: Cluster filter' })).toHaveAttribute('title', 'PRO feature');
+      expect(screen.getByRole('button', { name: 'PRO feature: Category filter' })).toHaveAttribute('title', 'PRO feature');
+      expect(screen.getByTestId('mf-search-input')).toBeDisabled();
+      expect(screen.getByTestId('mf-search-locked')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Grid View' }));
+      expect(screen.getByTestId('mf-lock-overlay-1')).toBeInTheDocument();
+      expect(screen.queryAllByText(/HIDDEN_FUND_|HIDDEN_CATEGORY_|HIDDEN_AMC_/)).toHaveLength(0);
     });
 
     it('Insurance screener formats cover with Cr and Lakhs and filters by type', async () => {

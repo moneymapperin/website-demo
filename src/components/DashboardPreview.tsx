@@ -1,4 +1,3 @@
-import { useComingSoon } from '../context/ComingSoonContext';
 import logoImg from '../assets/logo.png';
 import {
   Bell,
@@ -19,8 +18,6 @@ import {
 } from 'lucide-react';
 
 export const DashboardPreview: React.FC = () => {
-  const { openComingSoon } = useComingSoon();
-
   const sidebarItems = [
     { label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" />, active: true },
     { label: 'Insights', icon: <TrendingUp className="w-4 h-4" /> },
@@ -89,10 +86,7 @@ export const DashboardPreview: React.FC = () => {
         <aside className="w-full lg:w-48 xl:w-52 shrink-0 flex flex-row lg:flex-col justify-between lg:justify-start gap-1 pb-3 lg:pb-0 lg:border-r border-white/[0.08] pr-0 lg:pr-4 overflow-x-auto no-scrollbar">
           
           {/* Logo & Brand in Sidebar */}
-          <div
-            onClick={() => openComingSoon('MoneyMapper Pro')}
-            className="flex items-center gap-2 mb-4 px-2 cursor-pointer shrink-0"
-          >
+          <div className="flex items-center gap-2 mb-4 px-2 shrink-0">
             <img
               src={logoImg}
               alt="Logo"
@@ -108,10 +102,9 @@ export const DashboardPreview: React.FC = () => {
           {/* Sidebar Nav Items */}
           <div className="flex flex-row lg:flex-col gap-1 w-full shrink-0">
             {sidebarItems.map((item) => (
-              <button
+              <div
                 key={item.label}
-                onClick={() => openComingSoon(`Dashboard: ${item.label}`)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
                   item.active
                     ? 'bg-purple-900/40 text-brand-purple border border-purple-500/30 font-semibold shadow-sm'
                     : 'text-white/60 hover:text-white hover:bg-white/5'
@@ -119,7 +112,7 @@ export const DashboardPreview: React.FC = () => {
               >
                 {item.icon}
                 <span>{item.label}</span>
-              </button>
+              </div>
             ))}
           </div>
 
@@ -131,30 +124,27 @@ export const DashboardPreview: React.FC = () => {
           {/* Top Bar: Dropdown + Bell + Profile */}
           <div className="flex items-center justify-end gap-3 pb-1 border-b border-white/[0.04]">
             {/* "This Month ▾" Pill Dropdown */}
-            <button
+            <div
               id="dashboard-date-filter-btn"
-              onClick={() => openComingSoon('Date Range: This Month')}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#161327] border border-white/10 hover:border-white/20 text-xs font-medium text-white/80 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#161327] border border-white/10 text-xs font-medium text-white/80"
             >
               <span>This Month</span>
               <ChevronDown className="w-3.5 h-3.5 text-white/50" />
-            </button>
+            </div>
 
             {/* Notification Bell */}
-            <button
+            <div
               id="dashboard-bell-btn"
-              onClick={() => openComingSoon('Notifications Center')}
-              className="relative p-2 rounded-xl bg-[#161327] border border-white/10 hover:border-white/20 text-white/70 hover:text-white transition-all cursor-pointer"
-              aria-label="Notifications"
+              className="relative p-2 rounded-xl bg-[#161327] border border-white/10 text-white/70"
+              aria-hidden="true"
             >
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-[#161327]"></span>
-            </button>
+            </div>
 
             {/* User Profile Avatar */}
             <div
-              onClick={() => openComingSoon('User Profile Settings')}
-              className="w-7 h-7 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-magenta flex items-center justify-center text-xs font-bold text-white shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-7 h-7 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-magenta flex items-center justify-center text-xs font-bold text-white shadow-md"
             >
               S
             </div>
@@ -165,8 +155,7 @@ export const DashboardPreview: React.FC = () => {
             
             {/* Card 1: Financial Fitness Score (Dark card) */}
             <div
-              onClick={() => openComingSoon('Financial Fitness Score')}
-              className="rounded-2xl bg-[#151226] border border-white/[0.08] p-4 flex flex-col justify-between hover:border-brand-purple/40 transition-all cursor-pointer shadow-lg active:scale-[0.99]"
+              className="rounded-2xl bg-[#151226] border border-white/[0.08] p-4 flex flex-col justify-between hover:border-brand-purple/40 transition-all shadow-lg"
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[11px] font-bold text-white/70 flex items-center gap-1.5">
@@ -227,8 +216,7 @@ export const DashboardPreview: React.FC = () => {
 
             {/* Card 2: Net Financial Position (Dark card) */}
             <div
-              onClick={() => openComingSoon('Net Financial Position')}
-              className="rounded-2xl bg-[#151226] border border-white/[0.08] p-4 flex flex-col justify-between hover:border-brand-purple/40 transition-all cursor-pointer shadow-lg active:scale-[0.99]"
+              className="rounded-2xl bg-[#151226] border border-white/[0.08] p-4 flex flex-col justify-between hover:border-brand-purple/40 transition-all shadow-lg"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold text-white/70">
@@ -298,8 +286,7 @@ export const DashboardPreview: React.FC = () => {
 
             {/* Card 3: Live Gold Rate 24K (Warm cream/amber light card matching image 02) */}
             <div
-              onClick={() => openComingSoon('Live Gold Rate 24K')}
-              className="rounded-2xl bg-[#fffbf0] text-slate-900 border border-amber-200/90 p-4 flex items-center justify-between hover:border-amber-400 transition-all cursor-pointer shadow-lg active:scale-[0.99]"
+              className="rounded-2xl bg-[#fffbf0] text-slate-900 border border-amber-200/90 p-4 flex items-center justify-between hover:border-amber-400 transition-all shadow-lg"
             >
               <div>
                 <span className="block text-[11px] font-bold text-amber-900/80 uppercase tracking-wider">
@@ -342,8 +329,7 @@ export const DashboardPreview: React.FC = () => {
 
             {/* Card 4: Estimated Spending Limit (White/light card matching image 02) */}
             <div
-              onClick={() => openComingSoon('Estimated Spending Limit')}
-              className="rounded-2xl bg-white text-slate-900 border border-slate-200 p-4 flex items-center justify-between hover:border-indigo-300 transition-all cursor-pointer shadow-lg active:scale-[0.99]"
+              className="rounded-2xl bg-white text-slate-900 border border-slate-200 p-4 flex items-center justify-between hover:border-indigo-300 transition-all shadow-lg"
             >
               <div>
                 <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -387,7 +373,7 @@ export const DashboardPreview: React.FC = () => {
               <h4 className="text-xs font-bold uppercase tracking-wider text-white/70">
                 MoneyMapper Score Cards
               </h4>
-              <span className="text-[10px] text-brand-purple hover:underline cursor-pointer" onClick={() => openComingSoon('All Score Cards')}>
+              <span className="text-[10px] text-brand-purple">
                 View All Categories →
               </span>
             </div>
@@ -397,8 +383,7 @@ export const DashboardPreview: React.FC = () => {
               {scoreCards.map((sc) => (
                 <div
                   key={sc.title}
-                  onClick={() => openComingSoon(sc.title)}
-                  className="rounded-xl bg-[#151226] border border-white/[0.08] hover:border-white/20 p-3 flex flex-col justify-between transition-all cursor-pointer shadow-md hover:scale-[1.02] active:scale-[0.99]"
+                  className="rounded-xl bg-[#151226] border border-white/[0.08] hover:border-white/20 p-3 flex flex-col justify-between transition-all shadow-md hover:scale-[1.02]"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-white/80">

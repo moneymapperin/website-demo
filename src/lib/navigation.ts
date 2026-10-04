@@ -22,4 +22,20 @@ export function navigateTo(path: string): void {
   }
 }
 
+export function scrollToLandingSection(sectionId: string): void {
+  if (typeof window === 'undefined') return;
+
+  const scrollToSection = () => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  if (window.location.pathname === '/') {
+    scrollToSection();
+    return;
+  }
+
+  navigateTo('/');
+  window.requestAnimationFrame(() => window.requestAnimationFrame(scrollToSection));
+}
+
 export default navigateTo;

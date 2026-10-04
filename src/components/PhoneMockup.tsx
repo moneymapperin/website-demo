@@ -1,4 +1,3 @@
-import { useComingSoon } from '../context/ComingSoonContext';
 import logoImg from '../assets/logo.png';
 import {
   Bell,
@@ -17,8 +16,6 @@ interface PhoneMockupProps {
 }
 
 export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style }) => {
-  const { openComingSoon } = useComingSoon();
-
   return (
     <div
       style={style}
@@ -51,10 +48,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style 
 
           {/* Phone In-App Header */}
           <div className="px-4 py-2 flex items-center justify-between border-b border-white/[0.05]">
-            <div
-              onClick={() => openComingSoon('Mobile Brand Dashboard')}
-              className="flex items-center gap-1.5 cursor-pointer"
-            >
+            <div className="flex items-center gap-1.5">
               <img
                 src={logoImg}
                 alt="Logo"
@@ -68,17 +62,15 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style 
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => openComingSoon('Notifications')}
+              <div
                 className="relative p-1 rounded-full text-white/70 hover:text-white transition-colors"
-                aria-label="Notifications"
+                aria-hidden="true"
               >
                 <Bell className="w-4 h-4" />
                 <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-[#0d0a1a]"></span>
-              </button>
+              </div>
               <div
-                onClick={() => openComingSoon('User Profile')}
-                className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-purple to-brand-magenta flex items-center justify-center text-[10px] font-bold text-white shadow-sm cursor-pointer"
+                className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand-purple to-brand-magenta flex items-center justify-center text-[10px] font-bold text-white shadow-sm"
               >
                 S
               </div>
@@ -90,8 +82,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style 
 
             {/* 1. White Card: FINANCIAL FITNESS SCORE */}
             <div
-              onClick={() => openComingSoon('Financial Fitness Score')}
-              className="bg-white rounded-2xl p-3.5 shadow-md text-slate-900 cursor-pointer hover:shadow-lg transition-all active:scale-[0.99]"
+              className="bg-white rounded-2xl p-3.5 shadow-md text-slate-900 hover:shadow-lg transition-all"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[9px] font-bold tracking-wider text-slate-500 uppercase flex items-center gap-1">
@@ -157,8 +148,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style 
 
             {/* 2. NET FINANCIAL POSITION */}
             <div
-              onClick={() => openComingSoon('Net Financial Position')}
-              className="bg-[#18152c] border border-white/10 rounded-2xl p-3.5 shadow-md cursor-pointer hover:border-brand-purple/40 transition-all active:scale-[0.99]"
+              className="bg-[#18152c] border border-white/10 rounded-2xl p-3.5 shadow-md hover:border-brand-purple/40 transition-all"
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[9px] font-bold tracking-wider text-white/50 uppercase">
@@ -218,8 +208,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style 
 
             {/* 3. LIVE GOLD RATE 24K (PER GRAM) + CSS GOLD BARS */}
             <div
-              onClick={() => openComingSoon('Live 24K Gold Rate')}
-              className="bg-[#18152c] border border-white/10 rounded-2xl p-3.5 shadow-md flex items-center justify-between cursor-pointer hover:border-amber-500/40 transition-all active:scale-[0.99]"
+              className="bg-[#18152c] border border-white/10 rounded-2xl p-3.5 shadow-md flex items-center justify-between hover:border-amber-500/40 transition-all"
             >
               <div>
                 <span className="block text-[9px] font-bold text-white/70 uppercase tracking-wider">
@@ -262,34 +251,22 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style 
 
           {/* Bottom Tab Bar */}
           <div className="bg-[#0b0916] border-t border-white/[0.08] px-3 py-2 flex items-center justify-around z-20">
-            <button
-              onClick={() => openComingSoon('Mobile App: Home')}
-              className="flex flex-col items-center gap-0.5 text-brand-purple"
-            >
+            <div className="flex flex-col items-center gap-0.5 text-brand-purple">
               <Home className="w-4 h-4" />
               <span className="text-[8px] font-bold">Home</span>
-            </button>
-            <button
-              onClick={() => openComingSoon('Mobile App: Insights')}
-              className="flex flex-col items-center gap-0.5 text-white/50 hover:text-white transition-colors"
-            >
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-white/50">
               <FileText className="w-4 h-4" />
               <span className="text-[8px] font-medium">Insights</span>
-            </button>
-            <button
-              onClick={() => openComingSoon('Mobile App: Portfolio')}
-              className="flex flex-col items-center gap-0.5 text-white/50 hover:text-white transition-colors"
-            >
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-white/50">
               <Shield className="w-4 h-4" />
               <span className="text-[8px] font-medium">Portfolio</span>
-            </button>
-            <button
-              onClick={() => openComingSoon('Mobile App: AI Assistant')}
-              className="flex flex-col items-center gap-0.5 text-white/50 hover:text-white transition-colors"
-            >
+            </div>
+            <div className="flex flex-col items-center gap-0.5 text-white/50">
               <Bot className="w-4 h-4" />
               <span className="text-[8px] font-medium">AI Assistant</span>
-            </button>
+            </div>
           </div>
 
           {/* Bottom Home Indicator Bar */}

@@ -4,6 +4,8 @@ import { Hero } from '../components/Hero';
 import { PillarsSection } from '../components/PillarsSection';
 import { AIAssistantSection } from '../components/AIAssistantSection';
 import { InsightsSection } from '../components/InsightsSection';
+import { AboutSection } from '../components/AboutSection';
+import { PricingSection } from '../components/PricingSection';
 import { CTASection } from '../components/CTASection';
 import { Footer } from '../components/Footer';
 
@@ -19,6 +21,8 @@ export const LandingPage: React.FC = () => {
         <PillarsSection />
         <AIAssistantSection />
         <InsightsSection />
+        <PricingSection />
+        <AboutSection />
         <CTASection />
       </main>
 

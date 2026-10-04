@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ComingSoonProvider, useComingSoon } from '../context/ComingSoonContext';
 import { ComingSoonModal } from '../components/ComingSoonModal';
 import { Navbar } from '../components/Navbar';
 import { Hero } from '../components/Hero';
 import { PillarsSection } from '../components/PillarsSection';
+import { FeatureCards } from '../components/FeatureCards';
 import { Footer } from '../components/Footer';
 import { AIAssistantSection } from '../components/AIAssistantSection';
 import { InsightsSection } from '../components/InsightsSection';
@@ -177,26 +178,31 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
-    it('Navbar general links open the "Please login first" popup', () => {
+    it('Navbar section links scroll without opening a popup', () => {
+      const scrollIntoView = vi.fn();
       render(
         <ComingSoonProvider>
           <Navbar />
           <ComingSoonModal />
+          <section id="pricing" ref={(element) => {
+            if (element) element.scrollIntoView = scrollIntoView;
+          }} />
         </ComingSoonProvider>
       );
 
       const pricingLink = screen.getByRole('button', { name: /^Pricing$/i });
       fireEvent.click(pricingLink);
 
-      const modal = screen.getByRole('dialog');
-      expect(modal).toBeInTheDocument();
-      expect(within(modal).getByText('Pricing')).toBeInTheDocument();
-      expect(within(modal).getByText('Please login first 🔒')).toBeInTheDocument();
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+      expect(window.location.hash).toBe('#pricing');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^Pricing$/i })).toHaveAttribute('aria-current', 'location');
     });
   });
 
-  describe('Sample of 5 Other Components Opening Popup on Click', () => {
-    it('1. Hero "Explore Features" opens popup, while "Get Started Free" navigates to /register', () => {
+  describe('Landing page interactions without login prompts', () => {
+    it('Hero Explore Features scrolls to Features and Get Started Free navigates to /register', () => {
+      const scrollSpy = vi.spyOn(navigation, 'scrollToLandingSection').mockImplementation(() => {});
       render(
         <ComingSoonProvider>
           <Hero />
@@ -204,42 +210,36 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
         </ComingSoonProvider>
       );
 
-      // Explore Features opens modal
       const exploreBtn = screen.getByRole('button', { name: /Explore Features/i });
       fireEvent.click(exploreBtn);
-      const modal = screen.getByRole('dialog');
-      expect(modal).toBeInTheDocument();
-      expect(within(modal).getByText('Explore Features')).toBeInTheDocument();
-
-      // Close modal
-      fireEvent.click(within(modal).getByRole('button', { name: /Not now/i }));
+      expect(scrollSpy).toHaveBeenCalledWith('features');
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
-      // Get Started Free navigates to /register directly
       const getStartedFreeBtn = screen.getByRole('button', { name: /Get Started Free/i });
       fireEvent.click(getStartedFreeBtn);
       expect(navigateSpy).toHaveBeenCalledWith('/register');
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
-    it('2. PillarsSection pillar card click opens popup', () => {
+    it('pillar and feature cards are inert', () => {
       render(
         <ComingSoonProvider>
           <PillarsSection />
+          <FeatureCards />
           <ComingSoonModal />
         </ComingSoonProvider>
       );
 
       const mutualFundsCard = screen.getByRole('heading', { name: 'Mutual Funds' });
       fireEvent.click(mutualFundsCard);
+      fireEvent.click(screen.getByText('Secure & Private'));
 
-      const modal = screen.getByRole('dialog');
-      expect(modal).toBeInTheDocument();
-      expect(within(modal).getByText('Please login first 🔒')).toBeInTheDocument();
-      expect(within(modal).getByText('Mutual Funds')).toBeInTheDocument();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(navigateSpy).not.toHaveBeenCalled();
     });
 
-    it('3. Footer link click opens popup', () => {
+    it('Footer section links scroll and informational links are inert', () => {
+      const scrollSpy = vi.spyOn(navigation, 'scrollToLandingSection').mockImplementation(() => {});
       render(
         <ComingSoonProvider>
           <Footer />
@@ -247,16 +247,18 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
         </ComingSoonProvider>
       );
 
+      fireEvent.click(screen.getByRole('button', { name: 'About Us' }));
+      expect(scrollSpy).toHaveBeenCalledWith('about');
+
       const careersLink = screen.getByText('Careers');
+      expect(careersLink.tagName).toBe('SPAN');
       fireEvent.click(careersLink);
 
-      const modal = screen.getByRole('dialog');
-      expect(modal).toBeInTheDocument();
-      expect(within(modal).getByText('Please login first 🔒')).toBeInTheDocument();
-      expect(within(modal).getByText('Careers')).toBeInTheDocument();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(navigateSpy).not.toHaveBeenCalled();
     });
 
-    it('4. AIAssistantSection action button click opens popup', () => {
+    it('AI Assistant CTA navigates to /register without opening a popup', () => {
       render(
         <ComingSoonProvider>
           <AIAssistantSection />
@@ -267,13 +269,11 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
       const aiBtn = screen.getByRole('button', { name: /Try AI Assistant/i });
       fireEvent.click(aiBtn);
 
-      const modal = screen.getByRole('dialog');
-      expect(modal).toBeInTheDocument();
-      expect(within(modal).getByText('Please login first 🔒')).toBeInTheDocument();
-      expect(within(modal).getByText('Try AI Assistant')).toBeInTheDocument();
+      expect(navigateSpy).toHaveBeenCalledWith('/register');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
-    it('5. InsightsSection tab click opens popup', () => {
+    it('Insights tabs switch content without opening a popup', async () => {
       render(
         <ComingSoonProvider>
           <InsightsSection />
@@ -281,13 +281,12 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
         </ComingSoonProvider>
       );
 
-      const topStoriesTab = screen.getByRole('button', { name: /Top Stories/i });
-      fireEvent.click(topStoriesTab);
+      const learnGrowTab = screen.getByRole('button', { name: /Learn & Grow/i });
+      fireEvent.click(learnGrowTab);
 
-      const modal = screen.getByRole('dialog');
-      expect(modal).toBeInTheDocument();
-      expect(within(modal).getByText('Please login first 🔒')).toBeInTheDocument();
-      expect(within(modal).getByText('Top Stories')).toBeInTheDocument();
+      await waitFor(() => expect(learnGrowTab).toHaveClass('bg-[#231b3e]'));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(navigateSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -307,7 +306,7 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
-    it('with a mocked session, clicking a pillar card navigates to /dashboard with no popup', () => {
+    it('with a mocked session, clicking a landing pillar card remains inert', () => {
       vi.spyOn(hasSessionHook, 'useHasSession').mockReturnValue(true);
 
       render(
@@ -320,7 +319,7 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
       const insuranceCard = screen.getByRole('heading', { name: 'Insurance' });
       fireEvent.click(insuranceCard);
 
-      expect(navigateSpy).toHaveBeenCalledWith('/dashboard');
+      expect(navigateSpy).not.toHaveBeenCalled();
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useComingSoon } from '../context/ComingSoonContext';
+import { scrollToLandingSection } from '../lib/navigation';
 import { Lock, Shield } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 
@@ -32,8 +32,6 @@ const YoutubeIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }
 );
 
 export const Footer: React.FC = () => {
-  const { openComingSoon } = useComingSoon();
-
   const socialLinks = [
     { name: 'Twitter', icon: TwitterIcon },
     { name: 'LinkedIn', icon: LinkedinIcon },
@@ -72,14 +70,14 @@ export const Footer: React.FC = () => {
               {socialLinks.map((social) => {
                 const Icon = social.icon;
                 return (
-                  <button
+                  <span
                     key={social.name}
-                    onClick={() => openComingSoon(social.name)}
-                    className="w-8 h-8 rounded-full bg-[#161326] border border-white/10 hover:border-brand-purple/50 flex items-center justify-center text-white/70 hover:text-white transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-sm"
+                    role="img"
                     aria-label={social.name}
+                    className="w-8 h-8 rounded-full bg-[#161326] border border-white/10 flex items-center justify-center text-white/70 shadow-sm cursor-default"
                   >
                     <Icon className="w-3.5 h-3.5" />
-                  </button>
+                  </span>
                 );
               })}
             </div>
@@ -94,20 +92,21 @@ export const Footer: React.FC = () => {
               <ul className="space-y-2">
                 {productLinks.map((link) => (
                   <li key={link}>
-                    {link === 'Pricing' ? (
-                      <a
-                        href="/moneymapper-pricing.html"
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                      >
-                        {link}
-                      </a>
-                    ) : (
+                    {link === 'Pricing' || link === 'Features' || link === 'Insights' ? (
                       <button
-                        onClick={() => openComingSoon(link)}
+                        onClick={() => scrollToLandingSection(
+                          link === 'Pricing' ? 'pricing' : link === 'Features' ? 'features' : 'insights'
+                        )}
                         className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
                       >
                         {link}
                       </button>
+                    ) : (
+                      <span
+                        className="text-xs text-white/50 text-left py-0.5 w-full cursor-default"
+                      >
+                        {link}
+                      </span>
                     )}
                   </li>
                 ))}
@@ -120,12 +119,18 @@ export const Footer: React.FC = () => {
               <ul className="space-y-2">
                 {companyLinks.map((link) => (
                   <li key={link}>
-                    <button
-                      onClick={() => openComingSoon(link)}
-                      className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                    >
-                      {link}
-                    </button>
+                    {link === 'About Us' ? (
+                      <button
+                        onClick={() => scrollToLandingSection('about')}
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                      >
+                        {link}
+                      </button>
+                    ) : (
+                      <span className="text-xs text-white/50 text-left py-0.5 w-full cursor-default">
+                        {link}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -166,12 +171,9 @@ export const Footer: React.FC = () => {
                         {link}
                       </a>
                     ) : (
-                      <button
-                        onClick={() => openComingSoon(link)}
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                      >
+                      <span className="text-xs text-white/50 text-left py-0.5 w-full cursor-default">
                         {link}
-                      </button>
+                      </span>
                     )}
                   </li>
                 ))}
