@@ -12,8 +12,6 @@ import {
   Settings,
   HelpCircle,
   Crown,
-  LayoutGrid,
-  Flame,
   Maximize2
 } from 'lucide-react';
 
@@ -27,53 +25,6 @@ export const DashboardPreview: React.FC = () => {
     { label: 'Transactions', icon: <Receipt className="w-4 h-4" /> },
     { label: 'AI Assistant', icon: <Bot className="w-4 h-4" /> },
     { label: 'Settings', icon: <Settings className="w-4 h-4" /> },
-  ];
-
-  const scoreCards = [
-    {
-      title: 'Stock Score',
-      score: '75',
-      caption: 'NIFTY 50 Companies',
-      color: 'text-emerald-400',
-      badgeBg: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400',
-      icon: <TrendingUp className="w-4 h-4" />,
-      stroke: '#34d399',
-      path: 'M0,17 C4,17 7,11 11,11 C15,11 17,19 22,19 C27,19 30,8 35,8 C39,8 43,15 47,15 C49,15 51,5 54,2',
-      endPoint: { x: 54, y: 2 },
-    },
-    {
-      title: 'Mutual Fund Score',
-      score: '82',
-      caption: 'Top Performing Funds',
-      color: 'text-blue-400',
-      badgeBg: 'bg-blue-500/20 border-blue-500/30 text-blue-400',
-      icon: <LayoutGrid className="w-4 h-4" />,
-      stroke: '#60a5fa',
-      path: 'M0,18 C5,18 8,10 13,10 C17,10 20,18 25,18 C29,18 33,6 39,6 C43,6 46,12 50,12 C52,12 53,5 54,3',
-      endPoint: { x: 54, y: 3 },
-    },
-    {
-      title: 'Insurance Score',
-      score: '83',
-      caption: '32 Life & Health Plans',
-      color: 'text-purple-400',
-      badgeBg: 'bg-purple-500/20 border-purple-500/30 text-purple-400',
-      icon: <Shield className="w-4 h-4" />,
-      stroke: '#c084fc',
-      path: 'M0,16 C5,16 8,19 13,19 C18,19 21,8 27,8 C32,8 35,16 41,16 C45,16 48,7 54,4',
-      endPoint: { x: 54, y: 4 },
-    },
-    {
-      title: 'IPO Score',
-      score: '78',
-      caption: 'Upcoming IPOs',
-      color: 'text-amber-400',
-      badgeBg: 'bg-amber-500/20 border-amber-500/30 text-amber-400',
-      icon: <Flame className="w-4 h-4" />,
-      stroke: '#fbbf24',
-      path: 'M0,19 C4,19 7,7 13,7 C17,7 20,18 26,18 C31,18 35,9 41,9 C45,9 48,14 54,3',
-      endPoint: { x: 54, y: 3 },
-    },
   ];
 
   return (
@@ -363,77 +314,6 @@ export const DashboardPreview: React.FC = () => {
                   <Target className="w-3.5 h-3.5" />
                 </div>
               </div>
-            </div>
-
-          </div>
-
-          {/* Bottom Row: "MoneyMapper Score Cards" */}
-          <div className="mt-1">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-white/70">
-                MoneyMapper Score Cards
-              </h4>
-              <span className="text-[10px] text-brand-purple">
-                View All Categories →
-              </span>
-            </div>
-
-            {/* 4 Score Cards Row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              {scoreCards.map((sc) => (
-                <div
-                  key={sc.title}
-                  className="rounded-xl bg-[#151226] border border-white/[0.08] hover:border-white/20 p-3 flex flex-col justify-between transition-all shadow-md hover:scale-[1.02]"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-white/80">
-                      {sc.title}
-                    </span>
-                    <div className={`p-1.5 rounded-lg border ${sc.badgeBg}`}>
-                      {sc.icon}
-                    </div>
-                  </div>
-
-                  <div className="flex items-end justify-between mt-1">
-                    <div>
-                      <div className="text-xl font-black text-white tracking-tight flex items-baseline gap-1">
-                        <span className={sc.color}>{sc.score}</span>
-                        <span className="text-[10px] text-white/40 font-bold">/ 100</span>
-                      </div>
-                      <p className="text-[9.5px] text-white/50 truncate max-w-[110px] mt-0.5">
-                        {sc.caption}
-                      </p>
-                    </div>
-
-                    {/* Mini Stock Market Sparkline SVG */}
-                    <div className="w-14 h-7 flex items-end">
-                      <svg className="w-full h-full overflow-visible" viewBox="0 0 56 22">
-                        <path
-                          d={sc.path}
-                          fill="none"
-                          stroke={sc.stroke}
-                          strokeWidth="2.2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <circle
-                          cx={sc.endPoint.x}
-                          cy={sc.endPoint.y}
-                          r="2.5"
-                          fill={sc.stroke}
-                          className="animate-pulse"
-                        />
-                        <circle
-                          cx={sc.endPoint.x}
-                          cy={sc.endPoint.y}
-                          r="1"
-                          fill="#ffffff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
 
           </div>

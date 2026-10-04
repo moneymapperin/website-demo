@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Building2, ChevronRight, PieChart, TrendingUp } from 'lucide-react';
+import { ArrowRight, Building2 } from 'lucide-react';
 import { apiService } from '../services/apiService';
-import { loadMoneyMapperPicks, type PickItem } from '../pages/InsightsPage';
-import { SparklineChart } from './ui/SparklineChart';
 import logoImg from '../assets/logo.png';
 
 type LandingArticle = {
@@ -89,17 +87,6 @@ const FALLBACK_ARTICLES: LandingArticle[] = [
   },
 ];
 
-const FALLBACK_PICK: PickItem = {
-  isStock: true,
-  name: 'NATCOPHARM',
-  symbol: 'NATCOPHARM',
-  direction: 'BUY',
-  score: 70,
-  price: 1234.5,
-  change: 2.35,
-  changePercent: 1.94,
-};
-
 const FALLBACK_GRADIENTS = [
   'from-cyan-900 via-teal-950 to-slate-900',
   'from-neutral-800 via-zinc-900 to-black',
@@ -169,55 +156,6 @@ const getRotatedItems = <T,>(items: T[], startIndex: number, count = 3): T[] => 
   );
 };
 
-const getFiniteNumber = (value: unknown): number | null => {
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-  if (typeof value !== 'string' || value.trim() === '') return null;
-  const parsed = Number(value.replace(/,/g, ''));
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const getPickPrice = (pick: PickItem): number | null =>
-  getFiniteNumber(pick.price ?? pick.last_close ?? pick.lastClose ?? pick.current_price);
-
-const getPickChange = (pick: PickItem): { amount: number | null; percent: number | null } => ({
-  amount: getFiniteNumber(pick.change_amount ?? pick.changeAmount ?? pick.change),
-  percent: getFiniteNumber(
-    pick.change_percent ?? pick.change_percentage ?? pick.changePercent ?? pick.change_pct
-  ),
-});
-
-const getSparklinePoints = (pick: PickItem, changePercent: number | null): number[] => {
-  const rawSeries = pick.sparkline_data ?? pick.sparkline;
-  if (Array.isArray(rawSeries)) {
-    const realPoints = rawSeries
-      .map((point: unknown) => {
-        if (typeof point === 'number') return getFiniteNumber(point);
-        if (point && typeof point === 'object') {
-          const value = point as Record<string, unknown>;
-          return getFiniteNumber(value.close ?? value.price ?? value.value);
-        }
-        return null;
-      })
-      .filter((point: number | null): point is number => point !== null);
-    if (realPoints.length >= 2) return realPoints;
-  }
-
-  const seedText = String(pick.symbol ?? pick.name ?? pick.company_name ?? 'MoneyMapper');
-  let seed = Array.from(seedText).reduce((value, character) => value + character.charCodeAt(0), 17);
-  const trend = changePercent === null ? 0 : Math.sign(changePercent);
-  let level = 50;
-
-  return Array.from({ length: 8 }, (_, index) => {
-    seed = (seed * 9301 + 49297) % 233280;
-    const variation = ((seed / 233280) - 0.5) * 2.4;
-    level += variation + trend * 0.55;
-    return level + index * trend * 0.25;
-  });
-};
-
-const formatPrice = (value: number): string =>
-  new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
-
 const fetchLandingNews = async (): Promise<LandingArticle[]> => {
   let items = await apiService.getFinanceNews();
   if (Array.isArray(items) && items.length > 0) return items;
@@ -234,17 +172,12 @@ export const InsightsSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'top' | 'learn'>('top');
   const [newsItems, setNewsItems] = useState<LandingArticle[]>([]);
   const [blogItems, setBlogItems] = useState<LandingArticle[]>([]);
-  const [picks, setPicks] = useState<PickItem[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
   const [loadingBlogs, setLoadingBlogs] = useState(true);
-  const [loadingPicks, setLoadingPicks] = useState(true);
   const [newsStartIndex, setNewsStartIndex] = useState(0);
   const [blogStartIndex, setBlogStartIndex] = useState(0);
-  const [pickIndex, setPickIndex] = useState(0);
   const [feedVisible, setFeedVisible] = useState(true);
-  const [pickVisible, setPickVisible] = useState(true);
   const [feedHovered, setFeedHovered] = useState(false);
-  const [pickHovered, setPickHovered] = useState(false);
   const [documentVisible, setDocumentVisible] = useState(
     () => typeof document === 'undefined' || document.visibilityState === 'visible'
   );
@@ -252,7 +185,6 @@ export const InsightsSection: React.FC = () => {
     () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
   );
   const feedTransitionTimer = useRef<number | null>(null);
-  const pickTransitionTimer = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -294,24 +226,6 @@ export const InsightsSection: React.FC = () => {
       })
       .finally(() => {
         if (!cancelled) setLoadingBlogs(false);
-      });
-
-    void loadMoneyMapperPicks()
-      .then((items) => {
-        if (cancelled) return;
-        const availablePicks = Array.isArray(items) && items.length > 0 ? items : [FALLBACK_PICK];
-        setPicks(availablePicks);
-        setPickIndex(availablePicks.length > 1 ? Math.floor(Math.random() * availablePicks.length) : 0);
-      })
-      .catch((error) => {
-        console.error('Landing picks fetch failed:', error);
-        if (!cancelled) {
-          setPicks([FALLBACK_PICK]);
-          setPickIndex(0);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingPicks(false);
       });
 
     return () => {
@@ -358,24 +272,8 @@ export const InsightsSection: React.FC = () => {
     }, 180);
   }, [prefersReducedMotion]);
 
-  const transitionPick = useCallback((update: () => void) => {
-    if (pickTransitionTimer.current !== null) window.clearTimeout(pickTransitionTimer.current);
-    if (prefersReducedMotion) {
-      update();
-      setPickVisible(true);
-      return;
-    }
-    setPickVisible(false);
-    pickTransitionTimer.current = window.setTimeout(() => {
-      update();
-      setPickVisible(true);
-      pickTransitionTimer.current = null;
-    }, 180);
-  }, [prefersReducedMotion]);
-
   useEffect(() => () => {
     if (feedTransitionTimer.current !== null) window.clearTimeout(feedTransitionTimer.current);
-    if (pickTransitionTimer.current !== null) window.clearTimeout(pickTransitionTimer.current);
   }, []);
 
   const activeItems = activeTab === 'top' ? newsItems : blogItems;
@@ -400,38 +298,9 @@ export const InsightsSection: React.FC = () => {
     return () => window.clearInterval(interval);
   }, [activeItems.length, activeTab, blogItems.length, feedHovered, newsItems.length, pageCanRotate, transitionFeed]);
 
-  useEffect(() => {
-    if (!pageCanRotate || pickHovered || picks.length <= 1) return;
-
-    const interval = window.setInterval(() => {
-      transitionPick(() => setPickIndex((index) => (index + 1) % picks.length));
-    }, 10000);
-
-    return () => window.clearInterval(interval);
-  }, [pageCanRotate, pickHovered, picks.length, transitionPick]);
-
   const handleTabChange = (tab: 'top' | 'learn') => {
     if (tab !== activeTab) transitionFeed(() => setActiveTab(tab));
   };
-
-  const activePick = picks[pickIndex] ?? FALLBACK_PICK;
-  const isStock = Boolean(activePick.isStock);
-  const pickTitle = String(
-    activePick.company_name ?? activePick.name ?? activePick.symbol ?? activePick.ticker ?? 'MoneyMapper Pick'
-  );
-  const pickSymbol = activePick.symbol ?? activePick.ticker;
-  const recommendation = activePick.direction ?? activePick.recommendation ?? activePick.action;
-  const pickScore = getFiniteNumber(activePick.score);
-  const pickPrice = getPickPrice(activePick);
-  const { amount: pickChangeAmount, percent: pickChangePercent } = getPickChange(activePick);
-  const pickChangeDirection = pickChangePercent ?? pickChangeAmount;
-  const pickTrendColor = pickChangeDirection === null
-    ? '#60a5fa'
-    : pickChangeDirection >= 0 ? '#22c55e' : '#ef4444';
-  const sparklinePoints = getSparklinePoints(activePick, pickChangePercent);
-  const changeTextColor = pickChangeDirection === null
-    ? 'text-white/45'
-    : pickChangeDirection >= 0 ? 'text-emerald-400' : 'text-rose-400';
 
   return (
     <section id="insights" className="scroll-mt-24 relative py-16 lg:py-24 overflow-hidden">
@@ -452,7 +321,6 @@ export const InsightsSection: React.FC = () => {
         </div>
 
         <div
-          className="mb-6"
           onMouseEnter={() => setFeedHovered(true)}
           onMouseLeave={() => setFeedHovered(false)}
         >
@@ -542,80 +410,6 @@ export const InsightsSection: React.FC = () => {
           ) : (
             <div className="h-[360px] flex items-center justify-center bg-[#141124] rounded-2xl border border-white/[0.08] text-sm text-white/50">
               No learning guides available right now.
-            </div>
-          )}
-        </div>
-
-        <div>
-          <span className="block text-sm font-bold text-brand-purple mb-3 tracking-wide">
-            MoneyMapper Picks
-          </span>
-
-          {loadingPicks ? (
-            <div className="h-[112px] rounded-2xl border border-white/[0.08] bg-[#141124] p-5 animate-pulse" aria-label="Loading MoneyMapper Picks">
-              <div className="h-4 w-1/4 rounded bg-white/[0.08]" />
-              <div className="mt-3 h-3 w-1/2 rounded bg-white/[0.08]" />
-            </div>
-          ) : (
-            <div
-              onMouseEnter={() => setPickHovered(true)}
-              onMouseLeave={() => setPickHovered(false)}
-              className={`w-full min-h-[112px] rounded-2xl bg-[#141124] border border-white/[0.08] hover:border-brand-purple/50 p-4 sm:p-5 flex items-center justify-between gap-3 shadow-xl transition-all duration-300 hover:translate-x-1 group select-none motion-reduce:transition-none ${
-                pickVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
-              }`}
-            >
-              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                <div className={`w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300 ${
-                  isStock
-                    ? 'bg-blue-600/25 border-blue-500/40 text-blue-400'
-                    : 'bg-purple-600/25 border-purple-500/40 text-purple-300'
-                }`}>
-                  {isStock ? <TrendingUp className="w-5 h-5" /> : <PieChart className="w-5 h-5" />}
-                </div>
-
-                <div className="min-w-0">
-                  <span className={`text-[9px] font-black uppercase tracking-wider ${isStock ? 'text-blue-300' : 'text-purple-300'}`}>
-                    {isStock ? 'STOCK' : 'MUTUAL FUND'}
-                  </span>
-                  <h4 className="text-sm sm:text-lg font-bold text-white tracking-tight group-hover:text-white/95 truncate">
-                    {pickTitle}
-                  </h4>
-                  <div className="text-xs font-semibold flex flex-wrap items-center gap-1.5 mt-0.5">
-                    {recommendation && (
-                      <span className={String(recommendation).toLowerCase().includes('sell') ? 'text-rose-400' : 'text-emerald-400'}>
-                        {String(recommendation).replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())}
-                      </span>
-                    )}
-                    {recommendation && pickScore !== null && <span className="text-white/40">•</span>}
-                    {pickScore !== null && <span className="text-white/50 font-normal">Score: {pickScore}</span>}
-                    {pickSymbol && pickSymbol !== pickTitle && <span className="text-white/45 font-normal">{pickSymbol}</span>}
-                    {!isStock && activePick.category && <span className="text-white/50 font-normal">{activePick.category}</span>}
-                    {pickScore === null && !recommendation && isStock && <span className="text-white/50 font-normal">Stock signal</span>}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 sm:gap-5 shrink-0">
-                <div className="text-right min-w-[76px]">
-                  <div className="text-sm sm:text-xl font-black text-white tracking-tight">
-                    {pickPrice === null ? '—' : `₹${formatPrice(pickPrice)}`}
-                  </div>
-                  <div className={`text-[10px] sm:text-xs font-bold flex items-center justify-end gap-1 ${changeTextColor}`}>
-                    {pickChangeAmount !== null && (
-                      <span>{pickChangeAmount >= 0 ? '+' : '-'}{formatPrice(Math.abs(pickChangeAmount))}</span>
-                    )}
-                    {pickChangePercent !== null && (
-                      <span>({pickChangePercent < 0 ? '-' : ''}{Math.abs(pickChangePercent).toFixed(2)}%)</span>
-                    )}
-                    {pickChangeAmount === null && pickChangePercent === null && <span>Change unavailable</span>}
-                  </div>
-                </div>
-
-                <div className="hidden sm:flex w-24 sm:w-28 h-10 items-end">
-                  <SparklineChart data={sparklinePoints} width={112} height={40} color={pickTrendColor} />
-                </div>
-                <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0" />
-              </div>
             </div>
           )}
         </div>

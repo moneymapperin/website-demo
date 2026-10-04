@@ -190,7 +190,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar: Copyright (left) & Security Badges (right) */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
           <div>
-            <span>© 2024 MoneyMapper. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} MoneyMapper. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6">
