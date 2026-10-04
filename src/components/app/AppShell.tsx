@@ -436,20 +436,6 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-black uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>LIVE SYSTEM</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-800/10 dark:bg-zinc-800 hover:bg-zinc-800/20 transition-colors"
-            >
-              {isDark ? '☀️ Light' : '🌙 Dark'}
-            </button>
-          </div>
         </header>
 
         {children || <Outlet />}
