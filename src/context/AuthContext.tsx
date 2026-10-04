@@ -4,6 +4,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { authService } from '../services/authService';
 import { premiumService } from '../services/premiumService';
+import { apiService } from '../services/apiService';
 import { navigateTo } from '../lib/navigation';
 
 export interface AuthContextType {
@@ -53,6 +54,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!isMounted) return;
+
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        apiService.clearCache(['blogs', 'finance_news']);
+      }
 
       if (event === 'SIGNED_OUT') {
         authService.clearLocalData();

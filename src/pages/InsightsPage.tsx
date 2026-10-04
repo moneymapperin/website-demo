@@ -80,6 +80,9 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
 
   const fetchData = useCallback(
     async (force = false) => {
+      if (force) {
+        apiService.clearCache(['finance_news', 'blogs']);
+      }
       setLoadingNews(true);
       setLoadingBlogs(true);
       setLoadingPicks(true);

@@ -875,8 +875,11 @@ export class ApiService {
   }
 
   async getFinanceNews(): Promise<any[]> {
-    const cached = this.readCache('finance_news', TTL_LONG_MS);
-    if (cached !== null && cached !== undefined) return cached;
+    const cached = this.readCache<any[]>('finance_news', TTL_LONG_MS);
+    if (cached !== null && cached !== undefined) {
+      if (!Array.isArray(cached) || cached.length > 0) return cached;
+      this.clearCache(['finance_news']);
+    }
 
     try {
       const { data, error } = await supabase
@@ -888,7 +891,7 @@ export class ApiService {
 
       if (error) throw error;
       const result = data ?? [];
-      this.updateCache('finance_news', result);
+      if (result.length > 0) this.updateCache('finance_news', result);
       return result;
     } catch (e) {
       this.logErrorResilient(e, 'getFinanceNews');
@@ -897,8 +900,11 @@ export class ApiService {
   }
 
   async getBlogs(): Promise<any[]> {
-    const cached = this.readCache('blogs', TTL_LONG_MS);
-    if (cached !== null && cached !== undefined) return cached;
+    const cached = this.readCache<any[]>('blogs', TTL_LONG_MS);
+    if (cached !== null && cached !== undefined) {
+      if (!Array.isArray(cached) || cached.length > 0) return cached;
+      this.clearCache(['blogs']);
+    }
 
     try {
       const { data, error } = await supabase
@@ -910,7 +916,7 @@ export class ApiService {
 
       if (error) throw error;
       const result = data ?? [];
-      this.updateCache('blogs', result);
+      if (result.length > 0) this.updateCache('blogs', result);
       return result;
     } catch (e) {
       this.logErrorResilient(e, 'getBlogs');
