@@ -430,9 +430,31 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 MoneyMapper
               </span>
               <span>/</span>
-              <span className="text-indigo-500 uppercase tracking-wider font-black">
-                {location.pathname.replace('/', '').replace(/-/g, ' ') || 'Dashboard'}
-              </span>
+              {location.pathname.startsWith('/news') ? (
+                <>
+                  <span className="hover:text-indigo-500 cursor-pointer" onClick={() => navigate('/insights')}>
+                    Insights
+                  </span>
+                  <span>/</span>
+                  <span className="text-indigo-500 uppercase tracking-wider font-black">
+                    Top Stories
+                  </span>
+                </>
+              ) : location.pathname.startsWith('/pillars/') ? (
+                <>
+                  <span className="hover:text-indigo-500 cursor-pointer" onClick={() => navigate('/dashboard')}>
+                    Pillars
+                  </span>
+                  <span>/</span>
+                  <span className="text-indigo-500 uppercase tracking-wider font-black">
+                    {location.pathname.replace('/pillars/', '').split('/')[0].replace(/-/g, ' ').toUpperCase()}
+                  </span>
+                </>
+              ) : (
+                <span className="text-indigo-500 uppercase tracking-wider font-black">
+                  {location.pathname.replace('/', '').split('/')[0].replace(/-/g, ' ').toUpperCase() || 'DASHBOARD'}
+                </span>
+              )}
             </div>
           </div>
 

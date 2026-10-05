@@ -36,21 +36,19 @@ export const QuotesSection: React.FC<QuotesSectionProps> = ({ quoteOverride }) =
 
   return (
     <div
-      className="relative rounded-3xl bg-gradient-to-r from-[#200B3B] via-[#3B126A] to-[#280B4D] border-[1.2px] border-[#5B1D99]/60 shadow-[0_6px_16px_rgba(32,11,59,0.5)] overflow-hidden p-5 sm:p-6"
+      className="relative rounded-3xl bg-gradient-to-r from-[#1c0830] via-[#2f0e57] to-[#1c0830] border border-[#5B1D99]/50 shadow-[0_10px_30px_rgba(28,8,48,0.4)] overflow-hidden p-6 sm:p-7 text-center"
       data-testid="quotes-section"
     >
-      <div className="relative z-10 flex items-center justify-between gap-4">
-        <div className="flex items-start sm:items-center space-x-3.5 flex-1">
-          <span className="text-3xl sm:text-4xl font-black leading-none text-[#A855F7] select-none shrink-0">“</span>
-          <p className="text-xs sm:text-sm md:text-base leading-relaxed font-semibold text-white/95">
-            {quote}
-          </p>
-        </div>
-        <div className="hidden sm:flex items-center text-[#A855F7]/70 shrink-0">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 19L19 5m0 0H8m11 0v11" />
-          </svg>
-        </div>
+      <div className="relative z-10 flex items-center justify-center gap-3 sm:gap-4 max-w-4xl mx-auto">
+        <span className="text-3xl sm:text-5xl font-serif font-black leading-none text-[#A855F7] select-none shrink-0 opacity-80">
+          “
+        </span>
+        <p className="text-sm sm:text-base md:text-lg leading-relaxed font-semibold text-white/95 text-center px-1">
+          {quote}
+        </p>
+        <span className="text-3xl sm:text-5xl font-serif font-black leading-none text-[#A855F7] select-none shrink-0 opacity-80">
+          ”
+        </span>
       </div>
     </div>
   );

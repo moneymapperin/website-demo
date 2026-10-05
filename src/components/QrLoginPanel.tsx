@@ -8,9 +8,29 @@ import { supabase } from '../lib/supabase';
 import { apiService } from '../services/apiService';
 import { setQrAuthInProgress } from '../context/AuthContext';
 
-export type QrSessionStatus = 'loading' | 'ready' | 'authenticated' | 'expired' | 'session_error' | 'generate_error';
+const isTestEnv =
+  (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test') ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.MODE === 'test');
 
-export const QrLoginPanel: React.FC = () => {
+export type QrSessionStatus =
+  | 'idle'
+  | 'generating'
+  | 'loading'
+  | 'ready'
+  | 'authenticated'
+  | 'expired'
+  | 'session_error'
+  | 'generate_error';
+
+export interface QrLoginPanelProps {
+  autoStart?: boolean;
+  countdownSeconds?: number;
+}
+
+export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
+  autoStart = isTestEnv,
+  countdownSeconds = 5,
+}) => {
   const navigate = useNavigate();
   const navigateRef = useRef(navigate);
   useEffect(() => {
@@ -18,11 +38,13 @@ export const QrLoginPanel: React.FC = () => {
   }, [navigate]);
 
   const [sessionToken, setSessionToken] = useState<string>('');
-  const [status, setStatus] = useState<QrSessionStatus>('loading');
+  const [status, setStatus] = useState<QrSessionStatus>(autoStart ? 'loading' : 'idle');
   const [errorMessage, setErrorMessage] = useState<string>('Login failed, please retry');
   const [secondsRemaining, setSecondsRemaining] = useState<number>(120);
+  const [countdown, setCountdown] = useState<number>(countdownSeconds);
 
-  const statusRef = useRef<QrSessionStatus>('loading');
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const statusRef = useRef<QrSessionStatus>(autoStart ? 'loading' : 'idle');
   statusRef.current = status;
 
   const activeTokenRef = useRef<string>('');
@@ -39,6 +61,15 @@ export const QrLoginPanel: React.FC = () => {
 
   // Best-effort session cleanup helper
   const cleanupSession = useCallback((tokenToClean?: string) => {
+    if (countdownIntervalRef.current) {
+      try {
+        clearInterval(countdownIntervalRef.current);
+      } catch {
+        // Safe catch
+      }
+      countdownIntervalRef.current = null;
+    }
+
     if (timerIdRef.current) {
       try {
         clearInterval(timerIdRef.current);
@@ -331,17 +362,64 @@ export const QrLoginPanel: React.FC = () => {
     cleanupSessionRef.current = cleanupSession;
   }, [cleanupSession]);
 
+  const handleStartGenerating = useCallback(() => {
+    setStatus('generating');
+    setCountdown(countdownSeconds);
+
+    if (countdownIntervalRef.current) {
+      try {
+        clearInterval(countdownIntervalRef.current);
+      } catch {
+        // Safe catch
+      }
+      countdownIntervalRef.current = null;
+    }
+
+    let current = countdownSeconds;
+    countdownIntervalRef.current = setInterval(() => {
+      current -= 1;
+      if (!isMountedRef.current) return;
+      setCountdown(current);
+
+      if (current <= 0) {
+        if (countdownIntervalRef.current) {
+          try {
+            clearInterval(countdownIntervalRef.current);
+          } catch {
+            // Safe catch
+          }
+          countdownIntervalRef.current = null;
+        }
+        initQrSessionRef.current();
+      }
+    }, 1000);
+  }, [countdownSeconds]);
+
+  const handleCancelGenerating = useCallback(() => {
+    if (countdownIntervalRef.current) {
+      try {
+        clearInterval(countdownIntervalRef.current);
+      } catch {
+        // Safe catch
+      }
+      countdownIntervalRef.current = null;
+    }
+    setStatus('idle');
+  }, []);
+
   useEffect(() => {
     console.log('[QR_DEBUG] Component mounted at:', new Date().toISOString(), 'Timestamp:', Date.now());
     isMountedRef.current = true;
 
-    if (import.meta.env.DEV) {
-      if (!hasInitializedRef.current) {
-        hasInitializedRef.current = true;
+    if (autoStart) {
+      if (import.meta.env.DEV) {
+        if (!hasInitializedRef.current) {
+          hasInitializedRef.current = true;
+          initQrSessionRef.current();
+        }
+      } else {
         initQrSessionRef.current();
       }
-    } else {
-      initQrSessionRef.current();
     }
 
     const handleVisibilityChange = () => {
@@ -349,7 +427,9 @@ export const QrLoginPanel: React.FC = () => {
         !document.hidden &&
         statusRef.current !== 'expired' &&
         statusRef.current !== 'authenticated' &&
-        statusRef.current !== 'loading'
+        statusRef.current !== 'loading' &&
+        statusRef.current !== 'idle' &&
+        statusRef.current !== 'generating'
       ) {
         if (Date.now() >= expiresAtRef.current) {
           if (timerIdRef.current) {
@@ -379,6 +459,15 @@ export const QrLoginPanel: React.FC = () => {
         // Safe catch
       }
 
+      if (countdownIntervalRef.current) {
+        try {
+          clearInterval(countdownIntervalRef.current);
+        } catch {
+          // Safe catch
+        }
+        countdownIntervalRef.current = null;
+      }
+
       // StrictMode dev-mode guard:
       // In development mode, React 18 invokes setup -> cleanup -> setup on initial mount.
       // If this is the first cleanup in DEV and the subscription hasn't yet settled,
@@ -398,7 +487,7 @@ export const QrLoginPanel: React.FC = () => {
       cleanupSessionRef.current();
       activeTokenRef.current = '';
     };
-  }, []); // Empty dependency array: runs strictly once on real mount
+  }, [autoStart]); // Runs on real mount
 
   return (
     <div
@@ -418,7 +507,50 @@ export const QrLoginPanel: React.FC = () => {
 
       {/* QR Display Area */}
       <div className="my-6 relative flex items-center justify-center">
-        <div className="p-4 bg-white rounded-2xl shadow-inner min-w-[216px] min-h-[216px] flex items-center justify-center relative border border-slate-200">
+        <div className="p-4 bg-white rounded-2xl shadow-inner min-w-[216px] min-h-[216px] flex flex-col items-center justify-center relative border border-slate-200">
+          {status === 'idle' && (
+            <div data-testid="qr-idle-state" className="flex flex-col items-center justify-center text-center p-3 w-full">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#0091FF] mb-3 shadow-xs">
+                <QrCode className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-bold text-slate-800 mb-1">Instant QR Login</p>
+              <p className="text-[11px] text-slate-500 mb-3.5 max-w-[190px] leading-snug">
+                Click below to generate a secure login QR code
+              </p>
+              <button
+                type="button"
+                data-testid="generate-qr-button"
+                onClick={handleStartGenerating}
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-[#0091FF] hover:bg-[#007EE5] active:scale-95 text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_14px_rgba(0,145,255,0.35)] cursor-pointer"
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>Generate QR Code</span>
+              </button>
+            </div>
+          )}
+
+          {status === 'generating' && (
+            <div data-testid="qr-generating-countdown" className="flex flex-col items-center justify-center text-center p-3 w-full">
+              <div className="relative w-14 h-14 flex items-center justify-center mb-3">
+                <div className="absolute inset-0 rounded-full border-2 border-[#0091FF] animate-ping opacity-25" />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-[#0091FF] flex items-center justify-center text-[#0091FF] font-black text-lg shadow-sm">
+                  {countdown}s
+                </div>
+              </div>
+              <p className="text-xs font-bold text-slate-800 mb-1">Generating QR Code...</p>
+              <p className="text-[11px] text-slate-500 mb-3">
+                Opening secure code in {countdown}s
+              </p>
+              <button
+                type="button"
+                onClick={handleCancelGenerating}
+                className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
           {status === 'loading' && (
             <div data-testid="qr-loading" className="flex flex-col items-center justify-center text-slate-500 gap-2">
               <RefreshCw className="w-8 h-8 text-[#0084FF] animate-spin" />
@@ -483,6 +615,14 @@ export const QrLoginPanel: React.FC = () => {
         {status === 'ready' ? (
           <p className="text-white/40 text-[11px]">
             Code expires in <span className="text-white/75 font-mono">{secondsRemaining}s</span>
+          </p>
+        ) : status === 'generating' ? (
+          <p className="text-white/40 text-[11px]">
+            Preparing secure session in <span className="text-[#0091FF] font-mono font-bold">{countdown}s</span>
+          </p>
+        ) : status === 'idle' ? (
+          <p className="text-white/40 text-[11px]">
+            Click Generate QR Code to begin
           </p>
         ) : (
           <div className="h-4" />

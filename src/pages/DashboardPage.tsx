@@ -338,9 +338,6 @@ export const DashboardPage: React.FC = () => {
               canAccessPremium={canAccessPremium}
               onLockedClick={handleLockedPillar}
             />
-
-            {/* 5. Financial Quotes of Wisdom (lines 1980-2068) */}
-            <QuotesSection />
           </div>
 
           {/* Right Column / Screener Tools & Calculators (5 cols on desktop) */}
@@ -366,6 +363,11 @@ export const DashboardPage: React.FC = () => {
               showSipTrialBadge={!isPro && canAccessPremium}
             />
           </div>
+        </div>
+
+        {/* 5. Financial Quotes of Wisdom (Centered & Wide across bottom of Dashboard) */}
+        <div className="mt-8 max-w-5xl mx-auto w-full">
+          <QuotesSection />
         </div>
 
         {/* Global Footer (lines 2070-2097) */}
