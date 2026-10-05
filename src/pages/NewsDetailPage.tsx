@@ -5,11 +5,37 @@ import { apiService } from '../services/apiService';
 
 export function cleanArticleText(rawText: string = ''): string {
   if (!rawText) return '';
+  // Convert <br> or </p> to newline
+  let cleaned = rawText.replace(/<br\s*\/?>|<\/p>/gi, '\n');
   // Strip HTML tags and &nbsp;
-  let cleaned = rawText.replace(/<[^>]*>|&nbsp;/gi, ' ');
-  // Collapse multiple whitespaces
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  cleaned = cleaned.replace(/<[^>]*>|&nbsp;/gi, ' ');
+  // Normalize whitespace: collapse multiple horizontal spaces, but preserve up to single newlines
+  cleaned = cleaned
+    .split(/\r?\n/)
+    .map((line) => line.replace(/[^\S\r\n]+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n');
   return cleaned;
+}
+
+export function truncateToFiveLines(text: string): string {
+  if (!text) return '';
+  const trimmed = text.trim();
+
+  // If text contains explicit newline breaks, keep at most 5 lines
+  const lines = trimmed.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length > 5) {
+    return lines.slice(0, 5).join('\n') + '...';
+  }
+
+  // If text is a long continuous paragraph without newlines:
+  // In this container (max-w-3xl, ~750px), ~14 words per line, so 5 lines is ~70 words.
+  const words = trimmed.split(/\s+/);
+  if (words.length > 70) {
+    return words.slice(0, 70).join(' ') + '...';
+  }
+
+  return trimmed;
 }
 
 export const NewsDetailPage: React.FC = () => {
@@ -174,9 +200,9 @@ export const NewsDetailPage: React.FC = () => {
           {/* Render content as plain text strictly (never dangerouslySetInnerHTML) */}
           <div
             data-testid="article-plain-content"
-            className="text-sm md:text-base text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line"
+            className="text-sm md:text-base text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line line-clamp-5"
           >
-            {cleanDescription}
+            {truncateToFiveLines(cleanDescription)}
           </div>
 
           {isExternalHttp && (

@@ -233,7 +233,12 @@ export class AuthService {
       if (normalizedMessage.includes('database error')) {
         return "We couldn't create your account right now. Please try again later.";
       }
-      if (normalizedMessage.includes('network') || normalizedMessage.includes('fetch')) {
+      if (
+        normalizedMessage.includes('network') ||
+        normalizedMessage.includes('fetch') ||
+        normalizedMessage.includes('socket') ||
+        normalizedMessage.includes('failed host lookup')
+      ) {
         return 'Connection issue detected. Please check your internet and try again.';
       }
       if (import.meta.env.DEV) {

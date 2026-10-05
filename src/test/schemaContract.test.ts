@@ -34,6 +34,7 @@ describe('src/lib/schemaContract export integrity', () => {
       'app_logs',
       'web_sessions',
       'corporate_admins',
+      'market_sentiment',
     ]);
   });
 
@@ -47,7 +48,6 @@ describe('src/lib/schemaContract export integrity', () => {
       'blogs',
       'live_metal_rates',
       'user_subscriptions',
-      'market_sentiment',
     ]);
   });
 

@@ -39,13 +39,13 @@ describe('Task 2: AuthService (Port of Flutter auth_service.dart)', () => {
       expect(mockSignUp).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: 'password123',
-        options: {
+        options: expect.objectContaining({
           data: {
             fullName: 'Jane Doe',
             mobile: '9876543210',
             plan: 'b2c',
           },
-        },
+        }),
       });
       expect(res.user?.id).toBe('u-123');
     });

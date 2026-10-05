@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Briefcase, AlertTriangle } from 'lucide-react';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 import { authService } from '../services/authService';
@@ -58,18 +58,22 @@ export const CorporateLoginPage: React.FC = () => {
   };
 
   return (
-    <AuthPageLayout
-      title="Corporate Portal"
-      subtitle="Enter your admin credentials to access workforce intelligence"
-      showBack
-      maxWidth="md"
-    >
-      <div className="bg-[#0D0E15] border border-[#27272A] rounded-[24px] p-6 sm:p-8 shadow-xl">
+    <AuthPageLayout showBack maxWidth="md">
+      <div className="bg-[#080E2A]/90 backdrop-blur-xl border border-[#1E3268] rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-[0_12px_40px_rgba(0,145,255,0.15)]">
+        <div className="mb-5 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Corporate Portal
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1">
+            Enter your admin credentials to access workforce intelligence
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {errorMessage && (
             <div
               role="alert"
-              className="p-4 rounded-[16px] bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium"
+              className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm font-medium"
             >
               {errorMessage}
             </div>
@@ -79,12 +83,12 @@ export const CorporateLoginPage: React.FC = () => {
           <div className="space-y-1.5">
             <label
               htmlFor="corporate-email"
-              className="block text-sm font-medium text-white/90"
+              className="block text-xs sm:text-sm font-semibold text-slate-200"
             >
               Corporate Email
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
+            <div className="relative rounded-2xl bg-[#050A1E] border border-[#1C2C5E] focus-within:border-[#0091FF] focus-within:ring-1 focus-within:ring-[#0091FF] transition-all">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                 <Briefcase className="w-5 h-5" />
               </div>
               <input
@@ -95,7 +99,7 @@ export const CorporateLoginPage: React.FC = () => {
                 disabled={loading}
                 placeholder="admin@company.com"
                 autoComplete="email"
-                className="w-full pl-11 pr-4 py-3.5 bg-white/[0.04] border border-[#27272A] rounded-[16px] text-white placeholder-white/30 focus:outline-none focus:border-[#4F46E5] focus:ring-1 focus:ring-[#4F46E5] transition-all text-sm disabled:opacity-50"
+                className="w-full pl-12 pr-4 py-3.5 bg-transparent text-white placeholder-slate-500 text-sm focus:outline-none disabled:opacity-50"
               />
             </div>
           </div>
@@ -104,12 +108,12 @@ export const CorporateLoginPage: React.FC = () => {
           <div className="space-y-1.5">
             <label
               htmlFor="corporate-password"
-              className="block text-sm font-medium text-white/90"
+              className="block text-xs sm:text-sm font-semibold text-slate-200"
             >
               Admin Password
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
+            <div className="relative rounded-2xl bg-[#050A1E] border border-[#1C2C5E] focus-within:border-[#0091FF] focus-within:ring-1 focus-within:ring-[#0091FF] transition-all">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                 <Lock className="w-5 h-5" />
               </div>
               <input
@@ -120,12 +124,12 @@ export const CorporateLoginPage: React.FC = () => {
                 disabled={loading}
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="w-full pl-11 pr-12 py-3.5 bg-white/[0.04] border border-[#27272A] rounded-[16px] text-white placeholder-white/30 focus:outline-none focus:border-[#4F46E5] focus:ring-1 focus:ring-[#4F46E5] transition-all text-sm disabled:opacity-50"
+                className="w-full pl-12 pr-12 py-3.5 bg-transparent text-white placeholder-slate-500 text-sm focus:outline-none disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/40 hover:text-white/80 transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white transition-colors"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -136,7 +140,7 @@ export const CorporateLoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-4 py-3.5 px-4 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-[16px] transition-all duration-200 shadow-lg shadow-[#4F46E5]/25 disabled:opacity-60 flex items-center justify-center text-sm"
+            className="w-full mt-4 py-3.5 px-4 bg-[#0091FF] hover:bg-[#007EE5] text-white font-bold rounded-2xl transition-all duration-200 shadow-[0_4px_20px_rgba(0,145,255,0.4)] disabled:opacity-60 flex items-center justify-center text-sm sm:text-base"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -145,6 +149,15 @@ export const CorporateLoginPage: React.FC = () => {
             )}
           </button>
         </form>
+
+        <div className="mt-5 pt-4 border-t border-[#1C2C5E] text-center">
+          <Link
+            to="/login"
+            className="text-xs sm:text-sm font-semibold text-[#0091FF] hover:text-[#38BDF8] transition-colors"
+          >
+            ← Back to User Login
+          </Link>
+        </div>
       </div>
 
       {/* Standard User Dialog mirroring Flutter AlertDialog */}
@@ -152,29 +165,36 @@ export const CorporateLoginPage: React.FC = () => {
         <div
           role="dialog"
           aria-modal="true"
-          aria-labelledby="standard-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
         >
-          <div className="w-full max-w-md bg-[#0D0E15] border border-[#27272A] rounded-[24px] p-6 sm:p-8 shadow-2xl text-left">
-            <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="w-7 h-7 text-amber-400 shrink-0" />
-              <h2
-                id="standard-dialog-title"
-                className="text-lg font-bold text-white tracking-wide"
-              >
-                Standard Account Detected
-              </h2>
+          <div className="bg-[#0A0F29] border border-[#1E2954] rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl">
+            <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <AlertTriangle className="w-8 h-8" />
             </div>
-            <p className="text-white/70 text-sm leading-relaxed mb-6">
-              This email is not registered as a Corporate Admin. Please login as a normal user to access your personal dashboard.
-            </p>
-            <button
-              type="button"
-              onClick={() => navigate('/login')}
-              className="w-full py-3.5 px-4 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold rounded-[16px] transition-colors text-sm"
-            >
-              Back to Login
-            </button>
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-white">Standard Account Detected</h2>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                This email is not registered as a Corporate Admin. Please login as a normal user to access your personal dashboard.
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={() => navigate('/login', { replace: true })}
+                className="w-full py-3 px-4 bg-[#0084FF] hover:bg-[#0070DD] text-white font-bold rounded-2xl transition-all text-sm shadow-md"
+              >
+                Back to Login
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowStandardUserDialog(false)}
+                className="w-full py-2.5 px-4 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

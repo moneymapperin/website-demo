@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
 import { apiService } from '../services/apiService';
 import { setQrAuthInProgress } from '../context/AuthContext';
 
-export type QrSessionStatus = 'idle' | 'loading' | 'ready' | 'authenticated' | 'expired' | 'session_error' | 'generate_error';
+export type QrSessionStatus = 'loading' | 'ready' | 'authenticated' | 'expired' | 'session_error' | 'generate_error';
 
 export const QrLoginPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -18,11 +18,11 @@ export const QrLoginPanel: React.FC = () => {
   }, [navigate]);
 
   const [sessionToken, setSessionToken] = useState<string>('');
-  const [status, setStatus] = useState<QrSessionStatus>('idle');
+  const [status, setStatus] = useState<QrSessionStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('Login failed, please retry');
   const [secondsRemaining, setSecondsRemaining] = useState<number>(120);
 
-  const statusRef = useRef<QrSessionStatus>('idle');
+  const statusRef = useRef<QrSessionStatus>('loading');
   statusRef.current = status;
 
   const activeTokenRef = useRef<string>('');
@@ -338,14 +338,15 @@ export const QrLoginPanel: React.FC = () => {
     if (import.meta.env.DEV) {
       if (!hasInitializedRef.current) {
         hasInitializedRef.current = true;
+        initQrSessionRef.current();
       }
     } else {
+      initQrSessionRef.current();
     }
 
     const handleVisibilityChange = () => {
       if (
         !document.hidden &&
-        statusRef.current !== 'idle' &&
         statusRef.current !== 'expired' &&
         statusRef.current !== 'authenticated' &&
         statusRef.current !== 'loading'
@@ -402,41 +403,25 @@ export const QrLoginPanel: React.FC = () => {
   return (
     <div
       data-testid="qr-panel-placeholder"
-      className="lg:col-span-5 bg-[#0D0E15] border border-[#27272A] rounded-[24px] p-6 sm:p-8 shadow-xl flex flex-col items-center justify-between text-center relative overflow-hidden min-h-[460px]"
+      className="lg:col-span-5 bg-[#080E2A]/90 backdrop-blur-xl border border-[#1E3268] rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-[0_12px_40px_rgba(0,145,255,0.15)] flex flex-col items-center justify-between text-center relative overflow-hidden min-h-[460px]"
     >
       {/* Header */}
       <div>
-        <div className="w-12 h-12 mx-auto rounded-2xl bg-[#4F46E5]/10 border border-[#4F46E5]/20 flex items-center justify-center text-[#8B5CF6] mb-3">
+        <div className="w-12 h-12 mx-auto rounded-2xl bg-[#0091FF]/15 border border-[#0091FF]/40 flex items-center justify-center text-[#0091FF] mb-3 shadow-[0_0_14px_rgba(0,145,255,0.3)]">
           <QrCode className="w-6 h-6" />
         </div>
-        <h2 className="text-base font-bold text-white mb-1">Log in with QR Code</h2>
-        <p className="text-white/60 text-xs max-w-xs leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold text-white mb-1">Log in with QR Code</h2>
+        <p className="text-slate-300 text-xs max-w-xs leading-relaxed">
           Open MoneyMapper → Profile (or Corporate Dashboard) → QR scanner icon → scan this code
         </p>
       </div>
 
       {/* QR Display Area */}
       <div className="my-6 relative flex items-center justify-center">
-        <div className="p-4 bg-white rounded-2xl shadow-inner min-w-[216px] min-h-[216px] flex items-center justify-center relative">
-          {status === 'idle' && (
-            <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
-              <QrCode className="w-8 h-8 text-slate-400" />
-              <span className="text-xs font-semibold text-slate-600">Click to generate a secure QR code</span>
-              <button
-                type="button"
-                data-testid="qr-generate-button"
-                onClick={initQrSession}
-                className="inline-flex items-center gap-1.5 py-2 px-3.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-semibold transition-all shadow-md"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Generate QR Code</span>
-              </button>
-            </div>
-          )}
-
+        <div className="p-4 bg-white rounded-2xl shadow-inner min-w-[216px] min-h-[216px] flex items-center justify-center relative border border-slate-200">
           {status === 'loading' && (
             <div data-testid="qr-loading" className="flex flex-col items-center justify-center text-slate-500 gap-2">
-              <RefreshCw className="w-8 h-8 text-[#4F46E5] animate-spin" />
+              <RefreshCw className="w-8 h-8 text-[#0084FF] animate-spin" />
               <span className="text-xs font-semibold text-slate-600">Generating secure QR...</span>
             </div>
           )}
@@ -468,7 +453,7 @@ export const QrLoginPanel: React.FC = () => {
               <button
                 type="button"
                 onClick={initQrSession}
-                className="inline-flex items-center gap-1.5 py-2 px-3.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-semibold transition-all shadow-md"
+                className="inline-flex items-center gap-1.5 py-2 px-3.5 bg-[#0084FF] hover:bg-[#0070DD] text-white rounded-xl text-xs font-semibold transition-all shadow-md"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Refresh QR</span>

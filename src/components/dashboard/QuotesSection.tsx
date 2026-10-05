@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import logoImg from '../../assets/app/logo.png';
 
 export const QUOTES = [
   'Beware of little expenses; a small leak will sink a great ship. 🚢',
@@ -37,27 +36,21 @@ export const QuotesSection: React.FC<QuotesSectionProps> = ({ quoteOverride }) =
 
   return (
     <div
-      className="relative min-h-[105px] rounded-[22px] bg-gradient-to-br from-[#200B3B] via-[#3B126A] to-[#280B4D] border-[1.2px] border-[#5B1D99]/60 shadow-[0_6px_16px_rgba(32,11,59,0.5)] overflow-hidden p-4 sm:p-5 mb-4"
+      className="relative rounded-3xl bg-gradient-to-r from-[#200B3B] via-[#3B126A] to-[#280B4D] border-[1.2px] border-[#5B1D99]/60 shadow-[0_6px_16px_rgba(32,11,59,0.5)] overflow-hidden p-5 sm:p-6"
       data-testid="quotes-section"
     >
-      {/* Right Side Graphics: Arrow + Standalone MoneyMapper Logo */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-3 pointer-events-none select-none">
-        <svg className="w-6 h-6 text-[#A855F7] opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 19L19 5m0 0H8m11 0v11" />
-        </svg>
-        <img
-          src={logoImg}
-          alt="MoneyMapper Logo"
-          className="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-xl shrink-0"
-        />
-      </div>
-
-      {/* Quote text */}
-      <div className="relative z-10 flex items-start space-x-2.5 max-w-[75%] sm:max-w-[80%]">
-        <span className="text-3xl font-black leading-none text-[#A855F7] select-none">“</span>
-        <p className="text-[12.5px] leading-snug font-semibold text-white/95 mt-1">
-          {quote}
-        </p>
+      <div className="relative z-10 flex items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center space-x-3.5 flex-1">
+          <span className="text-3xl sm:text-4xl font-black leading-none text-[#A855F7] select-none shrink-0">“</span>
+          <p className="text-xs sm:text-sm md:text-base leading-relaxed font-semibold text-white/95">
+            {quote}
+          </p>
+        </div>
+        <div className="hidden sm:flex items-center text-[#A855F7]/70 shrink-0">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 19L19 5m0 0H8m11 0v11" />
+          </svg>
+        </div>
       </div>
     </div>
   );

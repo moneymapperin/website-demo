@@ -27,6 +27,7 @@ export const SCHEMA_TABLES: Record<SchemaName, readonly string[]> = {
     'app_logs',
     'web_sessions',
     'corporate_admins',
+    'market_sentiment',
   ],
   bse_data: [
     'stock_signals',
@@ -37,7 +38,6 @@ export const SCHEMA_TABLES: Record<SchemaName, readonly string[]> = {
     'blogs',
     'live_metal_rates',
     'user_subscriptions',
-    'market_sentiment',
   ],
   core: [
     'financial_fitness_scores',
@@ -202,7 +202,7 @@ export const TABLE_CONTRACTS: TableContract[] = [
     filters: ['user_id=eq'],
   },
   {
-    schema: 'bse_data',
+    schema: 'public',
     table: 'market_sentiment',
     operations: ['SELECT'],
     columnsRead: ['*'],

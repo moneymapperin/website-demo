@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, User, Phone, CheckCircle2 } from 'lucide-react';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 import { authService } from '../services/authService';
-
-const SIGNUP_COOLDOWN_SECONDS = 30;
-const PASSWORD_RULE_MESSAGE = 'Password must be at least 8 characters and include 1 uppercase letter, 1 lowercase letter and 1 number.';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,23 +16,11 @@ export const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  useEffect(() => {
-    if (cooldown <= 0) return;
-
-    const intervalId = setInterval(() => {
-      setCooldown((remaining) => remaining - 1);
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [cooldown]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cooldown > 0) return;
     setErrorMessage(null);
 
     const trimmedName = fullName.trim();
@@ -44,22 +29,6 @@ export const RegisterPage: React.FC = () => {
 
     if (!trimmedName || !trimmedEmail || !trimmedMobile || !password || !confirmPassword) {
       setErrorMessage('Please fill in all fields');
-      return;
-    }
-
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-      setErrorMessage(PASSWORD_RULE_MESSAGE);
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setErrorMessage('Please enter a valid email address');
-      return;
-    }
-
-    const mobileDigits = trimmedMobile.replace(/\D/g, '');
-    if (mobileDigits.length < 10) {
-      setErrorMessage('Please enter a valid mobile number');
       return;
     }
 
@@ -77,69 +46,97 @@ export const RegisterPage: React.FC = () => {
       });
       setShowSuccessDialog(true);
     } catch (err: any) {
-      const message = err.message || 'Registration failed. Please try again.';
-      setErrorMessage(message);
-      if (message.startsWith('Too many sign-up attempts')) {
-        setCooldown(SIGNUP_COOLDOWN_SECONDS);
-      }
+      setErrorMessage(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthPageLayout
-      title="Create account"
-      subtitle="Join MoneyMapper to track your financial health"
-      showBack
-      maxWidth="md"
-    >
-      <div className="bg-[#0D0E15] border border-[#27272A] rounded-[24px] p-6 sm:p-8 shadow-xl">
+    <AuthPageLayout showBack maxWidth="lg">
+      <div className="bg-[#080E2A]/90 backdrop-blur-xl border border-[#1E3268] rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-[0_12px_40px_rgba(0,145,255,0.15)]">
+        <div className="mb-5 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Create account
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1">
+            Join MoneyMapper to track your financial health
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {errorMessage && (
             <div
               role="alert"
-              className="p-4 rounded-[16px] bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium"
+              className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm font-medium"
             >
               {errorMessage}
             </div>
           )}
 
-          {/* Full Name */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="register-fullname"
-              className="block text-sm font-medium text-white/90"
-            >
-              Full Name
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
-                <User className="w-5 h-5" />
+          {/* Row 1: Full Name & Mobile Number */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Full Name */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="register-fullname"
+                className="block text-sm font-medium text-slate-200"
+              >
+                Full Name
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <User className="w-5 h-5" />
+                </div>
+                <input
+                  id="register-fullname"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={loading}
+                  placeholder="John Doe"
+                  autoComplete="name"
+                  className="w-full pl-12 pr-4 py-3 bg-[#070B1F]/90 border border-[#1E2954] rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-[#0084FF] focus:ring-1 focus:ring-[#0084FF] transition-all text-sm disabled:opacity-50"
+                />
               </div>
-              <input
-                id="register-fullname"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                disabled={loading}
-                placeholder="John Doe"
-                autoComplete="name"
-                className="w-full pl-11 pr-4 py-3.5 bg-white/[0.04] border border-[#27272A] rounded-[16px] text-white placeholder-white/30 focus:outline-none focus:border-[#4F46E5] focus:ring-1 focus:ring-[#4F46E5] transition-all text-sm disabled:opacity-50"
-              />
+            </div>
+
+            {/* Mobile Number */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="register-mobile"
+                className="block text-sm font-medium text-slate-200"
+              >
+                Mobile Number
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <input
+                  id="register-mobile"
+                  type="tel"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  disabled={loading}
+                  placeholder="+91 98765 43210"
+                  autoComplete="tel"
+                  className="w-full pl-12 pr-4 py-3 bg-[#070B1F]/90 border border-[#1E2954] rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-[#0084FF] focus:ring-1 focus:ring-[#0084FF] transition-all text-sm disabled:opacity-50"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Email Address */}
+          {/* Row 2: Email Address */}
           <div className="space-y-1.5">
             <label
               htmlFor="register-email"
-              className="block text-sm font-medium text-white/90"
+              className="block text-sm font-medium text-slate-200"
             >
               Email Address
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                 <Mail className="w-5 h-5" />
               </div>
               <input
@@ -150,153 +147,127 @@ export const RegisterPage: React.FC = () => {
                 disabled={loading}
                 placeholder="name@example.com"
                 autoComplete="email"
-                className="w-full pl-11 pr-4 py-3.5 bg-white/[0.04] border border-[#27272A] rounded-[16px] text-white placeholder-white/30 focus:outline-none focus:border-[#4F46E5] focus:ring-1 focus:ring-[#4F46E5] transition-all text-sm disabled:opacity-50"
+                className="w-full pl-12 pr-4 py-3 bg-[#070B1F]/90 border border-[#1E2954] rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-[#0084FF] focus:ring-1 focus:ring-[#0084FF] transition-all text-sm disabled:opacity-50"
               />
             </div>
           </div>
 
-          {/* Mobile Number */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="register-mobile"
-              className="block text-sm font-medium text-white/90"
-            >
-              Mobile Number
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
-                <Phone className="w-5 h-5" />
-              </div>
-              <input
-                id="register-mobile"
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                disabled={loading}
-                placeholder="+91 98765 43210"
-                autoComplete="tel"
-                className="w-full pl-11 pr-4 py-3.5 bg-white/[0.04] border border-[#27272A] rounded-[16px] text-white placeholder-white/30 focus:outline-none focus:border-[#4F46E5] focus:ring-1 focus:ring-[#4F46E5] transition-all text-sm disabled:opacity-50"
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="register-password"
-              className="block text-sm font-medium text-white/90"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
-                <Lock className="w-5 h-5" />
-              </div>
-              <input
-                id="register-password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-                placeholder="••••••••"
-                autoComplete="new-password"
-                className="w-full pl-11 pr-12 py-3.5 bg-white/[0.04] border border-[#27272A] rounded-[16px] text-white placeholder-white/30 focus:outline-none focus:border-[#4F46E5] focus:ring-1 focus:ring-[#4F46E5] transition-all text-sm disabled:opacity-50"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/40 hover:text-white/80 transition-colors"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+          {/* Row 3: Password & Confirm Password */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="register-password"
+                className="block text-sm font-medium text-slate-200"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="register-confirm-password"
-              className="block text-sm font-medium text-white/90"
-            >
-              Confirm Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
-                <Lock className="w-5 h-5" />
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <input
+                  id="register-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  className="w-full pl-12 pr-12 py-3 bg-[#070B1F]/90 border border-[#1E2954] rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-[#0084FF] focus:ring-1 focus:ring-[#0084FF] transition-all text-sm disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
-              <input
-                id="register-confirm-password"
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loading}
-                placeholder="••••••••"
-                autoComplete="new-password"
-                className="w-full pl-11 pr-12 py-3.5 bg-white/[0.04] border border-[#27272A] rounded-[16px] text-white placeholder-white/30 focus:outline-none focus:border-[#4F46E5] focus:ring-1 focus:ring-[#4F46E5] transition-all text-sm disabled:opacity-50"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/40 hover:text-white/80 transition-colors"
-                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="register-confirm-password"
+                className="block text-sm font-medium text-slate-200"
               >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+                Confirm Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <input
+                  id="register-confirm-password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={loading}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  className="w-full pl-12 pr-12 py-3 bg-[#070B1F]/90 border border-[#1E2954] rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-[#0084FF] focus:ring-1 focus:ring-[#0084FF] transition-all text-sm disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white transition-colors"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || cooldown > 0}
-            className="w-full mt-4 py-3.5 px-4 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-[16px] transition-all duration-200 shadow-lg shadow-[#4F46E5]/25 disabled:opacity-60 flex items-center justify-center text-sm"
+            disabled={loading}
+            className="w-full !mt-5 py-3.5 px-4 bg-[#0091FF] hover:bg-[#007EE5] text-white font-bold rounded-2xl transition-all duration-200 shadow-[0_4px_20px_rgba(0,145,255,0.4)] disabled:opacity-60 flex items-center justify-center text-sm sm:text-base"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : cooldown > 0 ? (
-              `Try again in ${cooldown}s`
             ) : (
               'Register'
             )}
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-[#27272A] text-center">
+        <div className="mt-5 pt-4 border-t border-[#1C2C5E] text-center">
           <Link
             to="/login"
-            className="text-sm text-white/80 hover:text-white transition-colors"
+            className="text-xs sm:text-sm font-semibold text-[#0091FF] hover:text-[#38BDF8] transition-colors"
           >
             Already have an account? Login
           </Link>
         </div>
       </div>
 
-      {/* Registration Success Modal mirroring Flutter AlertDialog */}
+      {/* Success Dialog */}
       {showSuccessDialog && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-labelledby="success-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
         >
-          <div className="w-full max-w-md bg-[#0D0E15] border border-[#27272A] rounded-[24px] p-6 sm:p-8 shadow-2xl text-left">
-            <div className="flex items-center gap-3 mb-4">
-              <CheckCircle2 className="w-7 h-7 text-emerald-500 shrink-0" />
-              <h2
-                id="success-dialog-title"
-                className="text-lg font-bold text-white tracking-wide"
-              >
-                Registration Successful
-              </h2>
+          <div className="bg-[#0A0F29] border border-[#1E2954] rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl">
+            <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 className="w-8 h-8" />
             </div>
-            <p className="text-white/70 text-sm leading-relaxed mb-6">
-              Your account has been created! Please check your email inbox to verify your account before logging in.
-            </p>
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-white">Registration Successful</h2>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                Your account has been created! Please check your email inbox to verify your account before logging in.
+              </p>
+            </div>
+
             <button
               type="button"
-              onClick={() => navigate('/login')}
-              className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-[16px] transition-colors text-sm"
+              onClick={() => navigate('/login', { replace: true })}
+              className="w-full py-3 px-4 bg-[#0084FF] hover:bg-[#0070DD] text-white font-bold rounded-2xl transition-all text-sm shadow-md"
             >
               Back to Login
             </button>
