@@ -4,13 +4,27 @@ import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 import { usePlan } from '../../hooks/usePlan';
 import { useIdleLogout } from '../../hooks/useIdleLogout';
+import { useSubscriptionSync } from '../../hooks/useSubscriptionSync';
 import { authService } from '../../services/authService';
 import {
   APP_COLORS,
   FINANCIAL_PILLARS,
   PREMIUM_PILLAR_TITLES,
+  SIDEBAR_PILLARS,
   NAV_ITEMS,
 } from '../../theme/tokens';
+import {
+  ShieldCheck,
+  Wallet,
+  Target,
+  BarChart3,
+  ShieldPlus,
+  ChevronRight,
+  Lock,
+  Home,
+  BookOpen,
+  User,
+} from 'lucide-react';
 import logoImg from '../../assets/app/logo.png';
 import mascotImg from '../../assets/app/mascot.png';
 
@@ -18,8 +32,46 @@ export interface AppShellProps {
   children?: React.ReactNode;
 }
 
+const hexToRgba = (hex: string, alpha: number) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+const getSidebarPillarIcon = (title: string) => {
+  switch (title) {
+    case 'Insurance Dashboard':
+      return ShieldCheck;
+    case 'Income Pillar Matrix':
+      return Wallet;
+    case 'Weekly Expense Predictor':
+      return Target;
+    case 'Mutual Fund Dashboard':
+      return BarChart3;
+    case 'Emergency Readiness':
+      return ShieldPlus;
+    default:
+      return ShieldCheck;
+  }
+};
+
+const getBottomNavIcon = (id: string) => {
+  switch (id) {
+    case 'home':
+      return Home;
+    case 'insights':
+      return BookOpen;
+    case 'profile':
+      return User;
+    default:
+      return null;
+  }
+};
+
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   useIdleLogout();
+  useSubscriptionSync();
 
   const { effectiveTheme, toggleTheme } = useTheme();
   const isDark = effectiveTheme === 'dark';
@@ -80,11 +132,41 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     navigate(pillar.webRoute);
   };
 
+  const handleSidebarPillarClick = (pillar: (typeof SIDEBAR_PILLARS)[number]) => {
+    const isLocked = pillar.isPremium && !canAccessPremium;
+
+    if (isLocked) {
+      showToast({
+        message: 'Upgrade to PRO to unlock this pillar! 🚀',
+        backgroundColor: APP_COLORS.accent,
+        action: {
+          label: 'UPGRADE',
+          onClick: () => {
+            navigate('/subscription');
+          },
+        },
+      });
+      return;
+    }
+
+    navigate(pillar.webRoute);
+  };
+
   const isRouteActive = (route: string) => {
     if (!route) return false;
     const path = location.pathname;
     if (path === route) return true;
     if (route !== '/' && route !== '/dashboard' && path.startsWith(route)) return true;
+    return false;
+  };
+
+  const isPillarActive = (webRoute: string) => {
+    const path = location.pathname;
+    if (path === webRoute) return true;
+    if (webRoute === '/pillars/expenses' && (path === '/pillars/weekly-expense' || path.startsWith('/pillars/weekly-expense'))) return true;
+    if (webRoute === '/pillars/emergency' && (path === '/pillars/emergency-fund' || path.startsWith('/pillars/emergency-fund'))) return true;
+    if (webRoute === '/pillars/investments' && (path === '/pillars/mutual-fund' || path.startsWith('/pillars/mutual-fund'))) return true;
+    if (webRoute !== '/' && webRoute !== '/dashboard' && path.startsWith(webRoute)) return true;
     return false;
   };
 
@@ -118,7 +200,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         </div>
 
         {/* Navigation Content */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
           {/* Main Navigation Links */}
           <nav className="space-y-1">
             {NAV_ITEMS.map((item) => {
@@ -151,81 +233,83 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             })}
           </nav>
 
-          {/* Financial Pillars Section */}
+          {/* 5 Clickable Pillar Cards */}
           <div className="space-y-2">
-            <div className="px-2 flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-zinc-400">
-                Financial Pillars
-              </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800/10 dark:bg-zinc-800 text-zinc-400">
-                5 ACTIVE
-              </span>
-            </div>
+            {SIDEBAR_PILLARS.map((pillar) => {
+              const Icon = getSidebarPillarIcon(pillar.title);
+              const isLocked = pillar.isPremium && !canAccessPremium;
+              const active = isPillarActive(pillar.webRoute);
 
-            <div className="space-y-1.5">
-              {FINANCIAL_PILLARS.map((pillar) => {
-                const isPremium = PREMIUM_PILLAR_TITLES.includes(
-                  pillar.title as (typeof PREMIUM_PILLAR_TITLES)[number]
-                );
-                const isLocked = isPremium && !canAccessPremium;
-                const active = isRouteActive(pillar.webRoute);
-
-                return (
-                  <button
-                    key={pillar.title}
-                    data-testid={`pillar-nav-${pillar.title.toLowerCase().replace(/\s+/g, '-')}`}
-                    onClick={() => handlePillarClick(pillar)}
-                    style={{
-                      backgroundColor: active
-                        ? 'rgba(79, 70, 229, 0.12)'
-                        : isDark
-                        ? APP_COLORS.darkBackground
-                        : '#F3F7FC',
-                      borderColor: active
-                        ? APP_COLORS.primary
-                        : isDark
-                        ? APP_COLORS.darkBorder
-                        : APP_COLORS.borderLight,
-                      opacity: isLocked ? 0.65 : 1,
-                    }}
-                    className={`w-full text-left p-2.5 rounded-xl border flex items-center justify-between gap-3 transition-all duration-150 ${
-                      active ? 'ring-1 ring-indigo-500' : 'hover:border-indigo-400/50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
-                        style={{
-                          backgroundColor: isLocked ? '#71717A20' : `${pillar.color}25`,
-                          color: isLocked ? '#71717A' : pillar.color,
-                        }}
-                      >
-                        {pillar.emoji}
-                      </div>
-                      <div className="min-w-0">
-                        <div
-                          className="text-xs font-bold truncate"
-                          style={{
-                            color: isDark ? APP_COLORS.textPrimaryDark : APP_COLORS.textPrimaryLight,
-                          }}
-                        >
-                          {pillar.title}
-                        </div>
-                        <div className="text-[10px] text-zinc-400 truncate">
-                          {pillar.desc}
-                        </div>
-                      </div>
+              return (
+                <button
+                  key={pillar.title}
+                  type="button"
+                  data-testid={`pillar-nav-${pillar.title.toLowerCase().replace(/\s+/g, '-')}`}
+                  onClick={() => handleSidebarPillarClick(pillar)}
+                  style={{
+                    backgroundColor: active
+                      ? 'rgba(79, 70, 229, 0.12)'
+                      : isDark
+                      ? APP_COLORS.darkBackground
+                      : '#F3F7FC',
+                    borderColor: active
+                      ? APP_COLORS.primary
+                      : isDark
+                      ? APP_COLORS.darkBorder
+                      : APP_COLORS.borderLight,
+                    borderWidth: '0.8px',
+                  }}
+                  className={`w-full text-left px-3 py-2.5 rounded-[14px] border flex items-center justify-between gap-3 transition-all duration-150 cursor-pointer ${
+                    active ? 'ring-1 ring-indigo-500' : 'hover:border-indigo-400/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div
+                      className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center"
+                      style={{
+                        backgroundColor: isLocked
+                          ? 'rgba(113, 113, 122, 0.12)'
+                          : hexToRgba(pillar.color, 0.12),
+                      }}
+                    >
+                      <Icon
+                        className="w-4 h-4"
+                        style={{ color: isLocked ? '#71717A' : pillar.color }}
+                      />
                     </div>
 
-                    {isLocked ? (
-                      <span className="text-amber-400 text-xs shrink-0">🔒</span>
-                    ) : (
-                      <span className="text-zinc-400 text-xs shrink-0">→</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+                    <div className="min-w-0 flex-1">
+                      <div
+                        className="text-[13px] font-bold truncate leading-tight"
+                        style={{
+                          color: isDark ? APP_COLORS.textPrimaryDark : APP_COLORS.textPrimaryLight,
+                          opacity: isLocked ? 0.5 : 1,
+                        }}
+                      >
+                        {pillar.title}
+                      </div>
+                      <div
+                        className="text-[10px] text-zinc-400 truncate mt-0.5 leading-tight"
+                        style={{
+                          opacity: isLocked ? 0.4 : 1,
+                        }}
+                      >
+                        {pillar.desc}
+                      </div>
+                    </div>
+                  </div>
+
+                  {isLocked ? (
+                    <Lock
+                      className="w-3.5 h-3.5 shrink-0"
+                      style={{ color: '#FFD700' }}
+                    />
+                  ) : (
+                    <ChevronRight className="w-3 h-3 text-zinc-400 shrink-0" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -503,7 +587,10 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                     backgroundColor: active ? 'rgba(79, 70, 229, 0.15)' : 'transparent',
                   }}
                 >
-                  ●
+                  {(() => {
+                    const IconComponent = getBottomNavIcon(item.id);
+                    return IconComponent ? <IconComponent className="w-5 h-5" /> : null;
+                  })()}
                 </div>
               )}
               <span className="text-[10px]">{item.label}</span>

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Search, Lock, X, PieChart } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Search, Lock } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
 import { useToast } from '../context/ToastContext';
 import { LockedCardPlaceholder, LockedRowPlaceholder, ProSearchLock, ProUpsellBlock } from '../components/market/ProAccessComponents';
-import { ScoreCardAdvisor } from '../services/marketAdvisor';
 import { ResilienceUtils } from '../services/resilienceUtils';
+import { BrandLogo } from '../components/market/BrandLogo';
 
 export const MutualFundScreenerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +24,6 @@ export const MutualFundScreenerPage: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(50);
 
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
-  const [selectedFundForAdvice, setSelectedFundForAdvice] = useState<any | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -64,7 +63,7 @@ export const MutualFundScreenerPage: React.FC = () => {
   const displayList = filteredFunds.slice(0, visibleCount);
   const visibleFunds = isPro ? displayList : displayList.slice(0, 1);
 
-  const handleFundClick = (fund: any, index: number) => {
+  const handleFundClick = (_fund: any, index: number) => {
     const isLocked = !isPro && index > 0;
     if (isLocked) {
       showToast({
@@ -75,9 +74,7 @@ export const MutualFundScreenerPage: React.FC = () => {
           onClick: () => navigate('/subscription'),
         },
       });
-      return;
     }
-    setSelectedFundForAdvice(fund);
   };
 
   return (
@@ -109,42 +106,6 @@ export const MutualFundScreenerPage: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-6 space-y-6">
-        {/* Web Analytics KPI Summary Bar */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-slate-400">Total Funds</span>
-            <div className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
-              {allFunds.length} <span className="text-xs font-normal text-slate-400">Schemes</span>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400">High Final Score (&gt;75)</span>
-            <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {allFunds.filter((f) => ResilienceUtils.safeDouble(f.final_score) >= 75).length}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400">Aggressive Growth</span>
-            <div className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
-              {allFunds.filter((f) => f.cluster === 'Aggressive').length}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-amber-500">Avg 3Y CAGR</span>
-            <div className="text-xl font-black text-amber-500 mt-0.5">
-              {allFunds.length > 0
-                ? (
-                    allFunds.reduce((a, b) => a + ResilienceUtils.safeDouble(b.cagr_3y), 0) /
-                    allFunds.length
-                  ).toFixed(1)
-                : '0.0'}
-              %
-            </div>
-          </div>
-        </div>
 
         {/* Search and Filters Bar */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
@@ -278,8 +239,7 @@ export const MutualFundScreenerPage: React.FC = () => {
                       <th className="py-3.5 px-4">RISK</th>
                       <th className="py-3.5 px-4">GROWTH</th>
                       <th className="py-3.5 px-4">3Y CAGR</th>
-                      <th className="py-3.5 px-4">SCORE</th>
-                      <th className="py-3.5 px-4 text-right">ACTION</th>
+                      <th className="py-3.5 px-4 text-right">SCORE</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
@@ -294,14 +254,10 @@ export const MutualFundScreenerPage: React.FC = () => {
                         <tr
                           key={f.id || idx}
                           data-testid={`mf-card-${idx}`}
-                          onClick={() => handleFundClick(f, idx)}
-                          className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
                         >
                           <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">
                             <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs shrink-0">
-                                <PieChart className="w-3.5 h-3.5" />
-                              </div>
+                              <BrandLogo name={f.fund_house || f.scheme_name || ''} size={28} />
                               <div>
                                 <div className="font-black text-slate-900 dark:text-white line-clamp-1">
                                   {f.scheme_name || 'Unknown Fund'}
@@ -320,18 +276,10 @@ export const MutualFundScreenerPage: React.FC = () => {
                           <td className="py-3.5 px-4 font-black text-rose-500">{riskScore}</td>
                           <td className="py-3.5 px-4 font-black text-emerald-500">{growthScore}</td>
                           <td className="py-3.5 px-4 font-black text-amber-500">{cagr3y}%</td>
-                          <td className="py-3.5 px-4 font-black">
+                          <td className="py-3.5 px-4 font-black text-right">
                             <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black">
                               {finalScore}
                             </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <button
-                              type="button"
-                              className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition shadow-xs"
-                            >
-                              Analyze
-                            </button>
                           </td>
                         </tr>
                       );
@@ -361,21 +309,18 @@ export const MutualFundScreenerPage: React.FC = () => {
                     <div
                       key={f.id || idx}
                       data-testid={`mf-card-${idx}`}
-                      onClick={() => handleFundClick(f, idx)}
-                      className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm cursor-pointer hover:border-indigo-400 transition-all"
+                      className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm"
                     >
                       <div className="space-y-4">
                         <div className="flex items-start justify-between gap-4">
-                          <div>
+                          <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs">
-                                <PieChart className="w-4 h-4" />
-                              </div>
-                              <div>
+                              <BrandLogo name={f.fund_house || f.scheme_name || ''} size={32} />
+                              <div className="min-w-0">
                                 <h3 className="font-black text-base text-slate-900 dark:text-white line-clamp-1">
                                   {f.scheme_name || 'Unknown Fund'}
                                 </h3>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                                   {f.category || ''} • {f.fund_house || ''}
                                 </p>
                               </div>
@@ -446,38 +391,6 @@ export const MutualFundScreenerPage: React.FC = () => {
         )}
       </main>
 
-      {/* Fund Advice Modal */}
-      {selectedFundForAdvice && (
-        <div
-          data-testid="mf-advice-modal"
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4"
-        >
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase text-indigo-600 dark:text-indigo-400">
-                AI Fund Analysis
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedFundForAdvice(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="text-xs md:text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed font-mono">
-              {ScoreCardAdvisor.generateMfAdvice(selectedFundForAdvice)}
-            </div>
-            <button
-              type="button"
-              onClick={() => setSelectedFundForAdvice(null)}
-              className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors"
-            >
-              Close Analysis
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

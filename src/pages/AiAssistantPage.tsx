@@ -8,18 +8,7 @@ import mascotImg from '../assets/app/mascot.png';
 import {
   Send,
   Lock,
-  Menu,
   ChevronRight,
-  Bell,
-  Paperclip,
-  Mic,
-  TrendingUp,
-  PieChart,
-  Shield,
-  Calendar,
-  ArrowRight,
-  FileText,
-  DollarSign,
 } from 'lucide-react';
 
 /**
@@ -78,52 +67,13 @@ export const AiAssistantPage: React.FC = () => {
   const suggestions = [
     { label: '📊 Reliance Stock', query: 'Reliance stock score' },
     { label: '📈 SBI Mutual Fund', query: 'SBI Bluechip Mutual Fund' },
-    { label: '🛡️ Health Insurance', query: 'HDFC Ergo Health Insurance' },
     { label: '🚀 Upcoming IPOs', query: 'Upcoming IPO score' },
     { label: '🚨 Emergency Fund', query: 'Emergency Fund' },
     { label: '📅 Weekly Expenses', query: 'Weekly Expenses' },
     { label: '👤 Edit Profile', query: 'Edit Profile' },
   ];
 
-  // Feature cards matching Image 1
-  const featureCards = [
-    {
-      title: 'Market Insights',
-      desc: 'Get real-time stock analysis and recommendations',
-      icon: <TrendingUp className="w-5 h-5 text-blue-400" />,
-      bg: 'bg-[#0F172A]',
-      route: '/market/stocks',
-    },
-    {
-      title: 'Mutual Funds',
-      desc: 'Find funds matching your goals and risk profile',
-      icon: <PieChart className="w-5 h-5 text-purple-400" />,
-      bg: 'bg-[#1E1B4B]',
-      route: '/market/funds',
-    },
-    {
-      title: 'Insurance Guidance',
-      desc: 'Compare and choose the best insurance plans',
-      icon: <Shield className="w-5 h-5 text-emerald-400" />,
-      bg: 'bg-[#064E3B]',
-      route: '/pillars/insurance',
-    },
-    {
-      title: 'Expense Planner',
-      desc: 'Track, predict and optimize your expenses',
-      icon: <Calendar className="w-5 h-5 text-amber-400" />,
-      bg: 'bg-[#451A03]',
-      route: '/pillars/expenses',
-    },
-  ];
 
-  // Popular questions matching Image 1
-  const popularQuestions = [
-    { label: 'Summarize my current financial health', icon: <FileText className="w-3.5 h-3.5 text-blue-400" /> },
-    { label: 'Show my upcoming bill payments', icon: <Calendar className="w-3.5 h-3.5 text-amber-400" /> },
-    { label: 'Best tax saving options this year', icon: <FileText className="w-3.5 h-3.5 text-emerald-400" /> },
-    { label: 'How much should I save monthly?', icon: <DollarSign className="w-3.5 h-3.5 text-purple-400" /> },
-  ];
 
   // Initialize with welcome message on mount
   useEffect(() => {
@@ -230,55 +180,25 @@ export const AiAssistantPage: React.FC = () => {
         }}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              data-testid="ai-menu-button"
-              className="md:hidden p-1.5 rounded-lg text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
-              onClick={() => {
-                const drawerBtn = document.querySelector('[data-testid="drawer-toggle-button"]');
-                if (drawerBtn instanceof HTMLElement) drawerBtn.click();
-              }}
-              aria-label="Open navigation drawer"
-            >
-              <Menu size={22} />
-            </button>
-            <div className="flex items-center gap-2.5">
-              <img
-                src={mascotImg}
-                alt="MoneyMapper Mascot"
-                data-testid="ai-header-mascot"
-                className="w-10 h-10 object-contain drop-shadow"
-              />
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                  AI Assistant
-                </h1>
-                {!isPro && isAiAccessible && (
-                  <span
-                    data-testid="ai-trial-badge"
-                    className="px-2 py-0.5 text-[9px] font-black tracking-wide rounded-md border text-amber-500 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-400/10 border-amber-500/30 dark:border-amber-400/30"
-                  >
-                    TRIAL: {trialDays}D LEFT
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Top Right Controls: Notification Bell, User Avatar */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="relative p-2 rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-700 dark:text-white transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
-            </button>
-
-            <div className="w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center border border-indigo-400 shadow-sm">
-              PK
+          <div className="flex items-center gap-2.5">
+            <img
+              src={mascotImg}
+              alt="MoneyMapper Mascot"
+              data-testid="ai-header-mascot"
+              className="w-10 h-10 object-contain drop-shadow"
+            />
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                AI Assistant
+              </h1>
+              {!isPro && isAiAccessible && (
+                <span
+                  data-testid="ai-trial-badge"
+                  className="px-2 py-0.5 text-[9px] font-black tracking-wide rounded-md border text-amber-500 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-400/10 border-amber-500/30 dark:border-amber-400/30"
+                >
+                  TRIAL: {trialDays}D LEFT
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -351,105 +271,7 @@ export const AiAssistantPage: React.FC = () => {
             </div>
           )}
 
-          {/* Hero Banner Card matching Image 1 */}
-          <div className="relative overflow-hidden rounded-3xl p-6 md:p-8 bg-white dark:bg-gradient-to-r dark:from-[#170E3B] dark:via-[#1F1250] dark:to-[#0F1C42] border border-slate-200/80 dark:border-indigo-500/30 shadow-sm dark:shadow-2xl text-slate-900 dark:text-white transition-colors">
-            {/* Background subtle glow circles */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/15 blur-[100px] pointer-events-none" />
 
-            <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6">
-              {/* Mascot image */}
-              <img
-                src={mascotImg}
-                alt="AI Assistant Mascot"
-                className="w-28 h-28 md:w-36 md:h-36 object-contain shrink-0 drop-shadow-[0_10px_25px_rgba(79,70,229,0.25)]"
-              />
-
-              <div className="flex-1 text-center md:text-left space-y-3">
-                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  Hi! I'm your{' '}
-                  <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 dark:from-indigo-400 dark:via-purple-300 dark:to-pink-400 bg-clip-text text-transparent">
-                    AI Assistant.
-                  </span>
-                </h2>
-
-                <p className="text-xs md:text-sm text-slate-600 dark:text-white/80 leading-relaxed max-w-2xl font-medium">
-                  You can ask me questions about your financial pillars, mutual funds, or ask me to redirect you anywhere in the app!
-                </p>
-
-                {/* 4 Quick Action Prompt Buttons */}
-                <div className="pt-2 flex flex-wrap gap-2.5 justify-center md:justify-start">
-                  {[
-                    { label: "📊 What's today's best stock for me?", query: "What's today's best stock for me?" },
-                    { label: '📈 Which mutual fund suits my long-term goals?', query: 'Which mutual fund suits my long-term goals?' },
-                    { label: '🐷 Best liquid fund for my emergency needs?', query: 'Best liquid fund for my emergency needs?' },
-                    { label: '🛡️ Which insurance fits my budget?', query: 'Which insurance fits my budget?' },
-                  ].map((item, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleSendMessage(item.query)}
-                      className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 border border-slate-200/80 dark:border-white/15 text-xs font-bold text-slate-800 dark:text-white transition-all active:scale-95 text-left shadow-xs"
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 4 Feature Category Cards matching Image 1 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {featureCards.map((card, idx) => (
-              <div
-                key={idx}
-                onClick={() => navigate(card.route)}
-                className="p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 hover:border-indigo-500/50 transition-all cursor-pointer flex flex-col justify-between group shadow-sm dark:shadow-lg"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">{card.icon}</div>
-                    <div className="w-7 h-7 rounded-full bg-indigo-600/10 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">{card.title}</h3>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">{card.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Popular Questions Section matching Image 1 */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                <span>💡</span> Popular Questions
-              </h3>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('Summarize my financial health')}
-                className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-              >
-                View All &gt;
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {popularQuestions.map((q, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSendMessage(q.label)}
-                  className="p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 hover:border-indigo-500/40 text-xs font-bold text-slate-800 dark:text-white/90 text-left flex items-center gap-2.5 transition-all hover:bg-slate-50 dark:hover:bg-zinc-800/50 shadow-xs dark:shadow-none"
-                >
-                  <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shrink-0">{q.icon}</div>
-                  <span className="truncate">{q.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Live Chat Messages Stream */}
           <div data-testid="chat-messages-container" className="space-y-4 pt-4">
@@ -559,10 +381,6 @@ export const AiAssistantPage: React.FC = () => {
               }}
               className="flex items-center gap-3"
             >
-              <button type="button" className="p-2 rounded-xl text-slate-400 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
-                <Paperclip className="w-4 h-4" />
-              </button>
-
               <input
                 type="text"
                 data-testid="ai-query-input"
@@ -572,10 +390,6 @@ export const AiAssistantPage: React.FC = () => {
                 disabled={isTyping}
                 className="flex-1 bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 font-medium"
               />
-
-              <button type="button" className="p-2 rounded-xl text-slate-400 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
-                <Mic className="w-4 h-4" />
-              </button>
 
               <button
                 type="submit"

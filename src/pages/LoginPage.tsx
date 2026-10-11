@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, Briefcase } from 'lucide-react';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 import { authService } from '../services/authService';
 import { QrLoginPanel } from '../components/QrLoginPanel';
-import { supabase } from '../lib/supabase';
 
 const LOGIN_COOLDOWN_KEY = 'mm_login_cooldown_until';
 const LOGIN_COOLDOWN_SECONDS = 30;
+const PENDING_GOOGLE_LOGIN_KEY = 'mm_pending_google_login';
 
 export const LoginPage: React.FC = () => {
   const location = useLocation();
@@ -19,6 +19,45 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  const pendingGoogleLoginRef = useRef(false);
+
+  // Show an oauthError passed through navigation state on mount
+  useEffect(() => {
+    const oauthError = (location.state as any)?.oauthError;
+    if (oauthError) {
+      setErrorMessage(oauthError);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, []);
+
+  // Back-button / bfcache handler
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      const isPending =
+        pendingGoogleLoginRef.current ||
+        (() => {
+          try {
+            return sessionStorage.getItem(PENDING_GOOGLE_LOGIN_KEY) === 'true';
+          } catch {
+            return false;
+          }
+        })();
+
+      if (event.persisted && isPending) {
+        pendingGoogleLoginRef.current = false;
+        try {
+          sessionStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
+        } catch {}
+        setLoading(false);
+        setErrorMessage('Google sign-in was abandoned or unsuccessful.');
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -92,15 +131,28 @@ export const LoginPage: React.FC = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    setErrorMessage(null);
+    setLoading(true);
+    pendingGoogleLoginRef.current = true;
     try {
-      await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
+      sessionStorage.setItem(
+        'oauth_post_login_path',
+        (location.state as any)?.from?.pathname || '/dashboard'
+      );
+      sessionStorage.setItem(PENDING_GOOGLE_LOGIN_KEY, 'true');
+    } catch {
+      // ignore
+    }
+
+    try {
+      await authService.signInWithGoogle();
     } catch (err: any) {
+      pendingGoogleLoginRef.current = false;
+      try {
+        sessionStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
+      } catch {}
       setErrorMessage(err.message || 'Google sign in could not be initiated.');
+      setLoading(false);
     }
   };
 
@@ -234,7 +286,9 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="w-full py-3.5 px-4 rounded-2xl border border-[#1C2C5E] bg-[#050A1E]/80 hover:bg-[#0E163B] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2.5 transition-all shadow-sm"
+              disabled={loading}
+              aria-busy={loading}
+              className="w-full py-3.5 px-4 rounded-2xl border border-[#1C2C5E] bg-[#050A1E]/80 hover:bg-[#0E163B] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2.5 transition-all shadow-sm disabled:opacity-60"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

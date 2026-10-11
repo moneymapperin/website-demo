@@ -257,23 +257,44 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
           // Safe catch
         }
 
-        // Corporate admin check + navigation
-        const userEmail = sessionData.user?.email || '';
-        let isCorporate = false;
-        if (userEmail) {
+        const rejectSession = async (message: string) => {
           try {
-            const admin = await apiService.getCorporateAdmin(userEmail);
-            if (admin && admin.company_name) {
-              isCorporate = true;
-            }
+            await supabase.auth.signOut({ scope: 'local' });
           } catch {
-            isCorporate = false;
+            // Safe catch
           }
+          setQrAuthInProgress(false);
+          isAuthenticatingRef.current = false;
+          if (isMountedRef.current) {
+            setSessionToken('');
+            setErrorMessage(message);
+            setStatus('session_error');
+          }
+        };
+
+        const userEmail = sessionData.user?.email;
+        if (!userEmail) {
+          await rejectSession('Could not verify your account. Please try again.');
+          return;
         }
 
-        const targetPath = isCorporate ? '/corporate-dashboard' : '/dashboard';
-        console.log('[QR_DEBUG] Right before navigate(...) called with path:', targetPath);
-        navigateRef.current(targetPath, { replace: true });
+        let corporateRecord = null;
+        try {
+          corporateRecord = await apiService.getCorporateAdmin(userEmail);
+        } catch {
+          await rejectSession('Could not verify your account. Please try again.');
+          return;
+        }
+
+        if (corporateRecord) {
+          await rejectSession(
+            "QR login is only for personal MoneyMapper accounts. Please use 'Access Corporate Portal' to sign in with your corporate email."
+          );
+          return;
+        }
+
+        console.log('[QR_DEBUG] Right before navigate(...) called with path: /dashboard');
+        navigateRef.current('/dashboard', { replace: true });
       } catch {
         setQrAuthInProgress(false);
         isAuthenticatingRef.current = false;
@@ -501,7 +522,7 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
         </div>
         <h2 className="text-base sm:text-lg font-bold text-white mb-1">Log in with QR Code</h2>
         <p className="text-slate-300 text-xs max-w-xs leading-relaxed">
-          Open MoneyMapper → Profile (or Corporate Dashboard) → QR scanner icon → scan this code
+          Open MoneyMapper → Profile → QR scanner icon → scan this code
         </p>
       </div>
 

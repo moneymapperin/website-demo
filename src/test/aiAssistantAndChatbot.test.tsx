@@ -701,7 +701,7 @@ describe('TASK 11 — AI Assistant (/ai-assistant) & Chatbot Intent Engine', () 
 
       renderWithContext(<AiAssistantPage />);
 
-      const efChip = screen.getByTestId('suggestion-chip-4'); // Emergency Fund chip
+      const efChip = screen.getByTestId('suggestion-chip-3'); // Emergency Fund chip
       fireEvent.click(efChip);
 
       await waitFor(() => {

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw, Menu, TrendingUp, PieChart, Lock, ChevronRight, ArrowRight } from 'lucide-react';
+import { RefreshCw, TrendingUp, PieChart, Lock, ArrowRight } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
-import { useToast } from '../context/ToastContext';
 
 export interface PickItem {
   isStock?: boolean;
@@ -68,7 +67,6 @@ export async function loadMoneyMapperPicks(
 export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
   const navigate = useNavigate();
   const { isPro } = usePlan();
-  const { showToast } = useToast();
 
   const [newsItems, setNewsItems] = useState<any[]>([]);
   const [blogItems, setBlogItems] = useState<any[]>([]);
@@ -112,26 +110,6 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
     fetchData();
   }, [fetchData]);
 
-  const handlePickClick = (pick: PickItem, index: number) => {
-    const isLocked = !isPro && index > 0;
-    if (isLocked) {
-      showToast({
-        message: 'Upgrade to PRO to unlock all expert picks! 🚀',
-        backgroundColor: '#F59E0B',
-        action: {
-          label: 'UPGRADE',
-          onClick: () => navigate('/subscription'),
-        },
-      });
-      return;
-    }
-
-    if (pick.isStock) {
-      navigate('/stock-screener');
-    } else {
-      navigate('/mf-recommendations?risk=moderate');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 text-slate-900 dark:text-white" data-testid="insights-page">
@@ -141,22 +119,11 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
         className="px-6 pt-6 pb-6 bg-gradient-to-b from-purple-950 via-purple-900/90 to-transparent border-b border-purple-800/20"
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Mobile Hamburger Button */}
-            <button
-              type="button"
-              data-testid="insights-menu-button"
-              className="md:hidden p-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
-              aria-label="Open Menu"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">Insights</h1>
-              <p className="text-xs md:text-sm font-bold text-white/80 tracking-wide mt-0.5">
-                MoneyMapper Insights
-              </p>
-            </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">Insights</h1>
+            <p className="text-xs md:text-sm font-bold text-white/80 tracking-wide mt-0.5">
+              MoneyMapper Insights
+            </p>
           </div>
 
           <button
@@ -306,8 +273,7 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
                     <div
                       key={idx}
                       data-testid={`pick-card-${idx}`}
-                      onClick={() => handlePickClick(pick, idx)}
-                      className={`relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 cursor-pointer transition-all hover:border-indigo-400 ${
+                      className={`relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 cursor-default transition-all ${
                         isLocked ? 'overflow-hidden' : ''
                       }`}
                     >
@@ -339,14 +305,12 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
                             {subTitle}
                           </p>
                         </div>
-
-                        <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />
                       </div>
 
                       {isLocked && (
                         <div
                           data-testid={`pick-locked-overlay-${idx}`}
-                          className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center rounded-2xl"
+                          className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center rounded-2xl select-none pointer-events-none"
                         >
                           <div className="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
                             <Lock className="w-4 h-4" />

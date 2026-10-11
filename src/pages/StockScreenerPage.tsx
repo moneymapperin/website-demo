@@ -6,8 +6,8 @@ import { usePlan } from '../hooks/usePlan';
 import { useToast } from '../context/ToastContext';
 import { SentimentGauge, calculateSentimentValue } from '../components/market/SentimentGauge';
 import { LockedCardPlaceholder, LockedRowPlaceholder, ProLockOverlay, ProSearchLock, ProUpsellBlock } from '../components/market/ProAccessComponents';
-import { ScoreCardAdvisor } from '../services/marketAdvisor';
 import { ResilienceUtils } from '../services/resilienceUtils';
+import { BrandLogo } from '../components/market/BrandLogo';
 
 export function getMinValue(val: string = ''): number {
   try {
@@ -72,8 +72,6 @@ export const StockScreenerPage: React.FC = () => {
   // Incremental rendering
   const [visibleCount, setVisibleCount] = useState(50);
 
-  // Advisory Modal State
-  const [selectedStockForAdvice, setSelectedStockForAdvice] = useState<any | null>(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
 
   const fetchData = useCallback(async () => {
@@ -125,7 +123,7 @@ export const StockScreenerPage: React.FC = () => {
     sentimentColor = 'text-rose-500';
   }
 
-  const handleStockClick = (stock: any, index: number) => {
+  const handleStockClick = (_stock: any, index: number) => {
     const isLocked = !isPro && index > 0;
     if (isLocked) {
       showToast({
@@ -136,9 +134,7 @@ export const StockScreenerPage: React.FC = () => {
           onClick: () => navigate('/subscription'),
         },
       });
-      return;
     }
-    setSelectedStockForAdvice(stock);
   };
 
   return (
@@ -183,39 +179,30 @@ export const StockScreenerPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-6 space-y-6">
         {/* Top Controls Grid: Search Bar (7 cols) + Market Sentiment Card (5 cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          <div className="lg:col-span-7 space-y-4">
-            <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
-              NIFTY 500 Intelligence Engine
-            </h2>
-            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Real-time Heikin Ashi, Bollinger & Pivot trend reversal analysis across top Indian equities.
-            </p>
-
+          <div className="lg:col-span-7">
             {/* Search Bar (gated for Pro users) */}
-            <div className="relative pt-2">
-              {isPro ? (
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    data-testid="stock-search-input"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search ticker (e.g. RELIANCE)..."
-                    className="w-full pl-9 pr-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
-                  />
+            {isPro ? (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Search className="w-4 h-4" />
                 </div>
-              ) : (
-                <ProSearchLock
-                  inputTestId="stock-search-input"
-                  lockTestId="stock-search-locked"
-                  placeholder="Search NIFTY 500 stocks..."
-                  ariaLabel="NIFTY 500 stocks"
+                <input
+                  type="text"
+                  data-testid="stock-search-input"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search ticker (e.g. RELIANCE)..."
+                  className="w-full pl-9 pr-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
                 />
-              )}
-            </div>
+              </div>
+            ) : (
+              <ProSearchLock
+                inputTestId="stock-search-input"
+                lockTestId="stock-search-locked"
+                placeholder="Search NIFTY 500 stocks..."
+                ariaLabel="NIFTY 500 stocks"
+              />
+            )}
           </div>
 
           {/* Market Sentiment Gauge Card */}
@@ -260,48 +247,11 @@ export const StockScreenerPage: React.FC = () => {
           </section>
         </div>
 
-        {/* Web Analytics KPI Summary Bar */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-slate-400">Total Tracked</span>
-            <div className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
-              {allSignals.length} <span className="text-xs font-normal text-slate-400">Equities</span>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400">High Confidence (&gt;70)</span>
-            <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {allSignals.filter((s) => ResilienceUtils.safeDouble(s.score) >= 70).length}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400">Buy Signals</span>
-            <div className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
-              {allSignals.filter((s) => s.direction === 'BUY').length}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400">Avg Market Score</span>
-            <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">
-              {allSignals.length > 0
-                ? Math.round(allSignals.reduce((a, b) => a + ResilienceUtils.safeDouble(b.score), 0) / allSignals.length)
-                : 0}
-              <span className="text-xs font-normal text-slate-400">/100</span>
-            </div>
-          </div>
-        </div>
-
         {/* Section Header & View Switcher */}
         <div className="flex items-center justify-between gap-4 my-6">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
-              NIFTY 500 SIGNALS &amp; STOCKS
-            </span>
-            <span className="text-xs font-semibold text-slate-400">({filteredSignals.length} items)</span>
-          </div>
+          <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
+            NIFTY 500 SIGNALS &amp; STOCKS
+          </span>
 
           {/* Desktop Table vs Grid Toggle */}
           <div className="hidden sm:flex items-center p-1 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
@@ -368,8 +318,7 @@ export const StockScreenerPage: React.FC = () => {
                       <th className="py-3.5 px-4">ENTRY ZONE</th>
                       <th className="py-3.5 px-4">TARGET RANGE</th>
                       <th className="py-3.5 px-4">STOP LOSS</th>
-                      <th className="py-3.5 px-4">EST. RETURN</th>
-                      <th className="py-3.5 px-4 text-right">ACTION</th>
+                      <th className="py-3.5 px-4 text-right">EST. RETURN</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
@@ -380,16 +329,18 @@ export const StockScreenerPage: React.FC = () => {
                       const isBuy = direction === 'BUY';
                       const isWait = direction === 'WAIT';
                       const upside = calculateUpsidePct(s.entry_range, s.target_range);
+                      const displayDirection = direction === 'BUY' ? 'BULLISH' : direction === 'SELL' ? 'BEARISH' : direction;
 
                       return (
                         <tr
                           key={s.id || idx}
                           data-testid={`stock-card-${idx}`}
-                          onClick={() => handleStockClick(s, idx)}
-                          className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
                         >
                           <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">
-                            <span>{s.symbol || 'Unknown'}</span>
+                            <div className="flex items-center gap-3">
+                              <BrandLogo name={s.symbol || ''} size={28} />
+                              <span>{s.symbol || 'Unknown'}</span>
+                            </div>
                           </td>
                           <td className="py-3.5 px-4 font-black">
                             <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black">
@@ -398,11 +349,11 @@ export const StockScreenerPage: React.FC = () => {
                           </td>
                           <td className="py-3.5 px-4">
                             <span
-                              className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider text-white ${
+                              className={`inline-block whitespace-nowrap px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider text-white ${
                                 isWait ? 'bg-slate-400' : isBuy ? 'bg-emerald-500' : 'bg-rose-500'
                               }`}
                             >
-                              {direction}
+                              {displayDirection}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-bold text-slate-600 dark:text-slate-300">
@@ -414,7 +365,7 @@ export const StockScreenerPage: React.FC = () => {
                           <td className="py-3.5 px-4 font-bold text-rose-500">
                             {s.sl_range || '–'}
                           </td>
-                          <td className="py-3.5 px-4 font-black">
+                          <td className="py-3.5 px-4 font-black text-right">
                             {!isWait && upside ? (
                               <span className={isBuy ? 'text-emerald-600' : 'text-rose-600'}>
                                 +{upside}
@@ -422,14 +373,6 @@ export const StockScreenerPage: React.FC = () => {
                             ) : (
                               '–'
                             )}
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <button
-                              type="button"
-                              className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition shadow-xs"
-                            >
-                              Analyze
-                            </button>
                           </td>
                         </tr>
                       );
@@ -456,42 +399,45 @@ export const StockScreenerPage: React.FC = () => {
                   const isBuy = direction === 'BUY';
                   const isWait = direction === 'WAIT';
                   const upside = calculateUpsidePct(s.entry_range, s.target_range);
+                  const displayDirection = direction === 'BUY' ? 'BULLISH' : direction === 'SELL' ? 'BEARISH' : direction;
 
                   return (
                     <div
                       key={s.id || idx}
                       data-testid={`stock-card-${idx}`}
-                      onClick={() => handleStockClick(s, idx)}
-                      className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm cursor-pointer hover:border-indigo-400 transition-all"
+                      className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm"
                     >
                       <div className="space-y-4">
                         <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-black text-lg text-slate-900 dark:text-white">
-                                {s.symbol || 'Unknown'}
-                              </h3>
-                            </div>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400 font-bold">
-                              <span>Score:</span>
-                              <span className="text-sm font-black text-slate-900 dark:text-white">
-                                {score}
-                              </span>
-                              <span>/100</span>
-                              {!isWait && upside && (
-                                <span className={isBuy ? 'text-emerald-600' : 'text-rose-600'}>
-                                  • Expected Return: {upside}
+                          <div className="flex items-center gap-3 min-w-0">
+                            <BrandLogo name={s.symbol || ''} size={36} />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-black text-lg text-slate-900 dark:text-white truncate">
+                                  {s.symbol || 'Unknown'}
+                                </h3>
+                              </div>
+                              <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400 font-bold">
+                                <span>Score:</span>
+                                <span className="text-sm font-black text-slate-900 dark:text-white">
+                                  {score}
                                 </span>
-                              )}
+                                <span>/100</span>
+                                {!isWait && upside && (
+                                  <span className={isBuy ? 'text-emerald-600' : 'text-rose-600'}>
+                                    • Expected Return: {upside}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
 
                           <span
-                            className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider text-white ${
+                            className={`shrink-0 whitespace-nowrap px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider text-white ${
                               isWait ? 'bg-slate-400' : isBuy ? 'bg-emerald-500' : 'bg-rose-500'
                             }`}
                           >
-                            {direction}
+                            {displayDirection}
                           </span>
                         </div>
 
@@ -590,38 +536,6 @@ export const StockScreenerPage: React.FC = () => {
         </div>
       )}
 
-      {/* Stock Advice Modal */}
-      {selectedStockForAdvice && (
-        <div
-          data-testid="stock-advice-modal"
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4"
-        >
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase text-indigo-600 dark:text-indigo-400">
-                AI Stock Analysis
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedStockForAdvice(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="text-xs md:text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed font-mono">
-              {ScoreCardAdvisor.generateStockAdvice(selectedStockForAdvice)}
-            </div>
-            <button
-              type="button"
-              onClick={() => setSelectedStockForAdvice(null)}
-              className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors"
-            >
-              Close Analysis
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -191,7 +191,7 @@ export function calculateMonthWeeks(
 ): WeekInfo[] {
   const monthStart = getMonthStartSunday(year, month);
   const weekCount = calculateDynamicWeekCount(year, month);
-  const ranges = calculateTargetRanges(weeklyIncome, expenseScore);
+  const baseRanges = calculateTargetRanges(weeklyIncome, expenseScore);
 
   const weeks: WeekInfo[] = [];
 
@@ -199,32 +199,73 @@ export function calculateMonthWeeks(
     const weekIndex = i + 1; // 1-BASED
     const start = new Date(monthStart.getFullYear(), monthStart.getMonth(), monthStart.getDate() + i * 7);
     const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
-    const endBoundary = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 0, 0);
+    const endBoundary = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999);
 
-    const log = logs.find((l) => Number(l.week_index) === weekIndex);
+    const log = logs.find((l) => Number(l.week_index ?? l.week_number) === weekIndex);
 
     const isPast = now.getTime() > endBoundary.getTime();
     const isFuture = now.getTime() < start.getTime();
     const isCurrent = !isPast && !isFuture;
 
     const hasLog = Boolean(log);
-    const isLocked = isFuture || (isPast && !hasLog);
+    // App lock rule: is_locked = !isCurrent && log == null && (weekIndex > 3)
+    const isLocked = !isCurrent && !hasLog && weekIndex > 3;
     const isSubmitted = hasLog;
+
+    // Progressive Adaptive Ranges
+    let rFixed: [number, number];
+    let rFlex: [number, number];
+    let rSave: [number, number];
+
+    if (i === 0) {
+      rFixed = baseRanges.range_fixed;
+      rFlex = baseRanges.range_flex;
+      rSave = baseRanges.range_save;
+    } else {
+      const prevWeek = weeks[i - 1];
+      const fixedMult = prevWeek.fixed_status === 'missed' ? 0.95 : 1.0;
+      const flexMult = prevWeek.flexible_status === 'missed' ? 0.90 : 1.0;
+      const saveMult =
+        prevWeek.savings_status === 'achieved'
+          ? 1.08
+          : prevWeek.savings_status === 'missed'
+          ? 0.92
+          : 1.0;
+
+      rFixed = [prevWeek.range_fixed[0] * fixedMult, prevWeek.range_fixed[1] * fixedMult];
+      rFlex = [prevWeek.range_flex[0] * flexMult, prevWeek.range_flex[1] * flexMult];
+      rSave = [prevWeek.range_save[0] * saveMult, prevWeek.range_save[1] * saveMult];
+    }
 
     weeks.push({
       index: weekIndex,
       start,
       end,
-      range_fixed: ranges.range_fixed,
-      range_flex: ranges.range_flex,
-      range_save: ranges.range_save,
+      range_fixed: rFixed,
+      range_flex: rFlex,
+      range_save: rSave,
       status: log?.status,
       fixed_status: log?.fixed_status,
       flexible_status: log?.flexible_status,
       savings_status: log?.savings_status,
-      spent_fixed: log?.spent_fixed !== undefined ? Number(log.spent_fixed) : undefined,
-      spent_flexible: log?.spent_flexible !== undefined ? Number(log.spent_flexible) : undefined,
-      spent_savings: log?.spent_savings !== undefined ? Number(log.spent_savings) : undefined,
+      spent_fixed:
+        log?.spent_fixed !== undefined
+          ? Number(log.spent_fixed)
+          : log?.spentFixed !== undefined
+          ? Number(log.spentFixed)
+          : undefined,
+      spent_flexible:
+        log?.spent_flexible !== undefined
+          ? Number(log.spent_flexible)
+          : log?.spentFlexible !== undefined
+          ? Number(log.spentFlexible)
+          : undefined,
+      spent_savings:
+        log?.spent_savings !== undefined
+          ? Number(log.spent_savings)
+          : log?.spentSavings !== undefined
+          ? Number(log.spentSavings)
+          : undefined,
       is_past: isPast,
       is_future: isFuture,
       is_current: isCurrent,
