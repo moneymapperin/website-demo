@@ -74,7 +74,7 @@ describe('TASK 10 — Insights Tab and Market Screens', () => {
       expect(screen.getByText('Insights')).toBeInTheDocument();
       expect(screen.getByText('MoneyMapper Insights')).toBeInTheDocument();
       expect(screen.getByTestId('insights-refresh-button')).toBeInTheDocument();
-      expect(screen.getByTestId('insights-menu-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('insights-menu-button')).not.toBeInTheDocument();
 
       // Assert NO Market Sentiment Gauge in Insights Header!
       expect(screen.queryByTestId('sentiment-gauge')).not.toBeInTheDocument();

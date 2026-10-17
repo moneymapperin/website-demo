@@ -154,11 +154,11 @@ describe('TASK 13 — Profile Tab and Secondary Screens', () => {
       expect(screen.getByTestId('subscription-card')).toHaveTextContent('WEALTH SELECT (PRO)');
     });
 
-    it('renders only SSL SECURED trust badge and omits SEBI CERTIFIED', async () => {
+    it('renders SSL SECURED and SEBI CERTIFIED trust badges', async () => {
       renderWithProviders(<ProfilePage />);
 
       expect(await screen.findByTestId('trust-badge-ssl')).toHaveTextContent('SSL SECURED');
-      expect(screen.queryByText(/SEBI CERTIFIED/i)).toBeNull();
+      expect(screen.getByTestId('trust-badge-sebi')).toHaveTextContent('SEBI CERTIFIED');
     });
 
     it('does not render mobile-only App Lock or Weekly Reminders settings', async () => {
@@ -181,7 +181,10 @@ describe('TASK 13 — Profile Tab and Secondary Screens', () => {
       const logoutBtn = await screen.findByTestId('btn-logout');
       fireEvent.click(logoutBtn);
 
-      expect(screen.getByTestId('logout-dialog')).toBeInTheDocument();
+      const dialog = screen.getByTestId('logout-dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(dialog).toHaveTextContent('Logout');
+      expect(dialog).toHaveTextContent('Are you sure you want to log out of MoneyMapper?');
 
       // Click cancel
       const cancelBtn = screen.getByTestId('logout-cancel-btn');
@@ -211,20 +214,15 @@ describe('TASK 13 — Profile Tab and Secondary Screens', () => {
   // 3. Theme Toggle Persistence
   // --------------------------------------------------------------------------
   describe('3. Theme Toggle Persistence', () => {
-    it('toggling theme mode updates ThemeProvider and persists to localStorage', async () => {
+    it('toggling dark mode updates theme and persists to localStorage', async () => {
       renderWithProviders(<ProfilePage />);
 
-      const darkBtn = await screen.findByTestId('theme-btn-dark');
-      fireEvent.click(darkBtn);
+      const darkModeToggle = await screen.findByTestId('toggle-dark-mode');
+      fireEvent.click(darkModeToggle);
       expect(localStorage.getItem('theme_mode')).toBe('dark');
 
-      const lightBtn = screen.getByTestId('theme-btn-light');
-      fireEvent.click(lightBtn);
+      fireEvent.click(darkModeToggle);
       expect(localStorage.getItem('theme_mode')).toBe('light');
-
-      const systemBtn = screen.getByTestId('theme-btn-system');
-      fireEvent.click(systemBtn);
-      expect(localStorage.getItem('theme_mode')).toBeNull(); // removed for system
     });
   });
 
@@ -599,6 +597,7 @@ describe('TASK 13 — Profile Tab and Secondary Screens', () => {
       renderWithProviders(<ProfilePage />);
 
       const faqBtn = await screen.findByTestId('btn-faq-modal');
+      expect(screen.getByText('FAQ')).toBeInTheDocument();
       fireEvent.click(faqBtn);
 
       expect(screen.getByTestId('faq-modal')).toBeInTheDocument();
@@ -613,28 +612,27 @@ describe('TASK 13 — Profile Tab and Secondary Screens', () => {
       ).toBeInTheDocument();
     });
 
-    it('submits rating feedback via mailto and shows thank you toast', async () => {
+    it('does not render Rate MoneyMapper row or rating dialog', async () => {
       renderWithProviders(<ProfilePage />);
 
-      const rateBtn = await screen.findByTestId('btn-rate-modal');
-      fireEvent.click(rateBtn);
-
-      expect(screen.getByTestId('rating-dialog')).toBeInTheDocument();
-
-      // Pick 4 stars
-      const star4 = screen.getByTestId('rate-star-4');
-      fireEvent.click(star4);
-
-      // Enter feedback text
-      const input = screen.getByTestId('rating-feedback-input');
-      fireEvent.change(input, { target: { value: 'Great financial insights!' } });
-
-      // Click submit
-      const submitBtn = screen.getByTestId('rating-submit-btn');
-      fireEvent.click(submitBtn);
-
-      expect(await screen.findByText('Thank you for your feedback!')).toBeInTheDocument();
+      expect(screen.queryByText('Rate MoneyMapper')).toBeNull();
+      expect(screen.queryByTestId('btn-rate-modal')).toBeNull();
       expect(screen.queryByTestId('rating-dialog')).toBeNull();
+    });
+
+    it('share feedback tile opens WhatsApp link with feedback message', async () => {
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+      renderWithProviders(<ProfilePage />);
+
+      const feedbackBtn = await screen.findByTestId('btn-share-feedback');
+      fireEvent.click(feedbackBtn);
+
+      expect(openSpy).toHaveBeenCalledWith(
+        'https://wa.me/917987469093?text=Hi+MoneyMapper+Team%2C+I+have+some+feedback+to+share%3A',
+        '_blank',
+        'noopener,noreferrer'
+      );
+      openSpy.mockRestore();
     });
   });
 });

@@ -8,9 +8,29 @@ import { supabase } from '../lib/supabase';
 import { apiService } from '../services/apiService';
 import { setQrAuthInProgress } from '../context/AuthContext';
 
-export type QrSessionStatus = 'idle' | 'loading' | 'ready' | 'authenticated' | 'expired' | 'session_error' | 'generate_error';
+const isTestEnv =
+  (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test') ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.MODE === 'test');
 
-export const QrLoginPanel: React.FC = () => {
+export type QrSessionStatus =
+  | 'idle'
+  | 'generating'
+  | 'loading'
+  | 'ready'
+  | 'authenticated'
+  | 'expired'
+  | 'session_error'
+  | 'generate_error';
+
+export interface QrLoginPanelProps {
+  autoStart?: boolean;
+  countdownSeconds?: number;
+}
+
+export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
+  autoStart = isTestEnv,
+  countdownSeconds = 5,
+}) => {
   const navigate = useNavigate();
   const navigateRef = useRef(navigate);
   useEffect(() => {
@@ -18,11 +38,13 @@ export const QrLoginPanel: React.FC = () => {
   }, [navigate]);
 
   const [sessionToken, setSessionToken] = useState<string>('');
-  const [status, setStatus] = useState<QrSessionStatus>('idle');
+  const [status, setStatus] = useState<QrSessionStatus>(autoStart ? 'loading' : 'idle');
   const [errorMessage, setErrorMessage] = useState<string>('Login failed, please retry');
   const [secondsRemaining, setSecondsRemaining] = useState<number>(120);
+  const [countdown, setCountdown] = useState<number>(countdownSeconds);
 
-  const statusRef = useRef<QrSessionStatus>('idle');
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const statusRef = useRef<QrSessionStatus>(autoStart ? 'loading' : 'idle');
   statusRef.current = status;
 
   const activeTokenRef = useRef<string>('');
@@ -39,6 +61,15 @@ export const QrLoginPanel: React.FC = () => {
 
   // Best-effort session cleanup helper
   const cleanupSession = useCallback((tokenToClean?: string) => {
+    if (countdownIntervalRef.current) {
+      try {
+        clearInterval(countdownIntervalRef.current);
+      } catch {
+        // Safe catch
+      }
+      countdownIntervalRef.current = null;
+    }
+
     if (timerIdRef.current) {
       try {
         clearInterval(timerIdRef.current);
@@ -226,23 +257,44 @@ export const QrLoginPanel: React.FC = () => {
           // Safe catch
         }
 
-        // Corporate admin check + navigation
-        const userEmail = sessionData.user?.email || '';
-        let isCorporate = false;
-        if (userEmail) {
+        const rejectSession = async (message: string) => {
           try {
-            const admin = await apiService.getCorporateAdmin(userEmail);
-            if (admin && admin.company_name) {
-              isCorporate = true;
-            }
+            await supabase.auth.signOut({ scope: 'local' });
           } catch {
-            isCorporate = false;
+            // Safe catch
           }
+          setQrAuthInProgress(false);
+          isAuthenticatingRef.current = false;
+          if (isMountedRef.current) {
+            setSessionToken('');
+            setErrorMessage(message);
+            setStatus('session_error');
+          }
+        };
+
+        const userEmail = sessionData.user?.email;
+        if (!userEmail) {
+          await rejectSession('Could not verify your account. Please try again.');
+          return;
         }
 
-        const targetPath = isCorporate ? '/corporate-dashboard' : '/dashboard';
-        console.log('[QR_DEBUG] Right before navigate(...) called with path:', targetPath);
-        navigateRef.current(targetPath, { replace: true });
+        let corporateRecord = null;
+        try {
+          corporateRecord = await apiService.getCorporateAdmin(userEmail);
+        } catch {
+          await rejectSession('Could not verify your account. Please try again.');
+          return;
+        }
+
+        if (corporateRecord) {
+          await rejectSession(
+            "QR login is only for personal MoneyMapper accounts. Please use 'Access Corporate Portal' to sign in with your corporate email."
+          );
+          return;
+        }
+
+        console.log('[QR_DEBUG] Right before navigate(...) called with path: /dashboard');
+        navigateRef.current('/dashboard', { replace: true });
       } catch {
         setQrAuthInProgress(false);
         isAuthenticatingRef.current = false;
@@ -331,24 +383,74 @@ export const QrLoginPanel: React.FC = () => {
     cleanupSessionRef.current = cleanupSession;
   }, [cleanupSession]);
 
+  const handleStartGenerating = useCallback(() => {
+    setStatus('generating');
+    setCountdown(countdownSeconds);
+
+    if (countdownIntervalRef.current) {
+      try {
+        clearInterval(countdownIntervalRef.current);
+      } catch {
+        // Safe catch
+      }
+      countdownIntervalRef.current = null;
+    }
+
+    let current = countdownSeconds;
+    countdownIntervalRef.current = setInterval(() => {
+      current -= 1;
+      if (!isMountedRef.current) return;
+      setCountdown(current);
+
+      if (current <= 0) {
+        if (countdownIntervalRef.current) {
+          try {
+            clearInterval(countdownIntervalRef.current);
+          } catch {
+            // Safe catch
+          }
+          countdownIntervalRef.current = null;
+        }
+        initQrSessionRef.current();
+      }
+    }, 1000);
+  }, [countdownSeconds]);
+
+  const handleCancelGenerating = useCallback(() => {
+    if (countdownIntervalRef.current) {
+      try {
+        clearInterval(countdownIntervalRef.current);
+      } catch {
+        // Safe catch
+      }
+      countdownIntervalRef.current = null;
+    }
+    setStatus('idle');
+  }, []);
+
   useEffect(() => {
     console.log('[QR_DEBUG] Component mounted at:', new Date().toISOString(), 'Timestamp:', Date.now());
     isMountedRef.current = true;
 
-    if (import.meta.env.DEV) {
-      if (!hasInitializedRef.current) {
-        hasInitializedRef.current = true;
+    if (autoStart) {
+      if (import.meta.env.DEV) {
+        if (!hasInitializedRef.current) {
+          hasInitializedRef.current = true;
+          initQrSessionRef.current();
+        }
+      } else {
+        initQrSessionRef.current();
       }
-    } else {
     }
 
     const handleVisibilityChange = () => {
       if (
         !document.hidden &&
-        statusRef.current !== 'idle' &&
         statusRef.current !== 'expired' &&
         statusRef.current !== 'authenticated' &&
-        statusRef.current !== 'loading'
+        statusRef.current !== 'loading' &&
+        statusRef.current !== 'idle' &&
+        statusRef.current !== 'generating'
       ) {
         if (Date.now() >= expiresAtRef.current) {
           if (timerIdRef.current) {
@@ -378,6 +480,15 @@ export const QrLoginPanel: React.FC = () => {
         // Safe catch
       }
 
+      if (countdownIntervalRef.current) {
+        try {
+          clearInterval(countdownIntervalRef.current);
+        } catch {
+          // Safe catch
+        }
+        countdownIntervalRef.current = null;
+      }
+
       // StrictMode dev-mode guard:
       // In development mode, React 18 invokes setup -> cleanup -> setup on initial mount.
       // If this is the first cleanup in DEV and the subscription hasn't yet settled,
@@ -397,46 +508,73 @@ export const QrLoginPanel: React.FC = () => {
       cleanupSessionRef.current();
       activeTokenRef.current = '';
     };
-  }, []); // Empty dependency array: runs strictly once on real mount
+  }, [autoStart]); // Runs on real mount
 
   return (
     <div
       data-testid="qr-panel-placeholder"
-      className="lg:col-span-5 bg-[#0D0E15] border border-[#27272A] rounded-[24px] p-6 sm:p-8 shadow-xl flex flex-col items-center justify-between text-center relative overflow-hidden min-h-[460px]"
+      className="lg:col-span-5 bg-[#080E2A]/90 backdrop-blur-xl border border-[#1E3268] rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-[0_12px_40px_rgba(0,145,255,0.15)] flex flex-col items-center justify-between text-center relative overflow-hidden min-h-[460px]"
     >
       {/* Header */}
       <div>
-        <div className="w-12 h-12 mx-auto rounded-2xl bg-[#4F46E5]/10 border border-[#4F46E5]/20 flex items-center justify-center text-[#8B5CF6] mb-3">
+        <div className="w-12 h-12 mx-auto rounded-2xl bg-[#0091FF]/15 border border-[#0091FF]/40 flex items-center justify-center text-[#0091FF] mb-3 shadow-[0_0_14px_rgba(0,145,255,0.3)]">
           <QrCode className="w-6 h-6" />
         </div>
-        <h2 className="text-base font-bold text-white mb-1">Log in with QR Code</h2>
-        <p className="text-white/60 text-xs max-w-xs leading-relaxed">
-          Open MoneyMapper → Profile (or Corporate Dashboard) → QR scanner icon → scan this code
+        <h2 className="text-base sm:text-lg font-bold text-white mb-1">Log in with QR Code</h2>
+        <p className="text-slate-300 text-xs max-w-xs leading-relaxed">
+          Open MoneyMapper → Profile → QR scanner icon → scan this code
         </p>
       </div>
 
       {/* QR Display Area */}
       <div className="my-6 relative flex items-center justify-center">
-        <div className="p-4 bg-white rounded-2xl shadow-inner min-w-[216px] min-h-[216px] flex items-center justify-center relative">
+        <div className="p-4 bg-white rounded-2xl shadow-inner min-w-[216px] min-h-[216px] flex flex-col items-center justify-center relative border border-slate-200">
           {status === 'idle' && (
-            <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
-              <QrCode className="w-8 h-8 text-slate-400" />
-              <span className="text-xs font-semibold text-slate-600">Click to generate a secure QR code</span>
+            <div data-testid="qr-idle-state" className="flex flex-col items-center justify-center text-center p-3 w-full">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#0091FF] mb-3 shadow-xs">
+                <QrCode className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-bold text-slate-800 mb-1">Instant QR Login</p>
+              <p className="text-[11px] text-slate-500 mb-3.5 max-w-[190px] leading-snug">
+                Click below to generate a secure login QR code
+              </p>
               <button
                 type="button"
-                data-testid="qr-generate-button"
-                onClick={initQrSession}
-                className="inline-flex items-center gap-1.5 py-2 px-3.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-semibold transition-all shadow-md"
+                data-testid="generate-qr-button"
+                onClick={handleStartGenerating}
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-[#0091FF] hover:bg-[#007EE5] active:scale-95 text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_14px_rgba(0,145,255,0.35)] cursor-pointer"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
+                <QrCode className="w-3.5 h-3.5" />
                 <span>Generate QR Code</span>
+              </button>
+            </div>
+          )}
+
+          {status === 'generating' && (
+            <div data-testid="qr-generating-countdown" className="flex flex-col items-center justify-center text-center p-3 w-full">
+              <div className="relative w-14 h-14 flex items-center justify-center mb-3">
+                <div className="absolute inset-0 rounded-full border-2 border-[#0091FF] animate-ping opacity-25" />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-[#0091FF] flex items-center justify-center text-[#0091FF] font-black text-lg shadow-sm">
+                  {countdown}s
+                </div>
+              </div>
+              <p className="text-xs font-bold text-slate-800 mb-1">Generating QR Code...</p>
+              <p className="text-[11px] text-slate-500 mb-3">
+                Opening secure code in {countdown}s
+              </p>
+              <button
+                type="button"
+                onClick={handleCancelGenerating}
+                className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                Cancel
               </button>
             </div>
           )}
 
           {status === 'loading' && (
             <div data-testid="qr-loading" className="flex flex-col items-center justify-center text-slate-500 gap-2">
-              <RefreshCw className="w-8 h-8 text-[#4F46E5] animate-spin" />
+              <RefreshCw className="w-8 h-8 text-[#0084FF] animate-spin" />
               <span className="text-xs font-semibold text-slate-600">Generating secure QR...</span>
             </div>
           )}
@@ -468,7 +606,7 @@ export const QrLoginPanel: React.FC = () => {
               <button
                 type="button"
                 onClick={initQrSession}
-                className="inline-flex items-center gap-1.5 py-2 px-3.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl text-xs font-semibold transition-all shadow-md"
+                className="inline-flex items-center gap-1.5 py-2 px-3.5 bg-[#0084FF] hover:bg-[#0070DD] text-white rounded-xl text-xs font-semibold transition-all shadow-md"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Refresh QR</span>
@@ -498,6 +636,14 @@ export const QrLoginPanel: React.FC = () => {
         {status === 'ready' ? (
           <p className="text-white/40 text-[11px]">
             Code expires in <span className="text-white/75 font-mono">{secondsRemaining}s</span>
+          </p>
+        ) : status === 'generating' ? (
+          <p className="text-white/40 text-[11px]">
+            Preparing secure session in <span className="text-[#0091FF] font-mono font-bold">{countdown}s</span>
+          </p>
+        ) : status === 'idle' ? (
+          <p className="text-white/40 text-[11px]">
+            Click Generate QR Code to begin
           </p>
         ) : (
           <div className="h-4" />

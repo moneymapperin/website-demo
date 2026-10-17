@@ -233,7 +233,12 @@ export class AuthService {
       if (normalizedMessage.includes('database error')) {
         return "We couldn't create your account right now. Please try again later.";
       }
-      if (normalizedMessage.includes('network') || normalizedMessage.includes('fetch')) {
+      if (
+        normalizedMessage.includes('network') ||
+        normalizedMessage.includes('fetch') ||
+        normalizedMessage.includes('socket') ||
+        normalizedMessage.includes('failed host lookup')
+      ) {
         return 'Connection issue detected. Please check your internet and try again.';
       }
       if (import.meta.env.DEV) {
@@ -343,6 +348,29 @@ export class AuthService {
     }
 
     return data;
+  }
+
+  async signInWithGoogle(): Promise<void> {
+    const redirectTo = `${window.location.origin}/auth/callback`;
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo, skipBrowserRedirect: true },
+      });
+      if (error) throw error;
+      if (!data?.url) throw new Error('Google sign-in could not be started.');
+      if (import.meta.env.DEV) {
+        const u = new URL(data.url);
+        console.info('[GOOGLE_AUTH] starting', {
+          host: u.host,
+          provider: u.searchParams.get('provider'),
+          redirect_to: u.searchParams.get('redirect_to') ?? redirectTo,
+        });
+      }
+      window.location.assign(data.url);
+    } catch (e) {
+      throw new Error(sanitizeErrorMessage(e));
+    }
   }
 
   async resetPassword(email: string): Promise<{}> {

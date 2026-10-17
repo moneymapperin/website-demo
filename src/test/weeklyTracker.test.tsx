@@ -219,11 +219,11 @@ describe('Task 9: Weekly Tracker Domain Models & Calculations', () => {
       expect(weeks[0].is_submitted).toBe(true);
       expect(weeks[0].is_locked).toBe(false);
 
-      // Week 2: Past without log -> is_past true, is_submitted false, is_locked true
+      // Week 2: Past without log -> is_past true, is_submitted false, is_locked false (weekIndex <= 3)
       expect(weeks[1].index).toBe(2);
       expect(weeks[1].is_past).toBe(true);
       expect(weeks[1].is_submitted).toBe(false);
-      expect(weeks[1].is_locked).toBe(true);
+      expect(weeks[1].is_locked).toBe(false);
 
       // Week 3: Current week -> is_current true, is_locked false
       expect(weeks[2].index).toBe(3);
@@ -634,7 +634,7 @@ describe('Task 9: WeeklyPage Component & Flow Tests', () => {
     });
   });
 
-  it('opening /weekly with an undecided week NEVER writes local_expense_score', async () => {
+  it('opening /weekly persists local_expense_score matching app', async () => {
     vi.spyOn(apiService, 'getDashboard').mockResolvedValue(mockDashboard as any);
     // Return empty logs so active week is undecided
     vi.spyOn(apiService, 'getWeeklyCurrent').mockResolvedValue({ data: [] } as any);
@@ -646,8 +646,8 @@ describe('Task 9: WeeklyPage Component & Flow Tests', () => {
       expect(screen.getByText('Weekly Tracker')).toBeInTheDocument();
     });
 
-    // Verify local_expense_score was NOT written
-    expect(gamificationStore.getLocalExpenseScore()).toBeNull();
+    // Verify local_expense_score was persisted matching Flutter app
+    expect(gamificationStore.getLocalExpenseScore()).toBe(0);
   });
 
   it('marking a decision (Done/Missed) writes local_expense_score', async () => {
@@ -760,7 +760,7 @@ describe('Task 9: WeeklyPage Component & Flow Tests', () => {
   });
 });
 
-describe('Task 9: Weekly Expense Predictor current-week lock behavior', () => {
+describe('Task 9: Weekly Expense Predictor Flutter Parity & Lock Behavior', () => {
   const pastWeekLog = {
     week_index: 1,
     status: 'achieved',
@@ -806,36 +806,76 @@ describe('Task 9: Weekly Expense Predictor current-week lock behavior', () => {
     localStorage.clear();
   });
 
-  it('keeps current-week decisions editable and enables submit after all decisions are chosen', async () => {
+  it('selects active calendar week (Week 3), renders overview card, and targets Week 2 for reporting', async () => {
     renderPredictor();
 
-    await screen.findByRole('heading', { name: 'Week 3 Target Ranges' });
+    // Current week overview card is visible for Week 3
+    await screen.findByRole('heading', { name: 'Week 3 Target Overview' });
+    expect(screen.getByText('CURRENT WEEK')).toBeInTheDocument();
+
+    // Reporting card targets Week 2 (since Week 3 is current and viewIndex > 0)
+    expect(screen.getByRole('heading', { name: 'Week 2 Target Ranges' })).toBeInTheDocument();
+
     const achievedButton = screen.getByTestId('fixed-achieved-btn');
     const missedButton = screen.getByTestId('fixed-missed-btn');
 
     expect(achievedButton).toBeEnabled();
     expect(missedButton).toBeEnabled();
-    expect(screen.queryByTestId('week-lock-notice')).not.toBeInTheDocument();
 
+    // Test opening and cancelling the amount modal
     fireEvent.click(achievedButton);
     expect(screen.getByTestId('log-amount-modal')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByTestId('log-amount-modal')).not.toBeInTheDocument();
 
+    // Mark decisions for Week 2
     fireEvent.click(missedButton);
     expect(missedButton.className).toContain('bg-rose-600');
     fireEvent.click(screen.getByTestId('flexible-missed-btn'));
     fireEvent.click(screen.getByTestId('savings-missed-btn'));
 
-    expect(screen.getByTestId('submit-week-btn')).toBeEnabled();
+    const submitBtn = screen.getByTestId('submit-week-btn');
+    expect(submitBtn).toBeEnabled();
+    expect(submitBtn).toHaveTextContent('SUBMIT REPORT FOR WEEK 2');
   });
 
-  it('locks all decisions and submit when a past week is selected', async () => {
+  it('applies app lock rule: weekIndex > 3 unsubmitted is locked; past week <= 3 is selectable and editable', async () => {
     renderPredictor();
 
-    await screen.findByRole('heading', { name: 'Week 3 Target Ranges' });
+    await screen.findByRole('heading', { name: 'Week 2 Target Ranges' });
+
+    // Week 1 (submitted) is not locked
+    expect(screen.queryByTestId('week-tab-lock-1')).not.toBeInTheDocument();
+    // Week 2 (past, index <= 3) is not locked
+    expect(screen.queryByTestId('week-tab-lock-2')).not.toBeInTheDocument();
+    // Week 3 (current) is not locked
+    expect(screen.queryByTestId('week-tab-lock-3')).not.toBeInTheDocument();
+    // Week 4 and Week 5 (future, index > 3, log == null) are locked
+    expect(screen.getByTestId('week-tab-lock-4')).toBeInTheDocument();
+    expect(screen.getByTestId('week-tab-lock-5')).toBeInTheDocument();
+    expect(screen.getByTestId('week-tab-4')).toBeDisabled();
+    expect(screen.getByTestId('week-tab-5')).toBeDisabled();
+
+    // Selecting Week 2 works (past week <= 3 is not locked)
     fireEvent.click(screen.getByTestId('week-tab-2'));
 
+    // Overview card is hidden because Week 2 is not the current calendar week
+    expect(screen.queryByTestId('current-week-overview-card')).not.toBeInTheDocument();
+
+    // Reporting card targets Week 2 itself and is editable
+    expect(screen.getByRole('heading', { name: 'Week 2 Target Ranges' })).toBeInTheDocument();
+    expect(screen.getByTestId('fixed-achieved-btn')).toBeEnabled();
+  });
+
+  it('disables decisions and submit button when submitted week (Week 1) is selected', async () => {
+    renderPredictor();
+
     await screen.findByRole('heading', { name: 'Week 2 Target Ranges' });
+    fireEvent.click(screen.getByTestId('week-tab-1'));
+
+    // Reporting card targets Week 1
+    await screen.findByRole('heading', { name: 'Week 1 Target Ranges' });
+
     const decisionButtonIds = [
       'fixed-achieved-btn',
       'fixed-missed-btn',
@@ -846,70 +886,106 @@ describe('Task 9: Weekly Expense Predictor current-week lock behavior', () => {
     ];
 
     for (const testId of decisionButtonIds) {
-      const button = screen.getByTestId(testId);
-      expect(button).toBeDisabled();
-      fireEvent.click(button);
+      expect(screen.getByTestId(testId)).toBeDisabled();
     }
 
-    expect(screen.queryByTestId('log-amount-modal')).not.toBeInTheDocument();
-    expect(screen.getByTestId('submit-week-btn')).toBeDisabled();
-    expect(screen.getByTestId('submit-week-btn')).toHaveTextContent('WEEK LOCKED');
-    expect(screen.getByTestId('week-lock-notice')).toBeVisible();
+    const submitBtn = screen.getByTestId('submit-week-btn');
+    expect(submitBtn).toBeDisabled();
+    expect(submitBtn).toHaveTextContent('SUBMITTED FOR WEEK 1');
   });
 
-  it('disables future week tabs and does not change the selected week when clicked', async () => {
+  it('opens and closes Expense Advisory modal via chip', async () => {
     renderPredictor();
 
-    await screen.findByRole('heading', { name: 'Week 3 Target Ranges' });
-    const futureTab = screen.getByTestId('week-tab-4');
+    await screen.findByRole('heading', { name: 'Week 2 Target Ranges' });
 
-    expect(futureTab).toBeDisabled();
-    expect(screen.getByTestId('week-tab-lock-4')).toBeInTheDocument();
-    fireEvent.click(futureTab);
+    const adviceChip = screen.getByTestId('expense-advice-chip');
+    expect(adviceChip).toBeInTheDocument();
 
-    expect(screen.getByRole('heading', { name: 'Week 3 Target Ranges' })).toBeInTheDocument();
+    fireEvent.click(adviceChip);
+
+    const dialog = screen.getByTestId('expense-advisory-dialog');
+    expect(dialog).toBeInTheDocument();
+    expect(screen.getByText('Expense Advisory')).toBeInTheDocument();
+    expect(screen.getByText(/Based on your current score/)).toBeInTheDocument();
+
+    const gotItBtn = screen.getByRole('button', { name: 'Got it!' });
+    fireEvent.click(gotItBtn);
+
+    expect(screen.queryByTestId('expense-advisory-dialog')).not.toBeInTheDocument();
   });
 
-  it('shows a lock icon on every non-current week tab only', async () => {
-    renderPredictor();
+  it('verifies progressive adaptive target ranges calculation in calculateMonthWeeks', () => {
+    const weeklyIncome = 10000;
+    const expenseScore = 50;
+    const now = new Date(2026, 8, 16); // Sep 2026
 
-    await screen.findByRole('heading', { name: 'Week 3 Target Ranges' });
+    const logs = [
+      {
+        week_index: 1,
+        fixed_status: 'missed',
+        flexible_status: 'missed',
+        savings_status: 'achieved',
+      },
+      {
+        week_index: 2,
+        fixed_status: 'achieved',
+        flexible_status: 'achieved',
+        savings_status: 'missed',
+      },
+    ];
 
-    for (const weekIndex of [1, 2, 4, 5]) {
-      expect(screen.getByTestId(`week-tab-lock-${weekIndex}`)).toBeInTheDocument();
-    }
-    expect(screen.queryByTestId('week-tab-lock-3')).not.toBeInTheDocument();
+    const weeks = calculateMonthWeeks(2026, 9, weeklyIncome, expenseScore, now, logs);
+
+    // Week 1 has base ranges
+    const baseFixed = weeks[0].range_fixed;
+    const baseFlex = weeks[0].range_flex;
+    const baseSave = weeks[0].range_save;
+
+    // Week 2: derived from Week 1
+    // fixed: missed -> x0.95
+    expect(weeks[1].range_fixed[0]).toBeCloseTo(baseFixed[0] * 0.95, 2);
+    expect(weeks[1].range_fixed[1]).toBeCloseTo(baseFixed[1] * 0.95, 2);
+    // flex: missed -> x0.90
+    expect(weeks[1].range_flex[0]).toBeCloseTo(baseFlex[0] * 0.90, 2);
+    expect(weeks[1].range_flex[1]).toBeCloseTo(baseFlex[1] * 0.90, 2);
+    // save: achieved -> x1.08
+    expect(weeks[1].range_save[0]).toBeCloseTo(baseSave[0] * 1.08, 2);
+    expect(weeks[1].range_save[1]).toBeCloseTo(baseSave[1] * 1.08, 2);
+
+    // Week 3: derived from Week 2
+    // fixed: achieved -> x1.0
+    expect(weeks[2].range_fixed[0]).toBeCloseTo(weeks[1].range_fixed[0] * 1.0, 2);
+    // flex: achieved -> x1.0
+    expect(weeks[2].range_flex[0]).toBeCloseTo(weeks[1].range_flex[0] * 1.0, 2);
+    // save: missed -> x0.92
+    expect(weeks[2].range_save[0]).toBeCloseTo(weeks[1].range_save[0] * 0.92, 2);
+    expect(weeks[2].range_save[1]).toBeCloseTo(weeks[1].range_save[1] * 0.92, 2);
   });
 
-  it('blocks hook decisions and submission for a non-current week', async () => {
-    const updateWeeklyStatusSpy = vi.spyOn(apiService, 'updateWeeklyStatus');
+  it('verifies score recompute and syncing expenseScore with disciplineScore in hook', async () => {
     const { result } = renderHook(() => useWeeklyTracker());
-
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    act(() => result.current.setCurrentViewWeekIndex(1));
-    const decisionsBefore = {
-      fixed: result.current.fixedDecision,
-      flexible: result.current.flexibleDecision,
-      savings: result.current.savingsDecision,
-    };
+    // When on current week (Week 3), reporting week is Week 2
+    expect(result.current.reportingWeek?.index).toBe(2);
 
-    act(() => result.current.handleDecision('fixed', 'missed'));
-
-    expect(result.current.fixedDecision).toBe(decisionsBefore.fixed);
-    expect(result.current.flexibleDecision).toBe(decisionsBefore.flexible);
-    expect(result.current.savingsDecision).toBe(decisionsBefore.savings);
-
-    act(() => result.current.setCurrentViewWeekIndex(0));
-    let submitResult: { success: boolean; error?: string } | undefined;
-    await act(async () => {
-      submitResult = await result.current.submitWeek();
+    act(() => {
+      // Mark fixed achieved with amount within range
+      const min = result.current.reportingWeek!.range_fixed[0];
+      result.current.handleDecision('fixed', 'achieved', min);
     });
 
-    expect(submitResult).toEqual({
-      success: false,
-      error: 'Only the current week can be submitted.',
+    // Score should be recomputed and synced
+    expect(result.current.disciplineScore).toBeGreaterThan(0);
+    expect(result.current.expenseScore).toBe(result.current.disciplineScore);
+
+    // Marking missed resets score component to 0 but keeps logged amount
+    act(() => {
+      result.current.handleDecision('fixed', 'missed');
     });
-    expect(updateWeeklyStatusSpy).not.toHaveBeenCalled();
+
+    expect(result.current.fixedDecision).toBe('missed');
+    expect(result.current.actualFixed).toBeGreaterThan(0); // Kept amount
   });
 });

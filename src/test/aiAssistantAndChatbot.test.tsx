@@ -610,6 +610,14 @@ describe('TASK 11 — AI Assistant (/ai-assistant) & Chatbot Intent Engine', () 
       expect(res.text).toContain('• **Price Band:** ₹371 - ₹390');
       expect(res.text).toContain('• **Grey Market Premium (GMP):** +₹12 (3.1%)');
     });
+
+    it('Upcoming IPO score query does not fall through to the dashboard score intent', async () => {
+      const res = await chatIntentService.processMessage('Upcoming IPO score', { skipDelay: true });
+
+      expect(res.text).toContain("couldn't find active IPO score card details");
+      expect(res.text).not.toContain('Financial Fitness Score');
+      expect(res.redirectTo).toBe('/dashboard');
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -693,7 +701,7 @@ describe('TASK 11 — AI Assistant (/ai-assistant) & Chatbot Intent Engine', () 
 
       renderWithContext(<AiAssistantPage />);
 
-      const efChip = screen.getByTestId('suggestion-chip-4'); // Emergency Fund chip
+      const efChip = screen.getByTestId('suggestion-chip-3'); // Emergency Fund chip
       fireEvent.click(efChip);
 
       await waitFor(() => {

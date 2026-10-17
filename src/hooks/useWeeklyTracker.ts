@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { apiService } from '../services/apiService';
 import { gamificationStore } from '../services/gamificationStore';
 import {
@@ -10,6 +10,15 @@ import {
   deriveHeatmapDays,
 } from '../models/weekly';
 
+export function getReportingWeek(weeksList: WeekInfo[], viewIndex: number): WeekInfo | undefined {
+  if (weeksList.length === 0 || viewIndex < 0 || viewIndex >= weeksList.length) return undefined;
+  const cur = weeksList[viewIndex];
+  if (cur.is_current && viewIndex > 0) {
+    return weeksList[viewIndex - 1];
+  }
+  return cur;
+}
+
 export interface UseWeeklyTrackerResult {
   loading: boolean;
   error: string | null;
@@ -17,6 +26,7 @@ export interface UseWeeklyTrackerResult {
   currentYear: number;
   currentMonth: number;
   weeks: WeekInfo[];
+  reportingWeek?: WeekInfo;
   currentViewWeekIndex: number;
   activeCalendarWeekIndex: number;
   weeklyIncome: number;
@@ -62,7 +72,7 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
   const [disciplineScore, setDisciplineScore] = useState<number>(0);
   const [targetsHit, setTargetsHit] = useState<string>('0/4');
   const [disciplineMsg, setDisciplineMsg] = useState<string>(
-    'Your financial discipline message will appear here.'
+    'Keep tracking your expenses daily.'
   );
 
   const [fixedDecision, setFixedDecision] = useState<'achieved' | 'missed' | undefined>();
@@ -84,24 +94,49 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
   const updateViewDecisions = useCallback(
     (weeksList: WeekInfo[], viewIndex: number) => {
       if (weeksList.length === 0 || viewIndex >= weeksList.length) return;
-      const cur = weeksList[viewIndex];
+      const target = getReportingWeek(weeksList, viewIndex);
+      if (!target) return;
 
-      const fDec = cur.fixed_status;
-      const flDec = cur.flexible_status;
-      const sDec = cur.savings_status;
+      const fDec = target.fixed_status;
+      const flDec = target.flexible_status;
+      const sDec = target.savings_status;
 
       setFixedDecision(fDec);
       setFlexibleDecision(flDec);
       setSavingsDecision(sDec);
 
-      setActualFixed(cur.spent_fixed ?? 0);
-      setActualFlex(cur.spent_flexible ?? 0);
-      setActualSaved(cur.spent_savings ?? 0);
+      const aFixed = target.spent_fixed ?? 0;
+      const aFlex = target.spent_flexible ?? 0;
+      const aSaved = target.spent_savings ?? 0;
 
-      // Reloading a submitted week shows base scores only (Flutter lines 150-168)
-      const fSc = fDec === 'achieved' ? 15 : 0;
-      const flSc = flDec === 'achieved' ? 15 : 0;
-      const sSc = sDec === 'achieved' ? 10 : 0;
+      setActualFixed(aFixed);
+      setActualFlex(aFlex);
+      setActualSaved(aSaved);
+
+      // Score logic matching Flutter lines 201-224:
+      let fSc = 0;
+      if (fDec === 'achieved') {
+        fSc =
+          aFixed > 0
+            ? calculateCategoryScore(aFixed, target.range_fixed[0], target.range_fixed[1], 'fixed')
+            : 15;
+      }
+
+      let flSc = 0;
+      if (flDec === 'achieved') {
+        flSc =
+          aFlex > 0
+            ? calculateCategoryScore(aFlex, target.range_flex[0], target.range_flex[1], 'flexible')
+            : 15;
+      }
+
+      let sSc = 0;
+      if (sDec === 'achieved') {
+        sSc =
+          aSaved > 0
+            ? calculateCategoryScore(aSaved, target.range_save[0], target.range_save[1], 'savings')
+            : 10;
+      }
 
       setFixedScore(fSc);
       setFlexScore(flSc);
@@ -109,7 +144,10 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
 
       const disc = calculateLocalDisciplineScore(fSc, flSc, sSc);
       setDisciplineScore(disc);
-      // NOTE: We do NOT call setLocalExpenseScore here to avoid Flutter's zero-score quirk!
+      setExpenseScore(disc); // Big score synced to discipline score
+
+      // Persist local_expense_score via gamificationStore
+      gamificationStore.setLocalExpenseScore(disc);
     },
     []
   );
@@ -177,7 +215,6 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
       if (currentWeekIdx !== -1) {
         activeIdx = currentWeekIdx;
       } else {
-        // Default to first unsubmitted or last week
         const firstUnsubmitted = generatedWeeks.findIndex((w) => !w.is_submitted);
         activeIdx = firstUnsubmitted !== -1 ? firstUnsubmitted : 0;
       }
@@ -190,7 +227,6 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
 
       setWeeklyIncome(wIncome);
       setMonthlyActiveIncome(mIncome);
-      setExpenseScore(expPillarScore);
       setDisciplineMsg(discMsg);
       setWeeks(generatedWeeks);
       setActiveCalendarWeekIndex(activeIdx);
@@ -246,8 +282,8 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
       amount?: number
     ) => {
       if (weeks.length === 0 || currentViewWeekIndex >= weeks.length) return;
-      const cur = weeks[currentViewWeekIndex];
-      if (!cur.is_current || cur.is_submitted) return;
+      const target = getReportingWeek(weeks, currentViewWeekIndex);
+      if (!target || target.is_submitted) return;
 
       let newFixedDec = fixedDecision;
       let newFlexDec = flexibleDecision;
@@ -265,15 +301,15 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
         if (type === 'fixed') {
           newFixedDec = 'missed';
           newFixedScore = 0;
-          newFixedAmt = 0;
+          // Keep existing actualFixed (app does not reset it)
         } else if (type === 'flexible') {
           newFlexDec = 'missed';
           newFlexScore = 0;
-          newFlexAmt = 0;
+          // Keep existing actualFlex
         } else if (type === 'savings') {
           newSaveDec = 'missed';
           newSaveScore = 0;
-          newSaveAmt = 0;
+          // Keep existing actualSaved
         }
       } else {
         // achieved
@@ -281,15 +317,30 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
         if (type === 'fixed') {
           newFixedDec = 'achieved';
           newFixedAmt = amt;
-          newFixedScore = calculateCategoryScore(amt, cur.range_fixed[0], cur.range_fixed[1], 'fixed');
+          newFixedScore = calculateCategoryScore(
+            amt,
+            target.range_fixed[0],
+            target.range_fixed[1],
+            'fixed'
+          );
         } else if (type === 'flexible') {
           newFlexDec = 'achieved';
           newFlexAmt = amt;
-          newFlexScore = calculateCategoryScore(amt, cur.range_flex[0], cur.range_flex[1], 'flexible');
+          newFlexScore = calculateCategoryScore(
+            amt,
+            target.range_flex[0],
+            target.range_flex[1],
+            'flexible'
+          );
         } else if (type === 'savings') {
           newSaveDec = 'achieved';
           newSaveAmt = amt;
-          newSaveScore = calculateCategoryScore(amt, cur.range_save[0], cur.range_save[1], 'savings');
+          newSaveScore = calculateCategoryScore(
+            amt,
+            target.range_save[0],
+            target.range_save[1],
+            'savings'
+          );
         }
       }
 
@@ -305,13 +356,30 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
       setFlexScore(newFlexScore);
       setSaveScore(newSaveScore);
 
-      const newDiscScore = calculateLocalDisciplineScore(newFixedScore, newFlexScore, newSaveScore);
+      const newDiscScore = calculateLocalDisciplineScore(
+        newFixedScore,
+        newFlexScore,
+        newSaveScore
+      );
       setDisciplineScore(newDiscScore);
+      setExpenseScore(newDiscScore); // Sync big score
 
-      // Writes local_expense_score ONLY when user marks a decision!
+      // Persist local_expense_score
       gamificationStore.setLocalExpenseScore(newDiscScore);
     },
-    [weeks, currentViewWeekIndex, fixedDecision, flexibleDecision, savingsDecision, actualFixed, actualFlex, actualSaved, fixedScore, flexScore, saveScore]
+    [
+      weeks,
+      currentViewWeekIndex,
+      fixedDecision,
+      flexibleDecision,
+      savingsDecision,
+      actualFixed,
+      actualFlex,
+      actualSaved,
+      fixedScore,
+      flexScore,
+      saveScore,
+    ]
   );
 
   const submitWeek = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
@@ -323,8 +391,10 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
       return { success: false, error: 'Invalid week.' };
     }
 
-    const cur = weeks[currentViewWeekIndex];
-  if (!cur.is_current) return { success: false, error: 'Only the current week can be submitted.' };
+    const target = getReportingWeek(weeks, currentViewWeekIndex);
+    if (!target) return { success: false, error: 'Invalid week.' };
+    if (target.is_submitted) return { success: false, error: 'Week already submitted.' };
+
     const overallStatus =
       fixedDecision === 'achieved' &&
       flexibleDecision === 'achieved' &&
@@ -334,7 +404,7 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
 
     try {
       await apiService.updateWeeklyStatus({
-        weekIndex: cur.index, // 1-BASED
+        weekIndex: target.index, // 1-BASED
         month: currentMonth,
         year: currentYear,
         status: overallStatus,
@@ -346,11 +416,11 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
         spentSavings: actualSaved,
       });
 
-      // Update streak and XP triggers (Flutter lines 324-326)
+      // Update streak and XP triggers
       gamificationStore.updateStreak();
       gamificationStore.rewardWeeklyCheckin();
 
-      // Persist local_expense_score to override dashboard
+      // Persist local_expense_score
       gamificationStore.setLocalExpenseScore(disciplineScore);
 
       // Refetch updated data
@@ -376,6 +446,11 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
     loadWeeklyData,
   ]);
 
+  const reportingWeek = useMemo(
+    () => getReportingWeek(weeks, currentViewWeekIndex),
+    [weeks, currentViewWeekIndex]
+  );
+
   const heatmapDays = deriveHeatmapDays(currentYear, currentMonth, weeks);
 
   return {
@@ -385,6 +460,7 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
     currentYear,
     currentMonth,
     weeks,
+    reportingWeek,
     currentViewWeekIndex,
     activeCalendarWeekIndex,
     weeklyIncome,

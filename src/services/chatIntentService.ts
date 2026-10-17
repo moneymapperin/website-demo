@@ -189,13 +189,25 @@ export class ChatIntentService {
       route: '/emergency_fund_p',
       redirectLabel: 'Check Emergency Fund',
       responseBuilder: (data) => {
+        const fitness = data?.financial_fitness_scores;
         const savings = data?.savings_scores;
-        if (savings) {
-          const current = Number(savings.ef_current_estimated ?? 0);
-          const target = Number(savings.ef_target_amount ?? 0);
+        const rawPillarScore = fitness?.savings_pillar_score;
+        const pillarScore =
+          rawPillarScore !== null && rawPillarScore !== undefined
+            ? Math.round(parseFloat(String(rawPillarScore)) || 0)
+            : 0;
+
+        if (savings || pillarScore > 0) {
+          const current = Number(savings?.ef_current_estimated ?? 0);
+          const target = Number(savings?.ef_target_amount ?? 0);
           const shortfall = target - current > 0 ? target - current : 0;
+          const scoreStr =
+            pillarScore > 0
+              ? `• **Emergency Savings Pillar Score:** **${pillarScore} / 100** ⭐\n`
+              : '';
           return (
             'Your **Emergency Fund** status:\n' +
+            scoreStr +
             `• Current Balance: **₹${current.toFixed(0)}**\n` +
             `• Target Cushion: **₹${target.toFixed(0)}**\n` +
             `• Shortfall: **₹${shortfall.toFixed(0)}**\n\n` +
@@ -219,12 +231,24 @@ export class ChatIntentService {
       route: '/income_p',
       redirectLabel: 'Analyze Income',
       responseBuilder: (data) => {
+        const fitness = data?.financial_fitness_scores;
         const income = data?.income_scores;
-        if (income) {
-          const active = income.active_income_score ?? 0;
-          const passive = income.passive_income_score ?? 0;
+        const rawPillarScore = fitness?.income_pillar_score;
+        const pillarScore =
+          rawPillarScore !== null && rawPillarScore !== undefined
+            ? Math.round(parseFloat(String(rawPillarScore)) || 0)
+            : 0;
+
+        if (income || pillarScore > 0) {
+          const active = income?.active_income_score ?? 0;
+          const passive = income?.passive_income_score ?? 0;
+          const scoreStr =
+            pillarScore > 0
+              ? `• **Income Pillar Score:** **${pillarScore} / 100** ⭐\n`
+              : '';
           return (
             'Here is your **Income Pillar** breakdown:\n' +
+            scoreStr +
             `• Active Income Score: **${active}**\n` +
             `• Passive Income Score: **${passive}**\n\n` +
             'Track cashflow and build passive streams to grow your wealth!'
@@ -238,6 +262,9 @@ export class ChatIntentService {
     {
       keywords: [
         'expense',
+        'expenses',
+        'weekly expenses',
+        'weekly expense',
         'spending',
         'fixed spend',
         'flexible spend',
@@ -247,13 +274,25 @@ export class ChatIntentService {
       route: '/dashboard',
       redirectLabel: 'View Dashboard',
       responseBuilder: (data) => {
+        const fitness = data?.financial_fitness_scores;
         const expense = data?.expense_scores;
-        if (expense) {
-          const fixed = expense.fixed_score ?? 0;
-          const flex = expense.flexible_score ?? 0;
-          const tip = expense.discipline_message ?? 'Keep tracking expenses daily.';
+        const rawPillarScore = fitness?.expense_pillar_score;
+        const pillarScore =
+          rawPillarScore !== null && rawPillarScore !== undefined
+            ? Math.round(parseFloat(String(rawPillarScore)) || 0)
+            : 0;
+
+        if (expense || pillarScore > 0) {
+          const fixed = expense?.fixed_score ?? 0;
+          const flex = expense?.flexible_score ?? 0;
+          const tip = expense?.discipline_message ?? 'Keep tracking expenses daily.';
+          const scoreStr =
+            pillarScore > 0
+              ? `• **Expenses Pillar Score:** **${pillarScore} / 100** ⭐\n`
+              : '';
           return (
             'Your **Expense & Budget** Breakdown:\n' +
+            scoreStr +
             `• Fixed Spend Score: **${fixed}**\n` +
             `• Flexible Spend Score: **${flex}**\n` +
             `• Tip: **${tip}**`
@@ -277,12 +316,24 @@ export class ChatIntentService {
       route: '/insurance_p',
       redirectLabel: 'Insurance Review',
       responseBuilder: (data) => {
+        const fitness = data?.financial_fitness_scores;
         const prot = data?.protection_scores;
-        if (prot) {
-          const term = prot.term_score ?? 0;
-          const health = prot.health_score ?? 0;
+        const rawPillarScore = fitness?.protection_pillar_score;
+        const pillarScore =
+          rawPillarScore !== null && rawPillarScore !== undefined
+            ? Math.round(parseFloat(String(rawPillarScore)) || 0)
+            : 0;
+
+        if (prot || pillarScore > 0) {
+          const term = prot?.term_score ?? 0;
+          const health = prot?.health_score ?? 0;
+          const scoreStr =
+            pillarScore > 0
+              ? `• **Protection Pillar Score:** **${pillarScore} / 100** ⭐\n`
+              : '';
           return (
             'Your **Protection Pillar** status:\n' +
+            scoreStr +
             `• Term Insurance Score: **${term}**\n` +
             `• Health Insurance Score: **${health}**`
           );
@@ -306,13 +357,25 @@ export class ChatIntentService {
       route: '/mutual_fund_p',
       redirectLabel: 'Explore Investments',
       responseBuilder: (data) => {
+        const fitness = data?.financial_fitness_scores;
         const inv = data?.investment_scores;
-        if (inv) {
-          const equity = inv.equity_score ?? 0;
-          const sip = inv.sip_score ?? 0;
-          const asset = inv.asset_balance_score ?? 0;
+        const rawPillarScore = fitness?.investment_pillar_score;
+        const pillarScore =
+          rawPillarScore !== null && rawPillarScore !== undefined
+            ? Math.round(parseFloat(String(rawPillarScore)) || 0)
+            : 0;
+
+        if (inv || pillarScore > 0) {
+          const equity = inv?.equity_score ?? 0;
+          const sip = inv?.sip_score ?? 0;
+          const asset = inv?.asset_balance_score ?? 0;
+          const scoreStr =
+            pillarScore > 0
+              ? `• **Investment Pillar Score:** **${pillarScore} / 100** ⭐\n`
+              : '';
           return (
             'Your **Investment Pillar** status:\n' +
+            scoreStr +
             `• Equity Score: **${equity}**\n` +
             `• SIP Score: **${sip}**\n` +
             `• Asset Balance Score: **${asset}**`
@@ -687,9 +750,9 @@ export class ChatIntentService {
           id: Date.now().toString(),
           sender: 'bot',
           text: 'Stock Score Card data is currently unavailable. Please explore active signals in our Stock Screener!',
-          redirectTo: '/stock-screener',
+          redirectTo: '/stock_screener',
           redirectLabel: 'Explore Stock Screener',
-          quickActions: [{ label: 'Stock Screener', route: '/stock-screener' }],
+          quickActions: [],
           timestamp,
         };
       }
@@ -731,9 +794,9 @@ export class ChatIntentService {
           id: Date.now().toString(),
           sender: 'bot',
           text: lines.join('\n'),
-          redirectTo: '/stock-screener',
+          redirectTo: '/stock_screener',
           redirectLabel: 'Explore Stock Screener',
-          quickActions: [{ label: 'Stock Screener', route: '/stock-screener' }],
+          quickActions: [],
           timestamp,
         };
       }
@@ -761,9 +824,9 @@ export class ChatIntentService {
           id: Date.now().toString(),
           sender: 'bot',
           text: 'Mutual Fund Score Card data is currently unavailable. Please explore rated funds in our Mutual Fund Screener!',
-          redirectTo: '/mf-screener',
+          redirectTo: '/mutual_fund_p',
           redirectLabel: 'Explore Mutual Funds',
-          quickActions: [{ label: 'MF Screener', route: '/mf-screener' }],
+          quickActions: [],
           timestamp,
         };
       }
@@ -828,16 +891,16 @@ export class ChatIntentService {
       }
 
       lines.push(
-        '💡 *These funds diversify your portfolio across growth and stability for long-term compounding.*'
+        '💡 *These 2 funds diversify your portfolio across growth and stability for long-term compounding.*'
       );
 
       return {
         id: Date.now().toString(),
         sender: 'bot',
         text: lines.join('\n'),
-        redirectTo: '/mf-screener',
+        redirectTo: '/mutual_fund_p',
         redirectLabel: 'Explore Mutual Funds',
-        quickActions: [{ label: 'MF Screener', route: '/mf-screener' }],
+        quickActions: [],
         timestamp,
       };
     }
@@ -860,9 +923,9 @@ export class ChatIntentService {
           id: Date.now().toString(),
           sender: 'bot',
           text: 'Liquid fund recommendations are currently unavailable. Check back soon or explore our Emergency Fund Pillar!',
-          redirectTo: '/pillars/emergency',
+          redirectTo: '/emergency_fund_p',
           redirectLabel: 'Check Emergency Fund',
-          quickActions: [{ label: 'Emergency Fund', route: '/pillars/emergency' }],
+          quickActions: [],
           timestamp,
         };
       }
@@ -881,17 +944,13 @@ export class ChatIntentService {
         rawLScore !== null && rawLScore !== undefined
           ? Math.round(parseFloat(rawLScore.toString()) || 0)
           : null;
+      const lReturn = selectedLiquid?.one_year_return ?? selectedLiquid?.yield;
 
       const lines: string[] = ['🛡️ **Best Liquid Fund for Your Emergency Needs**:\n'];
       if (lName) lines.push(`• **Fund Name**: **${lName}**`);
       lines.push(`• **Category**: ${lCat}`);
       if (lScore !== null) lines.push(`• **Score**: **${lScore} / 100** ⭐`);
-
-      if (selectedLiquid?.one_year_return) {
-        lines.push(`• **1-Year Return**: **${selectedLiquid.one_year_return}**`);
-      } else if (selectedLiquid?.yield) {
-        lines.push(`• **Yield**: **${selectedLiquid.yield}**`);
-      }
+      if (lReturn) lines.push(`• **Est. Annual Yield**: **${lReturn}**`);
 
       lines.push(
         '\n💡 *Liquid funds offer T+1 instant liquidity with zero lock-in, making them ideal for parking your emergency reserves safely.*'
@@ -901,9 +960,9 @@ export class ChatIntentService {
         id: Date.now().toString(),
         sender: 'bot',
         text: lines.join('\n'),
-        redirectTo: '/pillars/emergency',
+        redirectTo: '/emergency_fund_p',
         redirectLabel: 'Check Emergency Fund',
-        quickActions: [{ label: 'Emergency Fund', route: '/pillars/emergency' }],
+        quickActions: [],
         timestamp,
       };
     }
@@ -959,12 +1018,9 @@ export class ChatIntentService {
           id: Date.now().toString(),
           sender: 'bot',
           text: lines.join('\n'),
-          redirectTo: '/master-data?target=income',
+          redirectTo: '/master_data',
           redirectLabel: 'Update Income in Master Data',
-          quickActions: [
-            { label: 'Update Income', route: '/master-data?target=income' },
-            { label: 'Insurance Screener', route: '/insurance-screener' },
-          ],
+          quickActions: [],
           timestamp,
         };
       }
@@ -998,9 +1054,9 @@ export class ChatIntentService {
         id: Date.now().toString(),
         sender: 'bot',
         text: lines.join('\n'),
-        redirectTo: '/insurance-screener',
+        redirectTo: '/insurance_screener',
         redirectLabel: 'Explore Insurance Plans',
-        quickActions: [{ label: 'Insurance Screener', route: '/insurance-screener' }],
+        quickActions: [],
         timestamp,
       };
     }
@@ -1014,7 +1070,7 @@ export class ChatIntentService {
   ): Promise<ChatMessage | null> {
     const norm = queryText.toLowerCase().trim();
 
-    // 0. Featured AI Questions
+    // 0. FEATURED AI ASSISTANT INITIAL QUESTIONS
     const featuredAiMsg = await this._tryResolveFeaturedAiQuestions(norm, timestamp);
     if (featuredAiMsg) return featuredAiMsg;
 
@@ -1025,7 +1081,7 @@ export class ChatIntentService {
       norm.includes('emergency savings') ||
       (norm.includes('emergency') && !norm.includes('mutual'));
 
-    // 1. MUTUAL FUND SCORE CARD QUERY (Evaluated FIRST)
+    // 1. MUTUAL FUND SCORE CARD QUERY (Evaluated FIRST to prevent cross-domain stock intercepts)
     const mfKeywords = [
       'mutual fund',
       'mf',
@@ -1053,6 +1109,10 @@ export class ChatIntentService {
       'kotak emerging',
       'uti nifty',
       'icici pru',
+      'motilal',
+      'dsp',
+      'uti',
+      'kotak',
     ];
 
     const isMfQuery =
@@ -1061,37 +1121,40 @@ export class ChatIntentService {
     if (isMfQuery) {
       try {
         const funds = await this._getFunds();
-        const matchedFund = this._findBestMatch(norm, funds, [
-          'scheme_name',
-          'fund_name',
-          'category',
-          'cluster',
-        ]);
+        const matchedFunds = this._findBestMatches(
+          norm,
+          funds,
+          ['scheme_name', 'fund_name', 'category', 'cluster', 'provider_name', 'name']
+        );
 
-        if (matchedFund) {
-          const text = ScoreCardAdvisor.generateMfAdvice(matchedFund);
+        if (matchedFunds.length > 0) {
+          const text =
+            matchedFunds.length === 1
+              ? ScoreCardAdvisor.generateMfAdvice(matchedFunds[0])
+              : ScoreCardAdvisor.generateMultiMfDetails(matchedFunds, norm);
+
           return {
             id: Date.now().toString(),
             sender: 'bot',
             text,
-            redirectTo: '/mf-screener',
+            redirectTo: '/mf_screener',
             redirectLabel: 'Explore Mutual Fund Screener',
             quickActions: [
-              { label: 'MF Screener', route: '/mf-screener' },
-              { label: 'Stock Screener', route: '/stock-screener' },
+              { label: 'MF Screener', route: '/mf_screener' },
+              { label: 'Stock Screener', route: '/stock_screener' },
             ],
             timestamp,
           };
-        } else if (!this._matchesAnyIntent(norm) && !norm.includes('screener') && !norm.includes('overall')) {
+        } else if (!norm.includes('screener') && !norm.includes('overall')) {
           return {
             id: Date.now().toString(),
             sender: 'bot',
             text:
               "Sorry! I couldn't identify that mutual fund scheme in our Score Card dataset.\n\n" +
               "Try searching with specific scheme names (e.g. **'SBI Small Cap Fund'**, **'Parag Parikh Flexi Cap'**) or explore all rated schemes in our **Mutual Fund Screener**!",
-            redirectTo: '/mf-screener',
+            redirectTo: '/mf_screener',
             redirectLabel: 'Open MF Screener',
-            quickActions: [{ label: 'MF Screener', route: '/mf-screener' }],
+            quickActions: [{ label: 'MF Screener', route: '/mf_screener' }],
             timestamp,
           };
         }
@@ -1124,39 +1187,45 @@ export class ChatIntentService {
       'lic',
       'niva bupa',
       'aditya birla',
+      'ergo',
+      'health insurance',
     ];
 
     const isInsQuery = insKeywords.some((kw) => matchesKeyword(norm, kw));
     if (isInsQuery) {
       try {
         const plans = await this._getPlans();
-        const matchedPlan = this._findBestMatch(norm, plans, [
-          'plan_name',
-          'company_name',
-          'plan_type',
-        ]);
+        const matchedPlans = this._findBestMatches(
+          norm,
+          plans,
+          ['plan_name', 'company_name', 'provider_name', 'plan_type', 'category', 'name', 'type']
+        );
 
-        if (matchedPlan) {
-          const text = ScoreCardAdvisor.generateInsuranceDetails(matchedPlan);
+        if (matchedPlans.length > 0) {
+          const text =
+            matchedPlans.length === 1
+              ? ScoreCardAdvisor.generateInsuranceDetails(matchedPlans[0])
+              : ScoreCardAdvisor.generateMultiInsuranceDetails(matchedPlans, norm);
+
           return {
             id: Date.now().toString(),
             sender: 'bot',
             text,
-            redirectTo: '/insurance-screener',
+            redirectTo: '/insurance_screener',
             redirectLabel: 'Explore Insurance Screener',
-            quickActions: [{ label: 'Insurance Screener', route: '/insurance-screener' }],
+            quickActions: [{ label: 'Insurance Screener', route: '/insurance_screener' }],
             timestamp,
           };
-        } else if (!this._matchesAnyIntent(norm) && !norm.includes('screener') && !norm.includes('overall')) {
+        } else if (!norm.includes('screener') && !norm.includes('overall')) {
           return {
             id: Date.now().toString(),
             sender: 'bot',
             text:
               "Sorry! I couldn't find that specific insurance plan in our dataset.\n\n" +
               "Try searching for top providers like **'HDFC Ergo Optima'**, **'Star Health'**, or **'Care Health'**, or open the Insurance Screener!",
-            redirectTo: '/insurance-screener',
+            redirectTo: '/insurance_screener',
             redirectLabel: 'Open Insurance Screener',
-            quickActions: [{ label: 'Insurance Screener', route: '/insurance-screener' }],
+            quickActions: [{ label: 'Insurance Screener', route: '/insurance_screener' }],
             timestamp,
           };
         }
@@ -1174,16 +1243,25 @@ export class ChatIntentService {
       'gmp',
       'bidding',
       'allotment',
+      'initial public offering',
     ];
 
     const isIpoQuery = ipoKeywords.some((kw) => matchesKeyword(norm, kw));
     if (isIpoQuery) {
       try {
         const ipos = await this._getIpos();
-        const matchedIpo = this._findBestMatch(norm, ipos, ['company_name', 'name']);
+        const matchedIpos = this._findBestMatches(
+          norm,
+          ipos,
+          ['company_name', 'name', 'symbol', 'sector']
+        );
 
-        if (matchedIpo) {
-          const text = ScoreCardAdvisor.generateIpoDetails(matchedIpo);
+        if (matchedIpos.length > 0) {
+          const text =
+            matchedIpos.length === 1
+              ? ScoreCardAdvisor.generateIpoDetails(matchedIpos[0])
+              : ScoreCardAdvisor.generateMultiIpoDetails(matchedIpos, norm);
+
           return {
             id: Date.now().toString(),
             sender: 'bot',
@@ -1191,20 +1269,25 @@ export class ChatIntentService {
             redirectTo: '/dashboard',
             redirectLabel: 'View Dashboard',
             quickActions: [
-              { label: 'Stock Screener', route: '/stock-screener' },
-              { label: 'MF Screener', route: '/mf-screener' },
+              { label: 'Stock Screener', route: '/stock_screener' },
+              { label: 'MF Screener', route: '/mf_screener' },
             ],
             timestamp,
           };
-        } else if (!this._matchesAnyIntent(norm) && !norm.includes('screener')) {
+        } else {
           return {
             id: Date.now().toString(),
             sender: 'bot',
             text:
-              "Sorry! I couldn't find active IPO score card details for that query. Check upcoming IPOs in the dashboard or Stock Screener!",
-            redirectTo: '/dashboard',
-            redirectLabel: 'Go to Dashboard',
-            quickActions: [{ label: 'Stock Screener', route: '/stock-screener' }],
+              "🚀 **Upcoming IPO Score Cards Feature is Coming Soon!**\n\n" +
+              "We are currently integrating live IPO Grey Market Premium (GMP) and subscription metrics.\n\n" +
+              "In the meantime, explore top growth companies in our **Stock Screener** or check the Dashboard!",
+            redirectTo: '/stock_screener',
+            redirectLabel: 'Open Stock Screener',
+            quickActions: [
+              { label: 'Stock Screener', route: '/stock_screener' },
+              { label: 'Dashboard', route: '/dashboard' },
+            ],
             timestamp,
           };
         }
@@ -1265,36 +1348,40 @@ export class ChatIntentService {
     if (isStockQuery) {
       try {
         const stocks = await this._getStocks();
-        const matchedStock = this._findBestMatch(norm, stocks, [
-          'company_name',
-          'symbol',
-          'sector',
-        ]);
+        const matchedStocks = this._findBestMatches(
+          norm,
+          stocks,
+          ['company_name', 'symbol', 'sector', 'name', 'industry']
+        );
 
-        if (matchedStock) {
-          const text = ScoreCardAdvisor.generateStockAdvice(matchedStock);
+        if (matchedStocks.length > 0) {
+          const text =
+            matchedStocks.length === 1
+              ? ScoreCardAdvisor.generateStockAdvice(matchedStocks[0])
+              : ScoreCardAdvisor.generateMultiStockDetails(matchedStocks, norm);
+
           return {
             id: Date.now().toString(),
             sender: 'bot',
             text,
-            redirectTo: '/stock-screener',
+            redirectTo: '/stock_screener',
             redirectLabel: 'Explore Stock Screener',
             quickActions: [
-              { label: 'Stock Screener', route: '/stock-screener' },
-              { label: 'MF Screener', route: '/mf-screener' },
+              { label: 'Stock Screener', route: '/stock_screener' },
+              { label: 'MF Screener', route: '/mf_screener' },
             ],
             timestamp,
           };
-        } else if (!this._matchesAnyIntent(norm) && !norm.includes('screener') && !norm.includes('overall')) {
+        } else if (!norm.includes('screener') && !norm.includes('overall')) {
           return {
             id: Date.now().toString(),
             sender: 'bot',
             text:
               "Sorry! I couldn't identify that specific stock in our Stock Score Card dataset.\n\n" +
               "Try asking about top companies like **Reliance**, **Tata Motors**, **Infosys**, or **HDFC Bank**, or explore all listed stocks in our **Stock Screener**!",
-            redirectTo: '/stock-screener',
+            redirectTo: '/stock_screener',
             redirectLabel: 'Open Stock Screener',
-            quickActions: [{ label: 'Stock Screener', route: '/stock-screener' }],
+            quickActions: [{ label: 'Stock Screener', route: '/stock_screener' }],
             timestamp,
           };
         }
@@ -1306,58 +1393,40 @@ export class ChatIntentService {
     return null;
   }
 
-  private _matchesAnyIntent(norm: string): boolean {
-    for (const rule of this._intentRules) {
-      for (const keyword of rule.keywords) {
-        if (matchesKeyword(norm, keyword)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  private _findBestMatch(
+  private _findBestMatches(
     queryNorm: string,
     items: Record<string, any>[],
-    searchFields: string[]
-  ): Record<string, any> | null {
+    searchFields: string[],
+    maxResults = 5
+  ): Record<string, any>[] {
     const stopWords = new Set([
-      'mutual',
-      'fund',
-      'funds',
-      'stock',
-      'stocks',
-      'share',
-      'shares',
-      'company',
-      'plan',
-      'plans',
-      'insurance',
-      'direct',
-      'growth',
-      'scheme',
-      'option',
-      'screener',
-      'score',
-      'card',
       'tell',
       'show',
       'me',
       'about',
-      'best',
-      'top',
       'what',
       'is',
       'the',
       'for',
       'a',
+      'an',
       'suggest',
       'recommend',
       'give',
       'detail',
       'details',
       'info',
+      'screener',
+      'score',
+      'card',
+      'which',
+      'where',
+      'how',
+      'to',
+      'in',
+      'of',
+      'on',
+      'with',
     ]);
 
     const queryTokens = queryNorm
@@ -1365,50 +1434,70 @@ export class ChatIntentService {
       .split(/\s+/)
       .filter((w) => w.length >= 2 && !stopWords.has(w));
 
-    if (queryTokens.length === 0) return null;
+    if (queryTokens.length === 0) return [];
 
-    const tokenRegexes = queryTokens.map(
-      (t) => new RegExp(`\\b${escapeRegExp(t)}\\b`, 'i')
-    );
-
-    let bestItem: Record<string, any> | null = null;
-    let maxScore = 0;
+    const cleanPhrase = queryTokens.join(' ');
+    const scoredItems: { score: number; item: Record<string, any> }[] = [];
 
     for (const item of items) {
-      let score = 0;
+      let itemScore = 0;
+
       for (const field of searchFields) {
         const val = (item[field] ?? '').toString().toLowerCase();
         if (!val) continue;
 
-        // Exact phrase match
-        const cleanPhrase = queryTokens.join(' ');
+        // 1. Exact or Partial Phrase Match
         if (cleanPhrase.length > 0) {
-          const fullPhraseRegex = new RegExp(escapeRegExp(cleanPhrase), 'i');
-          if (fullPhraseRegex.test(val)) {
-            score += 20;
+          if (val === cleanPhrase) {
+            itemScore += 50;
+          } else if (val.includes(cleanPhrase) || cleanPhrase.includes(val)) {
+            itemScore += 30;
           }
         }
 
-        // Token RegExp matches
-        for (let i = 0; i < queryTokens.length; i++) {
-          const token = queryTokens[i];
-          const tokenRegex = tokenRegexes[i];
-
-          if (tokenRegex.test(val)) {
-            score += token.length >= 4 ? 5 : 3;
-          } else if (val.includes(token)) {
-            score += token.length >= 4 ? 3 : 1;
+        // 2. Token Matching
+        for (const token of queryTokens) {
+          if (val.includes(token)) {
+            if (val.split(/\s+/).includes(token)) {
+              itemScore += token.length >= 4 ? 10 : 6;
+            } else {
+              itemScore += token.length >= 4 ? 5 : 3;
+            }
           }
         }
       }
 
-      if (score > maxScore) {
-        maxScore = score;
-        bestItem = item;
+      if (itemScore >= 5) {
+        scoredItems.push({ score: itemScore, item });
       }
     }
 
-    return maxScore >= 3 ? bestItem : null;
+    if (scoredItems.length === 0) return [];
+
+    // Sort by score descending
+    scoredItems.sort((a, b) => b.score - a.score);
+
+    // Deduplicate and return top maxResults
+    const results: Record<string, any>[] = [];
+    const seenNames = new Set<string>();
+
+    for (const entry of scoredItems) {
+      if (results.length >= maxResults) break;
+      const item = entry.item;
+      const idOrName = (
+        item.id ??
+        item.company_name ??
+        item.plan_name ??
+        item.scheme_name ??
+        item.name ??
+        ''
+      ).toString();
+      if (idOrName.length > 0 && seenNames.has(idOrName)) continue;
+      if (idOrName.length > 0) seenNames.add(idOrName);
+      results.push(item);
+    }
+
+    return results;
   }
 }
 

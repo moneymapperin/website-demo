@@ -12,6 +12,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { CorporateLoginPage } from './pages/CorporateLoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { MasterDataPage } from './pages/MasterDataPage';
@@ -86,6 +87,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                     </PublicOnlyRoute>
                   }
                 />
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/corporate-login" element={<CorporateLoginPage />} />
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />

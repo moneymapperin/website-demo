@@ -355,17 +355,6 @@ describe('TASK 7 — Dashboard (/dashboard) Component & Integration Tests', () =
       expect(screen.getByTestId('ai-assistant-page')).toBeInTheDocument();
     });
     view2.unmount();
-
-    // 3. Weekly click -> /weekly
-    const view3 = renderDashboardPage();
-    await waitFor(() => {
-      expect(screen.getByTestId('dashboard-screen')).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByTestId('weekly-nav-btn'));
-    await waitFor(() => {
-      expect(screen.getByTestId('weekly-page')).toBeInTheDocument();
-    });
-    view3.unmount();
   });
 
   it('10. Score cards navigate to corresponding screener tools and IPO triggers toast', async () => {
@@ -433,7 +422,7 @@ describe('TASK 7 — Dashboard (/dashboard) Component & Integration Tests', () =
 
     // Remaining header buttons remain intact
     expect(screen.getByTestId('ai-assistant-nav-btn')).toBeInTheDocument();
-    expect(screen.getByTestId('weekly-nav-btn')).toBeInTheDocument();
+    expect(screen.queryByTestId('weekly-nav-btn')).not.toBeInTheDocument();
     expect(screen.getByTestId('dashboard-avatar-btn')).toBeInTheDocument();
   });
 
