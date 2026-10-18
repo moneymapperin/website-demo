@@ -1,4 +1,4 @@
-# MoneyMapper — Smart Financial Mapping & Wealth Management
+# MoneyMapper — Smart Financial Mapping & Wealth Management 
 
 A high-converting, modern, responsive fintech landing page built with **React**, **Vite**, **TypeScript**, and **Tailwind CSS**.
 

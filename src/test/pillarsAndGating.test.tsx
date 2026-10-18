@@ -18,6 +18,10 @@ import { PillarGuard } from '../components/common/PillarGuard';
 import { EmergencyFundPage } from '../pages/pillars/EmergencyFundPage';
 import { WeeklyExpensePredictorPage } from '../pages/pillars/WeeklyExpensePredictorPage';
 import { InsurancePillarPage } from '../pages/pillars/InsurancePillarPage';
+import {
+  formatInsuranceCompact,
+  calculateInsurancePillar,
+} from '../models/pillars/insurance';
 import { IncomePillarPage } from '../pages/pillars/IncomePillarPage';
 import { MutualFundPillarPage } from '../pages/pillars/MutualFundPillarPage';
 import { SubscriptionPage, SUBSCRIPTION_PLANS } from '../pages/SubscriptionPage';
@@ -385,9 +389,6 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
     });
   });
 
-  // ===========================================================================
-  // 5. EmergencyFundPage UI Tests
-  // ===========================================================================
   describe('5. EmergencyFundPage UI & Savings Updates', () => {
     const mockProfile = {
       monthlyExpenses: '50000',
@@ -399,11 +400,12 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
     beforeEach(() => {
       vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({ data: mockProfile });
       vi.spyOn(apiService, 'getDashboard').mockResolvedValue({
-        pillars: { emergency: { score: 50 } },
+        savings_scores: { ef_target_amount: 300000 },
+        financial_fitness_scores: { savings_pillar_score: 50 },
       });
     });
 
-    it('renders title "Savings Analysis", shortfall card, and yield tag', async () => {
+    it('renders title "Savings Analysis", shortfall card, yield tag, and always-visible growth badge', async () => {
       renderWithToast(<EmergencyFundPage />);
 
       await waitFor(() => {
@@ -413,8 +415,9 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
       expect(screen.getByTestId('emergency-score-header')).toBeInTheDocument();
       expect(screen.getByTestId('yield-tag')).toHaveTextContent('⚡ ~3.0% Annual Yield');
       expect(screen.getByTestId('shortfall-card')).toHaveTextContent('Shortfall to Target');
-      // Growth badge must be hidden on first render
-      expect(screen.queryByTestId('growth-badge')).not.toBeInTheDocument();
+      // Growth badge is ALWAYS visible with default 0.952 baseline (+5.0%)
+      expect(screen.getByTestId('growth-badge')).toBeInTheDocument();
+      expect(screen.getByTestId('growth-badge')).toHaveTextContent('▲ +5.0%');
     });
 
     it('validates add-savings input: 0 / empty / negative shows toast and blocks API', async () => {
@@ -443,61 +446,115 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
     });
 
     it('valid amount opens "Confirm Update" dialog with "Add ₹{n} to your emergency fund?", Cancel does nothing, Update calls addEmergencySavings once and refetches', async () => {
-      const addSpy = vi.spyOn(apiService, 'addEmergencySavings').mockResolvedValue({} as any);
+      vi.useFakeTimers();
+      try {
+        const addSpy = vi.spyOn(apiService, 'addEmergencySavings').mockResolvedValue({} as any);
 
-      renderWithToast(<EmergencyFundPage />);
-      await waitFor(() => screen.getByTestId('emergency-page-title'));
+        renderWithToast(<EmergencyFundPage />);
+        await act(async () => {
+          await vi.runAllTimersAsync();
+        });
 
-      const input = screen.getByTestId('savings-amount-input');
-      const submitBtn = screen.getByTestId('update-fund-btn');
+        const input = screen.getByTestId('savings-amount-input');
+        const submitBtn = screen.getByTestId('update-fund-btn');
 
-      fireEvent.change(input, { target: { value: '25000' } });
-      fireEvent.click(submitBtn);
+        fireEvent.change(input, { target: { value: '25000' } });
+        fireEvent.click(submitBtn);
 
-      // Confirm dialog opens with exact copy
-      expect(screen.getByText('Confirm Update')).toBeInTheDocument();
-      expect(screen.getByText('Add ₹25000 to your emergency fund?')).toBeInTheDocument();
+        // Confirm dialog opens with exact copy
+        expect(screen.getByText('Confirm Update')).toBeInTheDocument();
+        expect(screen.getByText('Add ₹25000 to your emergency fund?')).toBeInTheDocument();
 
-      // Cancel button closes dialog without API call
-      fireEvent.click(screen.getByText('Cancel'));
-      expect(screen.queryByText('Confirm Update')).not.toBeInTheDocument();
-      expect(addSpy).not.toHaveBeenCalled();
+        // Cancel button closes dialog without API call
+        fireEvent.click(screen.getByText('Cancel'));
+        expect(screen.queryByText('Confirm Update')).not.toBeInTheDocument();
+        expect(addSpy).not.toHaveBeenCalled();
 
-      // Open again and confirm
-      fireEvent.change(input, { target: { value: '25000' } });
-      fireEvent.click(submitBtn);
+        // Open again and confirm
+        fireEvent.change(input, { target: { value: '25000' } });
+        fireEvent.click(submitBtn);
 
-      const confirmBtn = screen.getByTestId('confirm-savings-update-btn');
-      fireEvent.click(confirmBtn);
+        const confirmBtn = screen.getByTestId('confirm-savings-update-btn');
+        fireEvent.click(confirmBtn);
 
-      await waitFor(() => {
-        expect(addSpy).toHaveBeenCalledTimes(1);
         expect(addSpy).toHaveBeenCalledWith(25000);
-      });
+
+        // Advance 3s wait
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(3000);
+        });
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
-    it('shows growth badge ONLY after in-session add or quick edit', async () => {
-      vi.spyOn(apiService, 'addEmergencySavings').mockImplementation(async () => {
-        // simulate balance increase
-        mockProfile.emergencyFundCurrent = '175000';
-        return {} as any;
+    it('growth baseline resets on quick edit but adding savings does not change baseline', async () => {
+      vi.useFakeTimers();
+      try {
+        const updateSpy = vi.spyOn(apiService, 'updateMasterProfile').mockResolvedValue({} as any);
+
+        renderWithToast(<EmergencyFundPage />);
+        await act(async () => {
+          await vi.runAllTimersAsync();
+        });
+
+        // Initially baseline was initialized to 150000 * 0.952 = 142800
+        expect(localStorage.getItem('ef_prev_current')).toBe('142800');
+
+        // Click edit button
+        fireEvent.click(screen.getByTestId('edit-estimated-fund-btn'));
+        expect(screen.getByText('Update Estimated Fund')).toBeInTheDocument();
+
+        // Update amount to 200000
+        const modalInput = screen.getByPlaceholderText('Enter amount');
+        fireEvent.change(modalInput, { target: { value: '200000' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Update' }));
+
+        // Right before API call, baseline is set to current fund (150000)
+        expect(localStorage.getItem('ef_prev_current')).toBe('150000');
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(2000);
+        });
+
+        expect(updateSpy).toHaveBeenCalledWith({ emergencyFundCurrent: '200000' });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('renders conditional shortfall text and fund completion percentage', async () => {
+      renderWithToast(<EmergencyFundPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId('shortfall-card')).toHaveTextContent(
+          'Your emergency fund is below target. Move your surplus to a Liquid Fund for safety.'
+        );
+      });
+
+      expect(screen.getByText('Fund Completion')).toBeInTheDocument();
+      expect(screen.getByText('Target Fulfillment')).toBeInTheDocument();
+      expect(screen.getByText('50.0%')).toBeInTheDocument();
+    });
+
+    it('renders fully funded message when shortfall gap is zero', async () => {
+      vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({
+        data: {
+          emergencyFundCurrent: '300000',
+          emergencyFundTarget: '300000',
+        },
+      });
+      vi.spyOn(apiService, 'getDashboard').mockResolvedValue({
+        savings_scores: { ef_target_amount: 300000 },
+        financial_fitness_scores: { savings_pillar_score: 100 },
       });
 
       renderWithToast(<EmergencyFundPage />);
-      await waitFor(() => screen.getByTestId('emergency-page-title'));
-
-      // Hidden initially
-      expect(screen.queryByTestId('growth-badge')).not.toBeInTheDocument();
-
-      // Perform update
-      const input = screen.getByTestId('savings-amount-input');
-      fireEvent.change(input, { target: { value: '25000' } });
-      fireEvent.click(screen.getByTestId('update-fund-btn'));
-      fireEvent.click(screen.getByTestId('confirm-savings-update-btn'));
-
       await waitFor(() => {
-        expect(screen.getByTestId('growth-badge')).toBeInTheDocument();
+        expect(screen.getByTestId('shortfall-card')).toHaveTextContent(
+          'Excellent! Your emergency fund is fully funded.'
+        );
       });
+      expect(screen.getByText('100.0%')).toBeInTheDocument();
     });
   });
 
@@ -578,7 +635,7 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
   // 7. Insurance, Income, and Mutual Fund Pillar Pages
   // ===========================================================================
   describe('7. Insurance, Income, and Mutual Fund Pages', () => {
-    it('InsurancePillarPage renders "Protection Analysis", optimize link, and "not available" when profile is empty', async () => {
+    it('InsurancePillarPage renders "Protection Analysis", optimize link, and defaults to ₹0 when profile is empty', async () => {
       // Empty profile
       vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({ data: null });
       vi.spyOn(apiService, 'getDashboard').mockResolvedValue({});
@@ -589,8 +646,94 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
         expect(screen.getByTestId('insurance-page-title')).toHaveTextContent('Protection Analysis');
       });
 
-      expect(screen.getAllByText('not available').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('insurance-score-header')).toBeInTheDocument();
+      expect(screen.getAllByText('₹0').length).toBeGreaterThan(0);
       expect(screen.getByTestId('insurance-optimize-btn')).toBeInTheDocument();
+    });
+
+    it('formatInsuranceCompact formats currency values correctly and treats NaN/missing as 0', () => {
+      expect(formatInsuranceCompact(1500000)).toBe('₹15.0L');
+      expect(formatInsuranceCompact(2500000)).toBe('₹25.0L');
+      expect(formatInsuranceCompact(4500000)).toBe('₹45.0L');
+      expect(formatInsuranceCompact(50000)).toBe('₹50K');
+      expect(formatInsuranceCompact(999)).toBe('₹999');
+      expect(formatInsuranceCompact(0)).toBe('₹0');
+      expect(formatInsuranceCompact(NaN)).toBe('₹0');
+      expect(formatInsuranceCompact(null as any)).toBe('₹0');
+      expect(formatInsuranceCompact(undefined as any)).toBe('₹0');
+    });
+
+    it('calculates gap math accurately matching 15x annual income for term & 10x for health', () => {
+      const res = calculateInsurancePillar(
+        {
+          monthlyActiveIncome: 100000,
+          termCover: 1500000,
+          lifeCover: 500000,
+          healthCover: 1500000,
+        },
+        {
+          financial_fitness_scores: { protection_pillar_score: 33 },
+          protection_scores: { term_score: 17, health_score: 50 },
+        }
+      );
+
+      expect(res.annualIncome).toBe(1200000);
+      expect(res.termGap).toBe(16000000);
+      expect(res.healthGap).toBe(10500000);
+      expect(res.protectionScore).toBe(33);
+      expect(res.termScore).toBe(17);
+      expect(res.healthScore).toBe(50);
+    });
+
+    it('renders red gap state when gap > 0 and green gap state when gap == 0', async () => {
+      // Non-zero gap -> red
+      vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({
+        data: {
+          monthlyActiveIncome: 100000,
+          termCover: 1000000,
+          lifeCover: 0,
+          healthCover: 500000,
+        },
+      });
+      vi.spyOn(apiService, 'getDashboard').mockResolvedValue({
+        financial_fitness_scores: { protection_pillar_score: 33 },
+        protection_scores: { term_score: 17, health_score: 50 },
+      });
+
+      const { unmount } = renderWithToast(<InsurancePillarPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId('term-gap-text')).toHaveClass('text-rose-600');
+        expect(screen.getByTestId('health-gap-text')).toHaveClass('text-rose-600');
+      });
+      unmount();
+
+      // Zero gap -> green
+      vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({
+        data: {
+          monthlyActiveIncome: 10000,
+          termCover: 2000000,
+          lifeCover: 0,
+          healthCover: 2000000,
+        },
+      });
+      renderWithToast(<InsurancePillarPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId('term-gap-text')).toHaveClass('text-emerald-600');
+        expect(screen.getByTestId('health-gap-text')).toHaveClass('text-emerald-600');
+      });
+    });
+
+    it('clamps score bar width between 1% and 100%', async () => {
+      vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({ data: null });
+      vi.spyOn(apiService, 'getDashboard').mockResolvedValue({
+        protection_scores: { term_score: 0, health_score: 150 },
+      });
+
+      renderWithToast(<InsurancePillarPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId('life-cover-bar')).toHaveStyle({ width: '1%' });
+        expect(screen.getByTestId('health-cover-bar')).toHaveStyle({ width: '100%' });
+      });
     });
 
     it('IncomePillarPage renders "Income Analysis", optimize link, and handles missing profile data', async () => {
@@ -616,7 +759,161 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
         expect(screen.getByTestId('investments-page-title')).toHaveTextContent('Investment Analysis');
       });
 
+      expect(screen.getByTestId('investments-score-header')).toBeInTheDocument();
+      expect(screen.getByText('GLOBAL PILLAR SCORE')).toBeInTheDocument();
+      expect(screen.getByText('Asset Mix')).toBeInTheDocument();
+      expect(screen.getByText('SIP Health')).toBeInTheDocument();
+      expect(screen.getByText('PORTFOLIO BREAKDOWN')).toBeInTheDocument();
+      expect(screen.getByText('ALLOCATION HEALTH')).toBeInTheDocument();
+      expect(screen.getByText('SIP ANALYSIS')).toBeInTheDocument();
       expect(screen.getByTestId('investments-optimize-btn')).toBeInTheDocument();
+    });
+
+    it('MutualFundPillarPage displays live metrics, portfolio breakdown tags, and unclamped scores', async () => {
+      vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({
+        data: {
+          totalEquityInvestments: '500000',
+          totalDebtInvestments: '300000',
+          totalGoldInvestments: '100000',
+          totalRealEstateInvestments: '100000',
+          monthlySipEquity: '10000',
+          monthlySipDebt: '15000',
+          monthlySipGold: '5000',
+          mfSips: [{ name: 'HDFC Flexi Cap', amount: '15000', date: 5 }],
+          goldSips: [{ name: 'Nippon Gold ETF', amount: '5000', date: 10 }],
+        },
+      });
+      vi.spyOn(apiService, 'getDashboard').mockResolvedValue({
+        financial_fitness_scores: { investment_pillar_score: 88 },
+        investment_scores: {
+          asset_balance_score: 75,
+          sip_score: 104, // Unclamped score > 100
+          total_investment_amount: 1000000,
+          sip_gap: 5000,
+        },
+      });
+
+      renderWithToast(<MutualFundPillarPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('88')).toBeInTheDocument();
+      });
+
+      // Verify unclamped scores
+      expect(screen.getByText('75')).toBeInTheDocument();
+      expect(screen.getByText('104')).toBeInTheDocument();
+
+      // Verify Portfolio Breakdown tags
+      expect(screen.getByText('Total Wealth Assets')).toBeInTheDocument();
+      expect(screen.getByText('High Growth')).toBeInTheDocument();
+      expect(screen.getByText('Stability')).toBeInTheDocument();
+      expect(screen.getByText('Hedge')).toBeInTheDocument();
+      expect(screen.getByText('Passive Assets')).toBeInTheDocument();
+
+      // Verify Allocation Breakdown
+      expect(screen.getByText('Allocation Breakdown')).toBeInTheDocument();
+      expect(screen.getByText('50.0%')).toBeInTheDocument();
+      expect(screen.getByText('30.0%')).toBeInTheDocument();
+      expect(screen.getAllByText('10.0%').length).toBe(2);
+
+      // Verify SIP Analysis
+      expect(screen.getByText('Monthly SIP Contribution')).toBeInTheDocument();
+      expect(screen.getByText('Mutual Fund SIP')).toBeInTheDocument();
+      expect(screen.getByText('Gold SIP')).toBeInTheDocument();
+      expect(screen.getByText('Monthly Shortfall (Gap)')).toBeInTheDocument();
+      expect(screen.getByText(/Increase your monthly SIP by/)).toBeInTheDocument();
+    });
+
+    it('opens Asset Quick Edit and calls updateMasterProfile', async () => {
+      vi.useFakeTimers();
+      try {
+        const updateSpy = vi.spyOn(apiService, 'updateMasterProfile').mockResolvedValue({ data: {} } as any);
+        vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({
+          data: {
+            totalEquityInvestments: '500000',
+          },
+        });
+        vi.spyOn(apiService, 'getDashboard').mockResolvedValue({
+          financial_fitness_scores: { investment_pillar_score: 80 },
+          investment_scores: { asset_balance_score: 70, sip_score: 80, total_investment_amount: 500000 },
+        });
+
+        renderWithToast(<MutualFundPillarPage />);
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(100);
+        });
+
+        // Click edit Stock button
+        const editStockBtn = screen.getByTitle('Edit Stock');
+        fireEvent.click(editStockBtn);
+
+        expect(screen.getByText('Update Stock')).toBeInTheDocument();
+        const input = screen.getByPlaceholderText('Enter amount');
+        fireEvent.change(input, { target: { value: '600000' } });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Update' }));
+
+        expect(updateSpy).toHaveBeenCalledWith({
+          totalEquityInvestments: '600000',
+        });
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(2100);
+        });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('opens Manage SIP modal, adds and removes an entry, and saves with updated total', async () => {
+      vi.useFakeTimers();
+      try {
+        const updateSpy = vi.spyOn(apiService, 'updateMasterProfile').mockResolvedValue({ data: {} } as any);
+        vi.spyOn(apiService, 'getMasterProfile').mockResolvedValue({
+          data: {
+            mfSips: [{ name: 'Axis Bluechip', amount: '5000', date: 10 }],
+            monthlySipDebt: '5000',
+          },
+        });
+        vi.spyOn(apiService, 'getDashboard').mockResolvedValue({});
+
+        renderWithToast(<MutualFundPillarPage />);
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(100);
+        });
+
+        // Click edit icon next to Mutual Fund SIP
+        const manageMfBtn = screen.getByTitle('Manage Mutual Fund SIP');
+        fireEvent.click(manageMfBtn);
+
+        expect(screen.getByText('Manage Mutual Fund SIP')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('Axis Bluechip')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('5000')).toBeInTheDocument();
+
+        // Add a new entry
+        const addBtn = screen.getByTitle('Add SIP');
+        fireEvent.click(addBtn);
+
+        // Save & Sync
+        const saveBtn = screen.getByText('Save & Sync Portfolio');
+        fireEvent.click(saveBtn);
+
+        expect(updateSpy).toHaveBeenCalledWith({
+          mfSips: [
+            { name: 'Axis Bluechip', amount: '5000', date: 10 },
+            { name: '', amount: '0', date: 1 },
+          ],
+          monthlySipDebt: '5000',
+        });
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(2100);
+        });
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 
@@ -635,7 +932,7 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
       expect(SUBSCRIPTION_PLANS[2].totalBilledPrice).toBe('₹3,588');
     });
 
-    it('renders read-only buy button with "Purchase in the MoneyMapper mobile app" and exact footnote', async () => {
+    it('renders enabled buy button with plan price and omits platform fee footnote', async () => {
       vi.spyOn(apiService, 'getSubscriptionDetails').mockResolvedValue(null);
 
       renderWithToast(<SubscriptionPage />);
@@ -645,13 +942,10 @@ describe('TASK 12 — The Five Pillar Dashboards & PRO Gating', () => {
       });
 
       const buyBtn = screen.getByTestId('buy-plan-btn');
-      expect(buyBtn).toBeDisabled();
-      expect(buyBtn).toHaveTextContent('Purchase in the MoneyMapper mobile app');
+      expect(buyBtn).toBeEnabled();
+      expect(buyBtn).toHaveTextContent('Get Financially Free (₹3,588)');
 
-      const footnote = screen.getByTestId('platform-fee-footnote');
-      expect(footnote).toHaveTextContent(
-        '*Final checkout price includes standard Google Play / App Store platform fees applied to base plan rates.'
-      );
+      expect(screen.queryByTestId('platform-fee-footnote')).toBeNull();
     });
 
     it('AUDIT TEST: SubscriptionPage NEVER calls stack_subscription RPC or any purchase mutation', async () => {

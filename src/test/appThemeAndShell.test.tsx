@@ -446,7 +446,7 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
       });
     });
 
-    it('highlights the active route for nested paths (e.g. /pillars/income)', () => {
+    it('highlights the active route for nested paths (e.g. /pillars/income in mobile drawer)', () => {
       render(
         <MemoryRouter initialEntries={['/pillars/income']}>
           <ThemeProvider>
@@ -459,11 +459,18 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
         </MemoryRouter>
       );
 
-      const incomeTile = screen.getByTestId('pillar-nav-income');
-      expect(incomeTile.className).toContain('ring-1 ring-indigo-500');
+      // Financial pillars removed from desktop sidebar
+      expect(screen.queryByTestId('pillar-nav-income')).not.toBeInTheDocument();
+      expect(screen.queryByText('Financial Pillars')).not.toBeInTheDocument();
+      expect(screen.queryByText('5 ACTIVE')).not.toBeInTheDocument();
+
+      // Mobile drawer still highlights active pillar
+      fireEvent.click(screen.getByTestId('drawer-toggle'));
+      const incomeTile = screen.getByTestId('drawer-pillar-income');
+      expect(incomeTile.className).toContain('ring-2 ring-indigo-500');
     });
 
-    it('shows lock on 3 premium pillars for non-pro user and clicking them triggers upgrade toast', async () => {
+    it('shows lock on 3 premium pillars for non-pro user in drawer and clicking them triggers upgrade toast', async () => {
       (window as any).__MOCK_PLAN__ = {
         isPro: false,
         isFeatureAccessible: false,
@@ -493,21 +500,27 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
         </MemoryRouter>
       );
 
+      // Financial pillars removed from desktop sidebar
+      expect(screen.queryByTestId('pillar-nav-protection')).not.toBeInTheDocument();
+
+      // Open drawer to inspect mobile pillar items
+      fireEvent.click(screen.getByTestId('drawer-toggle'));
+
       // Premium pillars: Protection, Investment, Emergency Savings
-      const insuranceTile = screen.getByTestId('pillar-nav-protection');
+      const insuranceTile = screen.getByTestId('drawer-pillar-protection');
       expect(insuranceTile).toHaveTextContent('🔒');
 
-      const mfTile = screen.getByTestId('pillar-nav-investment');
+      const mfTile = screen.getByTestId('drawer-pillar-investment');
       expect(mfTile).toHaveTextContent('🔒');
 
-      const emergencyTile = screen.getByTestId('pillar-nav-emergency-savings');
+      const emergencyTile = screen.getByTestId('drawer-pillar-emergency-savings');
       expect(emergencyTile).toHaveTextContent('🔒');
 
       // Free pillars: Income and Expenses do NOT have locks
-      const incomeTile = screen.getByTestId('pillar-nav-income');
+      const incomeTile = screen.getByTestId('drawer-pillar-income');
       expect(incomeTile).not.toHaveTextContent('🔒');
 
-      const expenseTile = screen.getByTestId('pillar-nav-expenses');
+      const expenseTile = screen.getByTestId('drawer-pillar-expenses');
       expect(expenseTile).not.toHaveTextContent('🔒');
 
       // Clicking locked pillar triggers toast

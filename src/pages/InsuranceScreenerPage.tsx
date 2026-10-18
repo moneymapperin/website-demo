@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Search, Lock, Shield, X, Heart, Star, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Search, Lock, Shield, Heart, Star, CheckCircle2 } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
 import { useToast } from '../context/ToastContext';
-import { ScoreCardAdvisor } from '../services/marketAdvisor';
 import { ResilienceUtils } from '../services/resilienceUtils';
 
 export function formatCover(val: any): string {
@@ -113,9 +112,6 @@ export const InsuranceScreenerPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState('All');
   const [loading, setLoading] = useState(true);
 
-  // Modal State
-  const [selectedPlanForAdvice, setSelectedPlanForAdvice] = useState<any | null>(null);
-
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -158,7 +154,7 @@ export const InsuranceScreenerPage: React.FC = () => {
     setSelectedType(type);
   };
 
-  const handlePlanClick = (plan: any, index: number) => {
+  const handlePlanClick = (_plan: any, index: number) => {
     const isLocked = !isPro && index > 0;
     if (isLocked) {
       showToast({
@@ -171,7 +167,6 @@ export const InsuranceScreenerPage: React.FC = () => {
       });
       return;
     }
-    setSelectedPlanForAdvice(plan);
   };
 
   return (
@@ -209,34 +204,7 @@ export const InsuranceScreenerPage: React.FC = () => {
 
       {/* 2. Main Container */}
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6 space-y-6">
-        {/* Top Hero Banner Matching Image 3 */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 dark:from-[#170E38] dark:via-[#100D28] dark:to-[#0A0B14] text-white shadow-xl border border-indigo-400/20 dark:border-indigo-500/20 relative overflow-hidden">
-          <div className="relative z-10 flex items-center gap-3.5">
-            <div className="p-3 rounded-2xl bg-white/15 border border-white/20 text-white dark:text-indigo-300 shadow-md">
-              <Shield className="w-7 h-7" />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
-                Insurance Score Card
-              </h1>
-              <p className="text-xs md:text-sm text-indigo-100 dark:text-zinc-400 mt-0.5">
-                Compare insurance plans and find the best cover for your needs.
-              </p>
-            </div>
-          </div>
-
-          {/* Right Quote Glass Banner */}
-          <div className="relative z-10 max-w-md p-3.5 rounded-2xl bg-white/10 dark:bg-indigo-950/40 border border-white/20 dark:border-indigo-500/20 backdrop-blur-md flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white/20 dark:bg-indigo-500/20 text-white dark:text-indigo-300 shrink-0">
-              <Shield className="w-5 h-5" />
-            </div>
-            <p className="text-xs font-semibold italic text-indigo-50 dark:text-indigo-200">
-              &ldquo;Right insurance today builds a safer and more confident tomorrow.&rdquo;
-            </p>
-          </div>
-        </div>
-
-        {/* 3. Search Bar & Category Filter Tabs */}
+        {/* Search Bar & Category Filter Tabs */}
         <div className="bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 rounded-3xl p-5 shadow-sm dark:shadow-xl space-y-4 transition-colors">
           <div className="relative">
             <div className={`relative ${!isPro ? 'filter blur-xs select-none' : ''}`}>
@@ -339,8 +307,8 @@ export const InsuranceScreenerPage: React.FC = () => {
                 <div
                   key={p.id || idx}
                   data-testid={`insurance-card-${idx}`}
-                  onClick={() => handlePlanClick(p, idx)}
-                  className="group relative bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 rounded-3xl p-5 md:p-6 shadow-sm dark:shadow-xl cursor-pointer hover:border-indigo-500 transition-all duration-200"
+                  onClick={isLocked ? () => handlePlanClick(p, idx) : undefined}
+                  className="group relative bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 rounded-3xl p-5 md:p-6 shadow-sm dark:shadow-xl transition-all duration-200"
                 >
                   <div className={`grid grid-cols-1 lg:grid-cols-12 gap-5 items-center ${isLocked ? 'filter blur-[5px] select-none pointer-events-none' : ''}`}>
                     {/* Left Info Column (5 cols) */}
@@ -412,17 +380,13 @@ export const InsuranceScreenerPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Right Score Circle & Navigation Arrow (2 cols) */}
-                    <div className="lg:col-span-2 flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0">
+                    {/* Right Score Circle (2 cols) */}
+                    <div className="lg:col-span-2 flex items-center justify-center lg:justify-end gap-3 pt-2 lg:pt-0">
                       <div className="flex flex-col items-center">
                         <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-0.5">SCORE</span>
                         <div className="w-12 h-12 rounded-full border-2 border-indigo-500 flex items-center justify-center font-black text-indigo-600 dark:text-indigo-400 text-sm shadow-xs bg-indigo-500/5">
                           {score}
                         </div>
-                      </div>
-
-                      <div className="w-9 h-9 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-xs">
-                        <ChevronRight className="w-4 h-4" />
                       </div>
                     </div>
                   </div>
@@ -430,7 +394,7 @@ export const InsuranceScreenerPage: React.FC = () => {
                   {isLocked && (
                     <div
                       data-testid={`insurance-lock-overlay-${idx}`}
-                      className="absolute inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center rounded-3xl"
+                      className="absolute inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center rounded-3xl cursor-pointer"
                     >
                       <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg">
                         <Lock className="w-5 h-5" />
@@ -446,39 +410,6 @@ export const InsuranceScreenerPage: React.FC = () => {
           </div>
         )}
       </main>
-
-      {/* Insurance Plan Advice Modal */}
-      {selectedPlanForAdvice && (
-        <div
-          data-testid="insurance-advice-modal"
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
-        >
-          <div className="bg-white dark:bg-[#0E0B1F] rounded-3xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto border border-slate-200 dark:border-indigo-500/30 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                Insurance Plan Details
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedPlanForAdvice(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="text-xs md:text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed font-mono">
-              {ScoreCardAdvisor.generateInsuranceDetails(selectedPlanForAdvice)}
-            </div>
-            <button
-              type="button"
-              onClick={() => setSelectedPlanForAdvice(null)}
-              className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all"
-            >
-              Close Details
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

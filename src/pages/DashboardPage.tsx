@@ -120,7 +120,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Action Links & Profile Avatar */}
         <div className="flex items-center space-x-3">
-          {/* Quick Links to AI Assistant & Weekly */}
+          {/* Quick Links to AI Assistant */}
           <button
             onClick={() => navigate('/ai-assistant')}
             className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-colors"
@@ -129,16 +129,6 @@ export const DashboardPage: React.FC = () => {
           >
             <span>🤖</span>
             <span>AI Assistant</span>
-          </button>
-
-          <button
-            onClick={() => navigate('/weekly')}
-            className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-colors"
-            aria-label="Weekly"
-            data-testid="weekly-nav-btn"
-          >
-            <span>📅</span>
-            <span>Weekly</span>
           </button>
 
           {/* User Profile Avatar */}
@@ -338,9 +328,6 @@ export const DashboardPage: React.FC = () => {
               canAccessPremium={canAccessPremium}
               onLockedClick={handleLockedPillar}
             />
-
-            {/* 5. Financial Quotes of Wisdom (lines 1980-2068) */}
-            <QuotesSection />
           </div>
 
           {/* Right Column / Screener Tools & Calculators (5 cols on desktop) */}
@@ -366,6 +353,11 @@ export const DashboardPage: React.FC = () => {
               showSipTrialBadge={!isPro && canAccessPremium}
             />
           </div>
+        </div>
+
+        {/* 5. Financial Quotes of Wisdom (Centered & Wide across bottom of Dashboard) */}
+        <div className="mt-8 max-w-5xl mx-auto w-full">
+          <QuotesSection />
         </div>
 
         {/* Global Footer (lines 2070-2097) */}

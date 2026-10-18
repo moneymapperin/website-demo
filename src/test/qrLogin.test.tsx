@@ -704,4 +704,74 @@ describe('Rebuilt QrLoginPanel (Supabase Realtime Contract)', () => {
     // Referential equality check on memoized context value
     expect(secondValue).toBe(firstValue);
   });
+
+  // ---------------------------------------------------------------------------
+  // 16. Manual Generate QR button with 5s countdown when autoStart={false}
+  // ---------------------------------------------------------------------------
+  it('16. renders Generate QR button when autoStart={false}, and triggers Realtime session after 5s countdown', async () => {
+    vi.useFakeTimers();
+
+    render(
+      <MemoryRouter>
+        <QrLoginPanel autoStart={false} countdownSeconds={5} />
+      </MemoryRouter>
+    );
+
+    // Initial state: No channel created yet
+    expect(supabase.channel).not.toHaveBeenCalled();
+    const generateBtn = screen.getByTestId('generate-qr-button');
+    expect(generateBtn).toBeInTheDocument();
+    expect(screen.getByText('Instant QR Login')).toBeInTheDocument();
+
+    // Click "Generate QR Code"
+    fireEvent.click(generateBtn);
+
+    // Countdown active
+    expect(screen.getByTestId('qr-generating-countdown')).toBeInTheDocument();
+    expect(screen.getByText('Generating QR Code...')).toBeInTheDocument();
+    expect(supabase.channel).not.toHaveBeenCalled();
+
+    // Advance 3 seconds -> still counting down
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(supabase.channel).not.toHaveBeenCalled();
+
+    // Advance remaining 2 seconds -> triggers session initialization
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(supabase.channel).toHaveBeenCalledTimes(1);
+    expect(mockChannel.subscribe).toHaveBeenCalledTimes(1);
+  });
+
+  // ---------------------------------------------------------------------------
+  // 17. Cancel during 5s countdown returns to idle state without creating session
+  // ---------------------------------------------------------------------------
+  it('17. cancels countdown and returns to idle state when Cancel button is clicked', async () => {
+    vi.useFakeTimers();
+
+    render(
+      <MemoryRouter>
+        <QrLoginPanel autoStart={false} countdownSeconds={5} />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByTestId('generate-qr-button'));
+    expect(screen.getByTestId('qr-generating-countdown')).toBeInTheDocument();
+
+    // Click Cancel
+    fireEvent.click(screen.getByText('Cancel'));
+
+    expect(screen.getByTestId('qr-idle-state')).toBeInTheDocument();
+    expect(screen.getByTestId('generate-qr-button')).toBeInTheDocument();
+
+    // Advance time to verify countdown was stopped
+    act(() => {
+      vi.advanceTimersByTime(6000);
+    });
+
+    expect(supabase.channel).not.toHaveBeenCalled();
+  });
 });

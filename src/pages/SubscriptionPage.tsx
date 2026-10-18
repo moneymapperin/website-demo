@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { RotateCw } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
+import { useToast } from '../context/ToastContext';
 import { premiumService, PremiumService, isProPlan } from '../services/premiumService';
+import { paymentService } from '../services/paymentService';
+import { APP_COLORS } from '../theme/tokens';
 import quarterlyImg from '../assets/app/quarterly_plan.png';
 import halfYearlyImg from '../assets/app/half_yearly_2.png';
 import yearlyImg from '../assets/app/yearly_plan_1.png';
@@ -61,12 +64,20 @@ export const SUBSCRIPTION_PLANS: SubPlan[] = [
 export const SubscriptionPage: React.FC = () => {
   const navigate = useNavigate();
   const { isPro, refreshPlan } = usePlan();
+  let showToast = (_opts: any) => {};
+  try {
+    const toast = useToast();
+    showToast = toast.showToast;
+  } catch {
+    // Graceful fallback for environments without ToastProvider
+  }
   const [selectedPlan, setSelectedPlan] = useState<SubPlan>(SUBSCRIPTION_PLANS[2]); // Default Yearly
   const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
-  const processSubscriptionDetails = useCallback(async (details: any) => {
+  const processSubscriptionDetails = useCallback(async (details: any, updateServicePlan: boolean = true) => {
     if (details?.current_period_end) {
       const rawPlan =
         details.tier ??
@@ -83,14 +94,21 @@ export const SubscriptionPage: React.FC = () => {
           year: 'numeric',
         });
         setExpiryDate(formatted);
-        await premiumService.setPlan(rawPlan || PremiumService.proMembership);
+        const targetPlan = rawPlan || PremiumService.proMembership;
+        if (updateServicePlan && premiumService.getCachedPlan() !== targetPlan) {
+          await premiumService.setPlan(targetPlan);
+        }
       } else {
         setExpiryDate(null);
-        await premiumService.setPlan(PremiumService.freeMembership);
+        if (updateServicePlan && premiumService.getCachedPlan() !== PremiumService.freeMembership) {
+          await premiumService.setPlan(PremiumService.freeMembership);
+        }
       }
     } else {
       setExpiryDate(null);
-      await premiumService.setPlan(PremiumService.freeMembership);
+      if (updateServicePlan && premiumService.getCachedPlan() !== PremiumService.freeMembership) {
+        await premiumService.setPlan(PremiumService.freeMembership);
+      }
     }
   }, []);
 
@@ -101,7 +119,7 @@ export const SubscriptionPage: React.FC = () => {
         setLoading(true);
         const details = await apiService.getSubscriptionDetails();
         if (!isMounted) return;
-        await processSubscriptionDetails(details);
+        await processSubscriptionDetails(details, true);
       } catch (err) {
         console.error('Could not fetch subscription details:', err);
       } finally {
@@ -115,6 +133,21 @@ export const SubscriptionPage: React.FC = () => {
     };
   }, [processSubscriptionDetails]);
 
+  // Re-read details and update expiry banner whenever the plan changes (two-way sync)
+  useEffect(() => {
+    const unsubscribe = premiumService.subscribe(async () => {
+      try {
+        const details = await apiService.getSubscriptionDetails();
+        await processSubscriptionDetails(details, false);
+      } catch (err) {
+        console.error('Could not update subscription on plan change:', err);
+      }
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [processSubscriptionDetails]);
+
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
@@ -125,6 +158,49 @@ export const SubscriptionPage: React.FC = () => {
       console.error('Could not refresh subscription details:', err);
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  const handleBuyPlan = async () => {
+    if (paymentLoading) return;
+
+    const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    if (!keyId || typeof keyId !== 'string' || keyId.trim() === '') {
+      showToast('Online payments are not available right now.');
+      return;
+    }
+
+    try {
+      setPaymentLoading(true);
+      await paymentService.startPurchase(selectedPlan);
+
+      await refreshPlan(true);
+      const details = await apiService.getSubscriptionDetails();
+      await processSubscriptionDetails(details);
+
+      showToast({
+        message: '🎉 Payment Successful! Welcome to Wealth Select Pro.',
+        backgroundColor: APP_COLORS.success,
+      });
+    } catch (err: any) {
+      if (err?.isCancelled || err?.message === 'Payment cancelled.') {
+        showToast('Payment cancelled.');
+      } else if (
+        err?.message === 'VITE_RAZORPAY_KEY_ID_MISSING' ||
+        err?.message === 'UNAVAILABLE' ||
+        err?.message?.includes('Failed to fetch') ||
+        err?.message?.includes('network') ||
+        err?.message?.includes('unreachable')
+      ) {
+        showToast('Online payments are not available right now.');
+      } else {
+        showToast({
+          message: `Purchase Failed: ${err?.message || 'Unknown error'}`,
+          backgroundColor: APP_COLORS.danger,
+        });
+      }
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -269,24 +345,34 @@ export const SubscriptionPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Read-Only Purchase CTA */}
+      {/* Purchase CTA */}
       <div className="space-y-3 pt-4">
         <button
           type="button"
-          disabled
+          disabled={paymentLoading}
           data-testid="buy-plan-btn"
-          className="w-full py-4 rounded-2xl bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold text-sm cursor-not-allowed text-center shadow-inner"
+          onClick={handleBuyPlan}
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:via-purple-500 hover:to-indigo-600 text-white font-bold text-sm text-center shadow-lg hover:shadow-indigo-500/25 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          Purchase in the MoneyMapper mobile app
+          {paymentLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <RotateCw className="w-4 h-4 animate-spin" />
+              Processing...
+            </span>
+          ) : (
+            `Get Financially Free (${selectedPlan.totalBilledPrice})`
+          )}
         </button>
-
-        <p
-          data-testid="platform-fee-footnote"
-          className="text-[9.5px] text-center text-gray-500 font-medium leading-relaxed"
-        >
-          *Final checkout price includes standard Google Play / App Store platform fees applied to base plan rates.
-        </p>
       </div>
+
+      {paymentLoading && (
+        <div data-testid="payment-loading-overlay" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/30 shadow-2xl">
+            <RotateCw className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
+            <p className="text-xs font-bold text-slate-800 dark:text-white">Processing payment...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

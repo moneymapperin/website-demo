@@ -55,8 +55,53 @@ export function getParkedYieldTag(location: string): string {
 }
 
 /**
- * Growth badge percentage:
- * In-session only: hidden when prev <= 0 or current === prev.
+ * Storage key helper scoped per user ID.
+ */
+export function getBaselineStorageKey(userId?: string | null): string {
+  return userId ? `ef_prev_current_${userId}` : 'ef_prev_current';
+}
+
+/**
+ * Retrieves baseline from localStorage or initializes it:
+ * baseline = current > 0 ? (current * 0.952) : 100000.
+ */
+export function getOrInitEfBaseline(current: number, userId?: string | null): number {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return current > 0 ? current * 0.952 : 100000;
+  }
+  const scopedKey = getBaselineStorageKey(userId);
+  const raw = localStorage.getItem(scopedKey) ?? localStorage.getItem('ef_prev_current');
+  const parsed = raw ? parseFloat(raw) : null;
+  if (parsed !== null && !isNaN(parsed) && parsed > 0) {
+    return parsed;
+  }
+  const defaultBaseline = current > 0 ? current * 0.952 : 100000;
+  localStorage.setItem(scopedKey, defaultBaseline.toString());
+  localStorage.setItem('ef_prev_current', defaultBaseline.toString());
+  return defaultBaseline;
+}
+
+/**
+ * Persists baseline to localStorage for the given user.
+ */
+export function saveEfBaseline(baseline: number, userId?: string | null): void {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  const scopedKey = getBaselineStorageKey(userId);
+  localStorage.setItem(scopedKey, baseline.toString());
+  localStorage.setItem('ef_prev_current', baseline.toString());
+}
+
+/**
+ * App growth percentage calculation:
+ * pct = (baseline <= 0 || current === baseline) ? 0 : ((current - baseline) / baseline) * 100.
+ */
+export function calculateFundChangePct(current: number, baseline: number): number {
+  if (baseline <= 0 || current === baseline) return 0;
+  return ((current - baseline) / baseline) * 100;
+}
+
+/**
+ * Backward compatibility alias for calculateSessionGrowthPct.
  */
 export function calculateSessionGrowthPct(current: number, prev: number): number | null {
   if (prev <= 0 || current === prev) return null;

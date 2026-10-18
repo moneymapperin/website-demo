@@ -280,17 +280,114 @@ export class ScoreCardAdvisor {
   }
 
   // ---------------------------------------------------------------------------
+  // 5. MULTI-MATCH RESULT FORMATTERS
+  // ---------------------------------------------------------------------------
+
+  static generateMultiStockDetails(stocks: Record<string, any>[], _query?: string): string {
+    const lines: string[] = [];
+    lines.push(`🔍 **Found ${stocks.length} Matching Stocks:**\n`);
+
+    for (let i = 0; i < stocks.length; i++) {
+      const s = stocks[i];
+      const name = s.company_name?.toString() ?? s.symbol?.toString() ?? 'Stock';
+      const symbol = s.symbol?.toString() ?? '';
+      const score = this._toDouble(s.score ?? s.final_score);
+      const sector = s.sector?.toString() ?? 'General';
+      const signal = s.signal?.toString() ?? s.recommendation?.toString() ?? '';
+
+      lines.push(`${i + 1}️⃣ **${name}**${symbol ? ` (\`${symbol}\`)` : ''}`);
+      lines.push(`   • **Score:** **${Math.round(score)}/100** ⭐`);
+      lines.push(`   • **Sector:** ${sector}`);
+      if (signal) {
+        lines.push(`   • **Signal:** \`${signal}\``);
+      }
+      lines.push('');
+    }
+
+    lines.push('💡 *Ask for a specific stock name (e.g. "Reliance") to see its full Score Card analysis!*');
+    return lines.join('\n');
+  }
+
+  static generateMultiMfDetails(funds: Record<string, any>[], _query?: string): string {
+    const lines: string[] = [];
+    lines.push(`🔍 **Found ${funds.length} Matching Mutual Funds:**\n`);
+
+    for (let i = 0; i < funds.length; i++) {
+      const f = funds[i];
+      const name = f.scheme_name?.toString() ?? f.fund_name?.toString() ?? 'Mutual Fund';
+      const score = this._toDouble(f.final_score ?? f.score);
+      const category = f.category?.toString() ?? f.cluster?.toString() ?? 'Equity';
+
+      lines.push(`${i + 1}️⃣ **${name}**`);
+      lines.push(`   • **Score:** **${Math.round(score)}/100** ⭐`);
+      lines.push(`   • **Category:** ${category}`);
+      lines.push('');
+    }
+
+    lines.push('💡 *Ask for a specific scheme name (e.g. "SBI Small Cap") to view full details!*');
+    return lines.join('\n');
+  }
+
+  static generateMultiInsuranceDetails(plans: Record<string, any>[], _query?: string): string {
+    const lines: string[] = [];
+    lines.push(`🔍 **Found ${plans.length} Matching Insurance Plans:**\n`);
+
+    for (let i = 0; i < plans.length; i++) {
+      const p = plans[i];
+      const company = p.company_name?.toString() ?? p.provider_name?.toString() ?? 'Provider';
+      const planName = p.plan_name?.toString() ?? p.name?.toString() ?? 'Policy';
+      const score = this._toDouble(p.score ?? p.final_score);
+      const planType = p.plan_type?.toString() ?? p.category?.toString() ?? 'Health/Term';
+      const csrVal = p.claim_settlement_ratio ?? p.csr;
+
+      lines.push(`${i + 1}️⃣ **${planName}**`);
+      lines.push(`   • **Provider:** ${company}`);
+      lines.push(`   • **Score:** **${Math.round(score)}/100**`);
+      lines.push(`   • **Type:** ${planType}`);
+      if (csrVal !== null && csrVal !== undefined && csrVal.toString() !== '' && csrVal.toString() !== 'null') {
+        const csr = this._toDouble(csrVal);
+        lines.push(`   • **CSR:** ${csr.toFixed(1)}%`);
+      }
+      lines.push('');
+    }
+
+    lines.push('💡 *Ask for a specific plan name (e.g. "HDFC Ergo Optima") to view its full Score Card!*');
+    return lines.join('\n');
+  }
+
+  static generateMultiIpoDetails(ipos: Record<string, any>[], _query?: string): string {
+    const lines: string[] = [];
+    lines.push(`🔍 **Found ${ipos.length} Matching Upcoming IPOs:**\n`);
+
+    for (let i = 0; i < ipos.length; i++) {
+      const ipo = ipos[i];
+      const company = ipo.company_name?.toString() ?? ipo.name?.toString() ?? 'IPO';
+      const score = this._toDouble(ipo.score ?? ipo.final_score);
+      const priceBand = ipo.price_band?.toString() ?? 'TBA';
+      const dates = ipo.bidding_dates ?? ipo.dates ?? 'Upcoming';
+
+      lines.push(`${i + 1}️⃣ **${company}**`);
+      lines.push(`   • **Score:** **${Math.round(score)}/100**`);
+      lines.push(`   • **Price Band:** ${priceBand}`);
+      lines.push(`   • **Bidding Dates:** ${dates}`);
+      lines.push('');
+    }
+
+    return lines.join('\n');
+  }
+
+  // ---------------------------------------------------------------------------
   // HELPER UTILITIES
   // ---------------------------------------------------------------------------
 
-  private static _toDouble(v: any): number {
+  static _toDouble(v: any): number {
     if (v === null || v === undefined) return 0;
     if (typeof v === 'number') return v;
     const parsed = parseFloat(v.toString());
     return isNaN(parsed) ? 0 : parsed;
   }
 
-  private static _formatCompact(amount: number): string {
+  static _formatCompact(amount: number): string {
     if (amount >= 10000000) {
       const cr = amount / 10000000;
       return `${cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2)} Cr`;

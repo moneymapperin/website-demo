@@ -39,7 +39,6 @@ export const CorporateDashboardPage: React.FC = () => {
 
   // UI Modals
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
-  const [showQrModal, setShowQrModal] = useState<boolean>(false);
   const [infoModal, setInfoModal] = useState<InfoModalState | null>(null);
 
   // 1. Intro sequence timers
@@ -223,10 +222,6 @@ export const CorporateDashboardPage: React.FC = () => {
               />
             </div>
 
-            <p className="text-xs text-zinc-400 pt-1">
-              Use the mobile app QR scanner to sign in on other devices
-            </p>
-
             <div className="pt-2">
               <button
                 data-testid="continue-to-dashboard-btn"
@@ -331,25 +326,7 @@ export const CorporateDashboardPage: React.FC = () => {
               </svg>
             </button>
 
-            {/* Web QR Info */}
-            <button
-              onClick={() => setShowQrModal(true)}
-              aria-label="Web QR Scanner"
-              className={`p-2 rounded-xl border ${
-                isDark
-                  ? 'border-zinc-700/60 bg-zinc-800/40 hover:bg-zinc-800 text-emerald-400'
-                  : 'border-slate-200 bg-white hover:bg-slate-100 text-emerald-600'
-              } transition-colors`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                />
-              </svg>
-            </button>
+
 
             {/* Theme Toggle */}
             <button
@@ -735,36 +712,7 @@ export const CorporateDashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: Web QR Info */}
-      {showQrModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-        >
-          <div
-            className={`max-w-md w-full p-6 rounded-3xl border ${
-              isDark ? 'bg-[#121B20] border-zinc-700 text-zinc-100' : 'bg-white border-slate-200 text-zinc-900'
-            } shadow-2xl space-y-4 text-center`}
-          >
-            <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-              </svg>
-            </div>
-            <h3 className="text-base font-bold">Web QR Login</h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Use the mobile app QR scanner to sign in on other devices without entering your corporate credentials manually.
-            </p>
-            <button
-              onClick={() => setShowQrModal(false)}
-              className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs transition-all"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
+
 
       {/* MODAL: Confirm Logout */}
       {showLogoutModal && (
