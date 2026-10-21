@@ -41,14 +41,19 @@ const hexToRgba = (hex: string, alpha: number) => {
 
 const getSidebarPillarIcon = (title: string) => {
   switch (title) {
+    case 'Protection':
     case 'Insurance Dashboard':
       return ShieldCheck;
+    case 'Income':
     case 'Income Pillar Matrix':
       return Wallet;
+    case 'Expenses':
     case 'Weekly Expense Predictor':
       return Target;
+    case 'Investment':
     case 'Mutual Fund Dashboard':
       return BarChart3;
+    case 'Emergency Savings':
     case 'Emergency Readiness':
       return ShieldPlus;
     default:
@@ -248,32 +253,32 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                   onClick={() => handleSidebarPillarClick(pillar)}
                   style={{
                     backgroundColor: active
-                      ? 'rgba(79, 70, 229, 0.12)'
+                      ? 'rgba(79, 70, 229, 0.14)'
                       : isDark
                       ? APP_COLORS.darkBackground
                       : '#F3F7FC',
                     borderColor: active
-                      ? APP_COLORS.primary
+                      ? 'rgba(99, 102, 241, 0.7)'
                       : isDark
                       ? APP_COLORS.darkBorder
                       : APP_COLORS.borderLight,
-                    borderWidth: '0.8px',
+                    borderWidth: '1px',
                   }}
-                  className={`w-full text-left px-3 py-2.5 rounded-[14px] border flex items-center justify-between gap-3 transition-all duration-150 cursor-pointer ${
-                    active ? 'ring-1 ring-indigo-500' : 'hover:border-indigo-400/50'
+                  className={`w-full text-left px-3 py-2.5 rounded-2xl border flex items-center justify-between gap-3 transition-all duration-150 cursor-pointer ${
+                    active ? 'ring-1 ring-indigo-500/50 shadow-[0_0_15px_rgba(79,70,229,0.2)]' : 'hover:border-indigo-400/50'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <div
-                      className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center"
+                      className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center border border-white/5"
                       style={{
                         backgroundColor: isLocked
                           ? 'rgba(113, 113, 122, 0.12)'
-                          : hexToRgba(pillar.color, 0.12),
+                          : hexToRgba(pillar.color, 0.16),
                       }}
                     >
                       <Icon
-                        className="w-4 h-4"
+                        className="w-4.5 h-4.5"
                         style={{ color: isLocked ? '#71717A' : pillar.color }}
                       />
                     </div>
@@ -503,39 +508,42 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         <header
           data-testid="desktop-top-header"
           style={{
-            backgroundColor: isDark ? APP_COLORS.darkCard : '#FFFFFF',
-            borderColor: isDark ? APP_COLORS.darkBorder : APP_COLORS.borderLight,
+            backgroundColor: isDark ? '#070913' : '#FFFFFF',
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.05)' : APP_COLORS.borderLight,
           }}
-          className="hidden md:flex items-center justify-between px-8 py-3 border-b sticky top-0 z-20 select-none shadow-xs"
+          className="hidden md:flex items-center justify-between px-8 lg:px-10 py-3.5 border-b sticky top-0 z-20 select-none shadow-xs"
         >
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-zinc-400">
-              <span className="hover:text-indigo-500 cursor-pointer" onClick={() => navigate('/dashboard')}>
+            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400">
+              <span className="hover:text-white cursor-pointer transition-colors" onClick={() => navigate('/dashboard')}>
                 MoneyMapper
               </span>
-              <span>/</span>
+              <span className="text-zinc-600">/</span>
               {location.pathname.startsWith('/news') ? (
                 <>
-                  <span className="hover:text-indigo-500 cursor-pointer" onClick={() => navigate('/insights')}>
+                  <span className="hover:text-white cursor-pointer transition-colors" onClick={() => navigate('/insights')}>
                     Insights
                   </span>
-                  <span>/</span>
-                  <span className="text-indigo-500 uppercase tracking-wider font-black">
-                    Top Stories
+                  <span className="text-zinc-600">/</span>
+                  <span className="text-[#38BDF8] uppercase tracking-wider font-bold">
+                    TOP STORIES
                   </span>
                 </>
               ) : location.pathname.startsWith('/pillars/') ? (
                 <>
-                  <span className="hover:text-indigo-500 cursor-pointer" onClick={() => navigate('/dashboard')}>
+                  <span className="hover:text-white cursor-pointer transition-colors" onClick={() => navigate('/dashboard')}>
                     Pillars
                   </span>
-                  <span>/</span>
-                  <span className="text-indigo-500 uppercase tracking-wider font-black">
-                    {location.pathname.replace('/pillars/', '').split('/')[0].replace(/-/g, ' ').toUpperCase()}
+                  <span className="text-zinc-600">/</span>
+                  <span className="text-[#38BDF8] uppercase tracking-wider font-bold">
+                    {(() => {
+                      const found = SIDEBAR_PILLARS.find((p) => p.webRoute === location.pathname || location.pathname.startsWith(p.webRoute));
+                      return found ? found.title.toUpperCase() : location.pathname.replace('/pillars/', '').split('/')[0].replace(/-/g, ' ').toUpperCase();
+                    })()}
                   </span>
                 </>
               ) : (
-                <span className="text-indigo-500 uppercase tracking-wider font-black">
+                <span className="text-[#38BDF8] uppercase tracking-wider font-bold">
                   {location.pathname.replace('/', '').split('/')[0].replace(/-/g, ' ').toUpperCase() || 'DASHBOARD'}
                 </span>
               )}

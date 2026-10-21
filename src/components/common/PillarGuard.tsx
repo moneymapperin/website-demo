@@ -38,9 +38,9 @@ export const PillarGuard: React.FC<PillarGuardProps> = ({ pillarName, children }
   }
 
   const pillarTitles: Record<string, string> = {
-    insurance: 'Insurance & Protection Pillar',
-    investments: 'Mutual Funds & Investment Pillar',
-    emergency: 'Emergency Readiness Pillar',
+    insurance: 'Protection Pillar',
+    investments: 'Investment Pillar',
+    emergency: 'Emergency Savings Pillar',
   };
 
   const title = pillarTitles[pillarName] || 'Financial Pillar';

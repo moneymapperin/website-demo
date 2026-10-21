@@ -104,11 +104,11 @@ export const FINANCIAL_PILLARS: readonly FinancialPillar[] = [
 ] as const;
 
 export const SIDEBAR_PILLARS = [
-  { title: 'Insurance Dashboard',      webRoute: '/pillars/insurance',   color: '#08796F', desc: 'Life, health & asset coverage overview', isPremium: true  },
-  { title: 'Income Pillar Matrix',     webRoute: '/pillars/income',      color: '#208858', desc: 'Analyse all your income streams',          isPremium: false },
-  { title: 'Weekly Expense Predictor', webRoute: '/pillars/expenses',    color: '#C9A84C', desc: 'Forecast & control weekly spending',       isPremium: false },
-  { title: 'Mutual Fund Dashboard',    webRoute: '/pillars/investments', color: '#35C4C4', desc: 'Monitor your MF portfolio growth',         isPremium: true  },
-  { title: 'Emergency Readiness',      webRoute: '/pillars/emergency',   color: '#F06464', desc: 'Emergency fund status & readiness',        isPremium: true  },
+  { title: 'Income',            webRoute: '/pillars/income',      color: '#208858', desc: 'Analyse all your income streams',          isPremium: false },
+  { title: 'Expenses',          webRoute: '/pillars/expenses',    color: '#C9A84C', desc: 'Forecast & control weekly spending',       isPremium: false },
+  { title: 'Emergency Savings', webRoute: '/pillars/emergency',   color: '#F06464', desc: 'Emergency fund status & readiness',        isPremium: true  },
+  { title: 'Protection',        webRoute: '/pillars/insurance',   color: '#08796F', desc: 'Life, health & asset coverage overview', isPremium: true  },
+  { title: 'Investment',        webRoute: '/pillars/investments', color: '#35C4C4', desc: 'Monitor your MF portfolio growth',         isPremium: true  },
 ] as const;
 
 export interface NavItem {

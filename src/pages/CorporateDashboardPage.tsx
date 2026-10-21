@@ -222,6 +222,10 @@ export const CorporateDashboardPage: React.FC = () => {
               />
             </div>
 
+            <p className="text-xs text-zinc-400">
+              Use the mobile app QR scanner to sign in on other devices
+            </p>
+
             <div className="pt-2">
               <button
                 data-testid="continue-to-dashboard-btn"

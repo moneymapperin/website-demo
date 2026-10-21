@@ -230,7 +230,7 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
         </ComingSoonProvider>
       );
 
-      const mutualFundsCard = screen.getByRole('heading', { name: 'Mutual Funds' });
+      const mutualFundsCard = screen.getByRole('heading', { name: /Investment|Mutual Funds/i });
       fireEvent.click(mutualFundsCard);
       fireEvent.click(screen.getByText('Secure & Private'));
 
@@ -316,7 +316,7 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
         </ComingSoonProvider>
       );
 
-      const insuranceCard = screen.getByRole('heading', { name: 'Insurance' });
+      const insuranceCard = screen.getByRole('heading', { name: /Protection|Insurance/i });
       fireEvent.click(insuranceCard);
 
       expect(navigateSpy).not.toHaveBeenCalled();

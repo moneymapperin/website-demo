@@ -1,12 +1,12 @@
-import { ArrowRight, Eye, LockKeyhole, Shield, Sparkles, Target, TrendingUp, Users, Wallet } from 'lucide-react';
+import { ArrowRight, Eye, LockKeyhole, Shield, Sparkles, Target, TrendingUp, Users, Wallet, CreditCard, Umbrella } from 'lucide-react';
 import { navigateTo } from '../lib/navigation';
 
 const pillars = [
-  { number: '01', title: 'Stock & Investment', description: 'Track your stocks, ETFs and portfolio performance', icon: TrendingUp },
-  { number: '02', title: 'Mutual Funds', description: 'Monitor SIPs, returns and top performing funds', icon: Sparkles },
-  { number: '03', title: 'Insurance', description: 'Keep track of your policies & coverage', icon: Shield },
-  { number: '04', title: 'Emergency Fund', description: 'Build & track your financial safety net', icon: Wallet },
-  { number: '05', title: 'Goals & Planning', description: 'Plan your goals and achieve them step by step', icon: Target },
+  { number: '01', title: 'Income', description: 'Analyse all your income streams and earnings', icon: Wallet },
+  { number: '02', title: 'Expenses', description: 'Forecast, track and control weekly spending', icon: CreditCard },
+  { number: '03', title: 'Emergency Savings', description: 'Build & track your financial safety net', icon: Shield },
+  { number: '04', title: 'Protection', description: 'Life, health & asset coverage evaluation', icon: Umbrella },
+  { number: '05', title: 'Investment', description: 'Monitor mutual funds and portfolio growth', icon: TrendingUp },
 ];
 
 const scores = [

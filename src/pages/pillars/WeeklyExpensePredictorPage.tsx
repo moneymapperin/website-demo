@@ -9,6 +9,7 @@ import {
   Sparkles,
   Lightbulb,
   LineChart,
+  Target,
 } from 'lucide-react';
 
 const EXPENSE_ADVISORIES: Record<string, string[]> = {
@@ -203,7 +204,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
   const getCategoryLabel = (type: 'fixed' | 'flexible' | 'savings'): string => {
     if (type === 'fixed') return 'Fixed Expenses';
     if (type === 'flexible') return 'Flexible Expenses';
-    return 'Savings';
+    return 'Savings Goal';
   };
 
   if (loading) {
@@ -217,54 +218,69 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
   if (isEmpty || !currentWeek || !activeReportingWeek) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <p className="text-slate-500 dark:text-zinc-400">Missing Data.</p>
+        <p className="text-zinc-400">Missing Data.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="w-full px-8 lg:px-10 py-6 space-y-6">
       <h1 data-testid="weekly-page-title" className="sr-only">
         Weekly Tracker
       </h1>
 
-      {/* 1. Score Header */}
+      {/* 1. HERO EXPENSE SCORE Card */}
       <div
         data-testid="weekly-score-header"
-        className="p-6 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between"
+        className="relative overflow-hidden p-6 sm:p-7 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
       >
-        <div>
-          <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            EXPENSE SCORE
+        {/* Subtle Ambient Glow on the Right */}
+        <div className="hidden dark:block absolute right-0 top-0 w-80 h-full bg-gradient-to-l from-purple-900/20 to-transparent pointer-events-none" />
+
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-12 h-12 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 dark:border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+            <Target className="w-6 h-6" />
           </div>
-          <div className="text-5xl sm:text-6xl font-black text-indigo-600 dark:text-indigo-400 mt-1 leading-none">
-            {Math.round(expenseScore)}
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+              EXPENSE SCORE
+            </div>
+            <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
+              {Math.round(expenseScore)}
+            </div>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1.5 font-medium">
+              {expenseScore >= 70
+                ? 'Great spending control this month'
+                : "Let's bring more control to your spending"}
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6 relative z-10 shrink-0 self-end sm:self-center">
+          {/* Discipline Ring */}
           <div className="flex flex-col items-center">
-            <div className="w-11 h-11 rounded-full border-[3px] border-purple-500/40 flex items-center justify-center text-xs font-bold text-purple-600 dark:text-purple-400">
+            <div className="w-14 h-14 rounded-full border-2 border-[#9333EA] dark:border-[#A855F7] flex items-center justify-center text-base font-black text-slate-900 dark:text-white bg-purple-50 dark:bg-purple-950/30 shadow-[0_0_15px_rgba(168,85,247,0.25)]">
               {Math.round(disciplineScore)}
             </div>
-            <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 mt-1">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 mt-1.5">
               Discipline
             </span>
           </div>
 
+          {/* Hit Rate Ring */}
           <div className="flex flex-col items-center">
-            <div className="w-11 h-11 rounded-full border-[3px] border-teal-500/40 flex items-center justify-center text-xs font-bold text-teal-600 dark:text-teal-400">
+            <div className="w-14 h-14 rounded-full border-2 border-[#059669] dark:border-[#10B981] flex items-center justify-center text-base font-black text-slate-900 dark:text-white bg-emerald-50 dark:bg-emerald-950/30 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
               {targetsHit}
             </div>
-            <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 mt-1">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 mt-1.5">
               Hit Rate
             </span>
           </div>
         </div>
       </div>
 
-      {/* 2. Horizontal Scrollable Week Strip */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+      {/* 2. Horizontal Desktop Week Selector Tabs */}
+      <div className="grid grid-cols-5 gap-3">
         {weeks.map((w, idx) => {
           const isSelected = idx === currentViewWeekIndex;
           const isLocked = w.is_locked;
@@ -279,15 +295,15 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               onClick={() => {
                 if (!isLocked) setCurrentViewWeekIndex(idx);
               }}
-              className={`w-20 shrink-0 py-2.5 rounded-2xl flex flex-col items-center justify-center transition-all border ${
+              className={`py-3.5 px-3 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border ${
                 isSelected
-                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/25'
-                  : 'bg-white dark:bg-[#0E0B1F] border-slate-200 dark:border-indigo-500/20 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-              } ${isLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
+                  ? 'bg-[#4F46E5] border-2 border-[#6366F1] shadow-[0_0_20px_rgba(79,70,229,0.4)] text-white scale-[1.02]'
+                  : 'bg-white dark:bg-[#0B0D1B] border-slate-200/80 dark:border-white/[0.08] text-slate-600 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white shadow-xs dark:shadow-none'
+              } ${isLocked ? 'opacity-40 cursor-not-allowed hover:border-slate-200/80 dark:hover:border-white/[0.08]' : ''}`}
             >
               <span
-                className={`text-[9px] font-bold ${
-                  isSelected ? 'text-white/80' : 'text-slate-400 dark:text-zinc-500'
+                className={`text-[11px] font-semibold tracking-wide ${
+                  isSelected ? 'text-white/90' : 'text-slate-500 dark:text-zinc-400'
                 }`}
               >
                 Week {w.index}
@@ -296,14 +312,14 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 {isLocked ? (
                   <Lock
                     data-testid={`week-tab-lock-${w.index}`}
-                    className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500"
+                    className="w-4 h-4 text-slate-400 dark:text-zinc-500"
                   />
                 ) : isDone ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
                 ) : (
                   <span
-                    className={`text-[11px] font-bold ${
-                      isSelected ? 'text-white' : 'text-slate-700 dark:text-zinc-300'
+                    className={`text-xs font-bold ${
+                      isSelected ? 'text-white' : 'text-slate-700 dark:text-zinc-200'
                     }`}
                   >
                     {formatDateShort(w.start)}
@@ -315,52 +331,54 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
         })}
       </div>
 
-      {/* 3. Week N Target Overview (Shown ONLY when selected week is current week) */}
+      {/* 3. Week N Target Overview (Shown when selected week is current week) */}
       {currentWeek.is_current && (
         <div
           data-testid="current-week-overview-card"
-          className="p-5 rounded-3xl bg-white dark:bg-[#0E0B1F] border border-indigo-500/25 dark:border-indigo-500/25 shadow-sm dark:shadow-xl space-y-4 transition-colors"
+          className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-indigo-600 dark:text-indigo-400">
-              Week {currentWeek.index} Target Overview
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold tracking-wider">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <span className="text-[#0284C7] dark:text-[#38BDF8]">Week {currentWeek.index}</span> Target Overview
+              </h2>
+              <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                {formatDateShort(currentWeek.start)} - {formatDateShort(currentWeek.end)}
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-indigo-500/10 dark:bg-[#4F46E5]/20 border border-indigo-500/30 dark:border-[#4F46E5]/40 text-indigo-600 dark:text-[#818CF8] text-[11px] font-bold tracking-wider uppercase">
               CURRENT WEEK
             </span>
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-zinc-400 -mt-2">
-            {formatDateShort(currentWeek.start)} - {formatDateShort(currentWeek.end)}
-          </div>
 
-          <div className="space-y-3 pt-1 divide-y divide-slate-100 dark:divide-zinc-800/80">
-            <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-zinc-200">
-                <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+          <div className="space-y-3.5 pt-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-900 dark:text-white">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0284C7] dark:bg-[#38BDF8] shrink-0 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
                 <span>Fixed Expenses</span>
               </div>
-              <span className="text-xs font-bold text-slate-500 dark:text-zinc-400">
-                Range: {formatRupees(currentWeek.range_fixed[0])} - {formatRupees(currentWeek.range_fixed[1])}
+              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
+                Range: {formatRupees(currentWeek.range_fixed[0])} – {formatRupees(currentWeek.range_fixed[1])}
               </span>
             </div>
 
-            <div className="flex items-center justify-between pt-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-zinc-200">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-900 dark:text-white">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] shrink-0 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
                 <span>Flexible Expenses</span>
               </div>
-              <span className="text-xs font-bold text-slate-500 dark:text-zinc-400">
-                Range: {formatRupees(currentWeek.range_flex[0])} - {formatRupees(currentWeek.range_flex[1])}
+              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
+                Range: {formatRupees(currentWeek.range_flex[0])} – {formatRupees(currentWeek.range_flex[1])}
               </span>
             </div>
 
-            <div className="flex items-center justify-between pt-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-zinc-200">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-900 dark:text-white">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
                 <span>Savings Goal</span>
               </div>
-              <span className="text-xs font-bold text-slate-500 dark:text-zinc-400">
-                Range: {formatRupees(currentWeek.range_save[0])} - {formatRupees(currentWeek.range_save[1])}
+              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
+                Range: {formatRupees(currentWeek.range_save[0])} – {formatRupees(currentWeek.range_save[1])}
               </span>
             </div>
           </div>
@@ -368,31 +386,36 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
       )}
 
       {/* 4. Target Ranges Reporting Section */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 shadow-sm dark:shadow-xl space-y-6 transition-colors">
-        <div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-            Week {activeReportingWeek.index} Target Ranges
-          </h2>
-          <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-            {formatDateShort(activeReportingWeek.start)} - {formatDateShort(activeReportingWeek.end)}
+      <div className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+              Week {activeReportingWeek.index} Target Ranges
+            </h2>
+            <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+              {formatDateShort(activeReportingWeek.start)} - {formatDateShort(activeReportingWeek.end)}
+            </div>
           </div>
+          {isTargetWeekSubmitted && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>COMPLETED</span>
+            </div>
+          )}
         </div>
 
         {/* 4A. Fixed Expenses Decision Block */}
-        <div
-          data-testid="decision-card-fixed"
-          className="space-y-3 pt-1"
-        >
-          <div className="flex justify-between items-start text-xs">
+        <div data-testid="decision-card-fixed" className="space-y-3 pt-1">
+          <div className="flex justify-between items-center text-xs">
             <span className="text-sm font-bold text-slate-900 dark:text-white">Fixed Expenses</span>
             <div className="text-right">
-              <div className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">
-                Range: {formatRupees(activeReportingWeek.range_fixed[0])} - {formatRupees(activeReportingWeek.range_fixed[1])}
-              </div>
+              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
+                Range: {formatRupees(activeReportingWeek.range_fixed[0])} – {formatRupees(activeReportingWeek.range_fixed[1])}
+              </span>
               {actualFixed > 0 && (
-                <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  Logged: {formatRupees(actualFixed)}
-                </div>
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-2">
+                  (Logged: {formatRupees(actualFixed)})
+                </span>
               )}
             </div>
           </div>
@@ -403,10 +426,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               data-testid="fixed-missed-btn"
               disabled={isTargetWeekSubmitted}
               onClick={() => handleMarkMissed('fixed')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center ${
+              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                 fixedDecision === 'missed'
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/25'
-                  : 'bg-rose-500/5 dark:bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15'
+                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
+                  : 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/15'
               } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Missed
@@ -416,10 +439,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               data-testid="fixed-achieved-btn"
               disabled={isTargetWeekSubmitted}
               onClick={() => handleOpenAchievedModal('fixed')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center ${
+              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                 fixedDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/25'
-                  : 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
+                  : 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/15'
               } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Achieved
@@ -427,23 +450,18 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
           </div>
         </div>
 
-        <hr className="border-slate-100 dark:border-zinc-800" />
-
         {/* 4B. Flexible Expenses Decision Block */}
-        <div
-          data-testid="decision-card-flexible"
-          className="space-y-3"
-        >
-          <div className="flex justify-between items-start text-xs">
+        <div data-testid="decision-card-flexible" className="space-y-3 pt-1">
+          <div className="flex justify-between items-center text-xs">
             <span className="text-sm font-bold text-slate-900 dark:text-white">Flexible Expenses</span>
             <div className="text-right">
-              <div className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">
-                Range: {formatRupees(activeReportingWeek.range_flex[0])} - {formatRupees(activeReportingWeek.range_flex[1])}
-              </div>
+              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
+                Range: {formatRupees(activeReportingWeek.range_flex[0])} – {formatRupees(activeReportingWeek.range_flex[1])}
+              </span>
               {actualFlex > 0 && (
-                <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  Logged: {formatRupees(actualFlex)}
-                </div>
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-2">
+                  (Logged: {formatRupees(actualFlex)})
+                </span>
               )}
             </div>
           </div>
@@ -454,10 +472,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               data-testid="flexible-missed-btn"
               disabled={isTargetWeekSubmitted}
               onClick={() => handleMarkMissed('flexible')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center ${
+              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                 flexibleDecision === 'missed'
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/25'
-                  : 'bg-rose-500/5 dark:bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15'
+                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
+                  : 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/15'
               } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Missed
@@ -467,10 +485,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               data-testid="flexible-achieved-btn"
               disabled={isTargetWeekSubmitted}
               onClick={() => handleOpenAchievedModal('flexible')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center ${
+              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                 flexibleDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/25'
-                  : 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
+                  : 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/15'
               } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Achieved
@@ -478,23 +496,18 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
           </div>
         </div>
 
-        <hr className="border-slate-100 dark:border-zinc-800" />
-
         {/* 4C. Savings Goal Decision Block */}
-        <div
-          data-testid="decision-card-savings"
-          className="space-y-3"
-        >
-          <div className="flex justify-between items-start text-xs">
+        <div data-testid="decision-card-savings" className="space-y-3 pt-1">
+          <div className="flex justify-between items-center text-xs">
             <span className="text-sm font-bold text-slate-900 dark:text-white">Savings Goal</span>
             <div className="text-right">
-              <div className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">
-                Range: {formatRupees(activeReportingWeek.range_save[0])} - {formatRupees(activeReportingWeek.range_save[1])}
-              </div>
+              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
+                Range: {formatRupees(activeReportingWeek.range_save[0])} – {formatRupees(activeReportingWeek.range_save[1])}
+              </span>
               {actualSaved > 0 && (
-                <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  Logged: {formatRupees(actualSaved)}
-                </div>
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-2">
+                  (Logged: {formatRupees(actualSaved)})
+                </span>
               )}
             </div>
           </div>
@@ -505,10 +518,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               data-testid="savings-missed-btn"
               disabled={isTargetWeekSubmitted}
               onClick={() => handleMarkMissed('savings')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center ${
+              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                 savingsDecision === 'missed'
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/25'
-                  : 'bg-rose-500/5 dark:bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15'
+                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
+                  : 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/30 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/15'
               } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Missed
@@ -518,10 +531,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               data-testid="savings-achieved-btn"
               disabled={isTargetWeekSubmitted}
               onClick={() => handleOpenAchievedModal('savings')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center ${
+              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                 savingsDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/25'
-                  : 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
+                  : 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30 text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/15'
               } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Achieved
@@ -536,10 +549,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
             data-testid="submit-week-btn"
             disabled={isTargetWeekSubmitted || isSubmitting}
             onClick={handleSubmitReport}
-            className={`w-full py-4 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
+            className={`w-full py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
               isTargetWeekSubmitted
-                ? 'bg-slate-200 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 cursor-not-allowed'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/25 active:scale-[0.99]'
+                ? 'bg-slate-200 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 cursor-not-allowed border border-slate-300 dark:border-white/5'
+                : 'bg-gradient-to-r from-[#4F46E5] to-[#4338CA] hover:from-[#4338CA] hover:to-[#3730A3] text-white shadow-indigo-600/30 active:scale-[0.99]'
             }`}
           >
             <span>
@@ -556,38 +569,40 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
       {/* 5. Financial Observation Card */}
       <div
         data-testid="weekly-observation-card"
-        className="p-5 rounded-3xl bg-white dark:bg-[#0E0B1F] border border-indigo-500/20 dark:border-indigo-500/20 shadow-sm dark:shadow-xl space-y-3 transition-colors"
+        className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-4"
       >
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-xs sm:text-sm">
-            <LineChart className="w-4 h-4 shrink-0" />
-            <span className="text-slate-900 dark:text-white">Financial Observation</span>
+          <div className="flex items-center gap-2.5 text-sm font-bold text-slate-900 dark:text-white">
+            <LineChart className="w-5 h-5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+            <span>Financial Observation</span>
           </div>
 
           <button
             type="button"
             data-testid="expense-advice-chip"
             onClick={handleOpenAdvisoryDialog}
-            className="px-2.5 py-1 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-500/20 transition-all active:scale-95"
+            className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 transition-all active:scale-95 cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Expense Advice</span>
           </button>
         </div>
 
-        <p className="text-xs sm:text-sm text-slate-700 dark:text-zinc-300 leading-relaxed">
-          {disciplineMsg}
+        <p className="text-sm text-slate-700 dark:text-zinc-300 leading-relaxed font-medium">
+          {disciplineMsg || 'Excellent discipline.'}
         </p>
 
         {recommendedExpenseAction && (
-          <div className="p-3.5 rounded-2xl bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/15 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-              <Lightbulb className="w-4 h-4 shrink-0" />
-              <span>Recommended Expense Action</span>
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#121528] border border-slate-200 dark:border-indigo-500/20 flex items-start gap-3.5">
+            <Lightbulb className="w-5 h-5 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                Recommended Expense Action
+              </div>
+              <p className="text-xs text-slate-700 dark:text-zinc-200 leading-relaxed font-medium">
+                {recommendedExpenseAction}
+              </p>
             </div>
-            <p className="text-xs text-slate-800 dark:text-zinc-200 leading-relaxed font-medium">
-              {recommendedExpenseAction}
-            </p>
           </div>
         )}
       </div>
@@ -597,19 +612,19 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
         type="button"
         data-testid="weekly-optimize-btn"
         onClick={() => navigate('/master-data?target=expenses')}
-        className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-600/25 transition-all active:scale-[0.99] flex items-center justify-center gap-2"
+        className="w-full py-4 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#4338CA] hover:from-[#4338CA] hover:to-[#3730A3] text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
       >
         <Sparkles className="w-4 h-4" />
-        <span>Optimize Now</span>
+        <span>OPTIMIZE NOW</span>
       </button>
 
       {/* Log Exact Amount Modal */}
       {modalTarget && activeReportingWeek && (
         <div
           data-testid="log-amount-modal"
-          className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn"
         >
-          <div className="bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/30 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Log {getCategoryLabel(modalTarget)} (Week {activeReportingWeek.index})
             </h3>
@@ -617,7 +632,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               Enter the exact amount for {getCategoryLabel(modalTarget)} for Week {activeReportingWeek.index}:
             </p>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 text-sm">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 text-sm font-bold">
                 ₹
               </span>
               <input
@@ -625,7 +640,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 data-testid="modal-amount-input"
                 value={modalAmount}
                 onChange={(e) => setModalAmount(e.target.value)}
-                className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-indigo-500/30 bg-slate-50 dark:bg-[#14102B] text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#14102B] text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500"
                 placeholder="Amount (₹)"
                 autoFocus
               />
@@ -655,9 +670,9 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
       {showAdvisoryDialog && (
         <div
           data-testid="expense-advisory-dialog"
-          className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn"
         >
-          <div className="bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/30 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 text-center">
+          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 text-center">
             <div className="flex items-center justify-center gap-2 text-indigo-600 dark:text-indigo-400">
               <Sparkles className="w-5 h-5" />
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -669,14 +684,14 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               Based on your current score of {Math.round(expenseScore)}, here is a recommended action:
             </p>
 
-            <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-slate-800 dark:text-zinc-100 text-sm font-semibold leading-relaxed">
+            <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-slate-800 dark:text-zinc-100 text-sm font-semibold leading-relaxed">
               {dialogAdvice}
             </div>
 
             <button
               type="button"
               onClick={() => setShowAdvisoryDialog(false)}
-              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all"
+              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
             >
               Got it!
             </button>

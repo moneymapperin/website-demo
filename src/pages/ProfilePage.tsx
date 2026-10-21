@@ -6,7 +6,6 @@ import { usePlan } from '../hooks/usePlan';
 import { authService } from '../services/authService';
 import { gamificationStore } from '../services/gamificationStore';
 import { ALL_BADGES, checkAndUnlockBadges } from '../services/badgeService';
-import { APP_COLORS } from '../theme/tokens';
 import {
   Star,
   Trophy,
@@ -71,6 +70,12 @@ export const FAQS = [
   },
 ];
 
+const SectionLabel: React.FC<{ label: string }> = ({ label }) => (
+  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 pl-1 mb-2.5">
+    {label}
+  </div>
+);
+
 interface SettingsTileProps {
   icon: React.ReactNode;
   title: string;
@@ -92,20 +97,20 @@ const SettingsTile: React.FC<SettingsTileProps> = ({
     data-testid={testId}
     onClick={onClick}
     className={`p-4 md:p-5 flex items-center justify-between gap-3 ${
-      onClick ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors' : ''
+      onClick ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors' : ''
     }`}
   >
     <div className="flex items-center gap-3.5 min-w-0">
-      <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
         {icon}
       </div>
       <div className="min-w-0">
         <div className="text-sm font-bold text-slate-900 dark:text-white truncate">{title}</div>
-        <div className="text-xs text-slate-500 dark:text-zinc-400 truncate">{subtitle}</div>
+        <div className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-0.5">{subtitle}</div>
       </div>
     </div>
     <div className="shrink-0">
-      {trailing ?? <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-400" />}
+      {trailing ?? <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500" />}
     </div>
   </div>
 );
@@ -128,7 +133,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, ariaLabe
       e.stopPropagation();
       onChange(!checked);
     }}
-    className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+    className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
       checked ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-zinc-700'
     }`}
   >
@@ -245,308 +250,299 @@ export const ProfilePage: React.FC = () => {
   return (
     <div
       data-testid="profile-page"
-      className="min-h-screen pb-16 transition-colors duration-200"
-      style={{
-        backgroundColor: isDark ? '#09090B' : APP_COLORS.background,
-        color: isDark ? '#FAFAFA' : APP_COLORS.textPrimaryLight,
-      }}
+      className="w-full px-8 lg:px-10 py-6 space-y-6"
     >
-      {/* 1. HEADER matching Flutter profile */}
+      {/* 1. HERO PROFILE CARD */}
       <div
         data-testid="profile-header"
-        className="px-4 pt-6 pb-8 rounded-b-[28px] text-center select-none bg-gradient-to-b from-[#2E1065] via-[#1E0A45] to-transparent text-white"
+        className="relative overflow-hidden p-6 sm:p-7 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-6"
       >
-        <div className="max-w-2xl mx-auto space-y-3">
-          {/* Page title */}
-          <div className="text-center pb-1">
-            <h1 className="text-lg font-black text-white tracking-wide">Profile</h1>
-          </div>
+        {/* Subtle Ambient Glow on the Right */}
+        <div className="hidden dark:block absolute right-0 top-0 w-96 h-full bg-gradient-to-l from-indigo-900/20 via-purple-900/10 to-transparent pointer-events-none" />
 
-          {/* Centered avatar circle with initial (tap opens master data) */}
+        <div className="flex items-center gap-5 relative z-10">
+          {/* Avatar circle with initial (tap opens master data) */}
           <div
             data-testid="user-avatar"
             onClick={() => navigate('/master-data')}
-            className="cursor-pointer mx-auto w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 text-white flex items-center justify-center text-2xl md:text-3xl font-black shadow-md border-2 border-white/20 transition-transform active:scale-95"
+            className="cursor-pointer w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/25 dark:to-purple-500/25 border-2 border-indigo-500/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl sm:text-3xl font-black shadow-[0_0_20px_rgba(99,102,241,0.2)] shrink-0 transition-transform active:scale-95"
             title="Open Master Data"
           >
             {initials}
           </div>
 
-          {/* Greeting line with streak pill */}
-          <div className="flex items-center justify-center gap-2 pt-1">
-            <span className="text-xs md:text-sm text-white/70 font-medium">{greeting} 🌟</span>
-            <div
-              data-testid="streak-badge"
-              className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/15 text-white text-[9px] font-extrabold tracking-wide"
-            >
-              <span className="text-[11px]">🔥</span>
-              <span>{streakCount} WEEKS</span>
-            </div>
-          </div>
-
-          {/* User name with PRO badge next to it only when isPro */}
-          <div className="flex items-center justify-center gap-2">
-            <h2 data-testid="user-name" className="text-xl md:text-2xl font-black text-white">
-              {userName}
-            </h2>
-            {isPro && (
-              <span
-                data-testid="pro-badge"
-                className="px-2 py-0.5 rounded-full bg-[#6D28D9] text-white text-[9px] font-bold tracking-wider"
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
+                {greeting} 🌟
+              </span>
+              <div
+                data-testid="streak-badge"
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 dark:border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-black tracking-wide"
               >
-                PRO
-              </span>
-            )}
-          </div>
+                <span className="text-xs">🔥</span>
+                <span>{streakCount} WEEKS</span>
+              </div>
+            </div>
 
-          {/* Email below */}
-          <div data-testid="user-email" className="text-xs text-white/70 font-medium">
-            {userEmail}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Single Column Container */}
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        {/* 2. SUBSCRIPTION CARD */}
-        <div
-          data-testid="subscription-card"
-          onClick={() => navigate('/subscription')}
-          className={`cursor-pointer rounded-3xl p-5 md:p-6 transition-all hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden flex flex-col justify-between shadow-xl ${
-            isPro
-              ? 'bg-gradient-to-br from-indigo-600 to-purple-700 text-white'
-              : 'bg-gradient-to-br from-gray-700 to-gray-500 text-white'
-          }`}
-        >
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="px-2.5 py-1 rounded-full bg-white/20 text-[10px] font-black tracking-wider uppercase">
-                {isPro ? 'WEALTH SELECT (PRO)' : 'BASIC ACCESS (FREE)'}
-              </span>
-              {isPro ? (
-                <Crown className="w-5 h-5 text-white" />
-              ) : (
-                <Lock className="w-5 h-5 text-white" />
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 data-testid="user-name" className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                {userName}
+              </h2>
+              {isPro && (
+                <span
+                  data-testid="pro-badge"
+                  className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[10px] font-black tracking-wider uppercase shadow-xs shadow-indigo-600/30"
+                >
+                  PRO
+                </span>
               )}
             </div>
 
-            <h3 className="text-base md:text-lg font-bold mb-1 text-white">
-              {isPro ? 'MoneyMapper Pro Membership' : 'MoneyMapper Free Membership'}
-            </h3>
-            <p className="text-xs text-white/85 leading-relaxed">
-              {isPro
-                ? 'All 5 Financial Pillars, Screener Intelligence & AI Assistant Unlocked.'
-                : 'Free Tier — Upgrade to PRO to unlock full screeners, AI assistant & deep insights.'}
-            </p>
-          </div>
-
-          <div className="mt-4 flex justify-end">
-            <span className="text-white/70 text-[10px] md:text-xs font-bold hover:text-white transition-colors">
-              Tap to manage membership →
-            </span>
-          </div>
-        </div>
-
-        {/* 3. Section GAMIFIED MILESTONES */}
-        <div className="space-y-2">
-          <div className="px-2 text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-zinc-400">
-            GAMIFIED MILESTONES
-          </div>
-          <div className="rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 shadow-sm dark:shadow-xl overflow-hidden transition-colors">
-            {/* Progress Row */}
-            <div className="p-4 md:p-5 space-y-3.5">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
-                    <Star className="w-5 h-5 fill-amber-500" />
-                  </div>
-                  <div>
-                    <div className="text-sm md:text-base font-black text-slate-900 dark:text-white">
-                      LVL {levelInfo.level}
-                    </div>
-                    <div className="text-[10px] font-extrabold tracking-wider text-slate-500 dark:text-zinc-400 uppercase">
-                      Financial Navigator
-                    </div>
-                  </div>
-                </div>
-                <div className="text-xs font-black text-indigo-600 dark:text-indigo-400">
-                  {totalXp} / {levelInfo.maxXp} XP
-                </div>
-              </div>
-
-              {/* Progress bar (no minimum clamp of 10%) */}
-              <div className="h-2 w-full bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, Math.max(0, levelInfo.progress * 100))}%` }}
-                />
-              </div>
+            <div data-testid="user-email" className="text-xs font-medium text-slate-500 dark:text-zinc-400">
+              {userEmail}
             </div>
-
-            <div className="border-t border-slate-100 dark:border-white/10" />
-
-            {/* Badges & Achievements tile */}
-            <SettingsTile
-              icon={<Trophy className="w-5 h-5" />}
-              title="Badges & Achievements"
-              subtitle="Review your earned financial milestones"
-              onClick={() => navigate('/achievements')}
-            />
-
-            {/* Horizontally scrollable row of round emoji-only badges */}
-            {unlockedBadges.length > 0 && (
-              <div className="px-4 md:px-5 pb-4 flex items-center gap-3 overflow-x-auto scrollbar-none">
-                {unlockedBadges.map((item) => (
-                  <div
-                    key={item.id}
-                    className="w-12 h-12 rounded-full bg-slate-100 dark:bg-white/5 border border-purple-500/20 flex items-center justify-center text-2xl shrink-0 shadow-xs"
-                  >
-                    {item.emoji}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="border-t border-slate-100 dark:border-white/10" />
-
-            {/* Invite a Friend tile */}
-            <SettingsTile
-              icon={<UserPlus className="w-5 h-5" />}
-              title="Invite a Friend"
-              subtitle="Help others improve their financial score"
-              onClick={handleInviteFriend}
-            />
           </div>
         </div>
 
-        {/* 4. Section SECURITY & PREFERENCES */}
-        <div className="space-y-2">
-          <div className="px-2 text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-zinc-400">
-            SECURITY & PREFERENCES
-          </div>
-          <div className="rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 shadow-sm dark:shadow-xl overflow-hidden transition-colors">
-            {/* Dark Mode */}
-            <SettingsTile
-              icon={isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              title="Dark Mode"
-              subtitle="Optimizes interface for low-light conditions"
-              trailing={
-                <ToggleSwitch
-                  checked={isDark}
-                  onChange={handleToggleDarkMode}
-                  ariaLabel="Dark mode toggle"
-                  testId="toggle-dark-mode"
-                />
-              }
-            />
-          </div>
-        </div>
-
-        {/* 5. Section SUPPORT */}
-        <div className="space-y-2">
-          <div className="px-2 text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-zinc-400">
-            SUPPORT
-          </div>
-          <div className="rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 shadow-sm dark:shadow-xl overflow-hidden transition-colors">
-            <SettingsTile
-              testId="btn-support-modal"
-              icon={<Headphones className="w-5 h-5" />}
-              title="Help & Support"
-              subtitle="Contact us via WhatsApp or Email"
-              onClick={() => setShowSupportModal(true)}
-            />
-
-            <div className="border-t border-slate-100 dark:border-white/10" />
-
-            <SettingsTile
-              testId="btn-faq-modal"
-              icon={<HelpCircle className="w-5 h-5" />}
-              title="FAQ"
-              subtitle="Learn how MoneyMapper works"
-              onClick={() => setShowFaqModal(true)}
-            />
-
-            <div className="border-t border-slate-100 dark:border-white/10" />
-
-            <SettingsTile
-              testId="btn-share-feedback"
-              icon={<MessageSquare className="w-5 h-5" />}
-              title="Share your Feedback"
-              subtitle="Help us improve MoneyMapper"
-              onClick={handleShareFeedback}
-            />
-          </div>
-        </div>
-
-        {/* 6. Section MY PROFILE */}
-        <div className="space-y-2">
-          <div className="px-2 text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-zinc-400">
-            MY PROFILE
-          </div>
-          <div className="rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 shadow-sm dark:shadow-xl overflow-hidden transition-colors">
-            <SettingsTile
-              testId="link-master-data"
-              icon={<User className="w-5 h-5" />}
-              title="My Profile"
-              subtitle="Manage your 52 core identity & pillar data fields"
-              onClick={() => navigate('/master-data')}
-            />
-          </div>
-        </div>
-
-        {/* 7. Section ABOUT & COMPLIANCE */}
-        <div className="space-y-2">
-          <div className="px-2 text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-zinc-400">
-            ABOUT & COMPLIANCE
-          </div>
-          <div className="rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200/80 dark:border-indigo-500/20 shadow-sm dark:shadow-xl overflow-hidden transition-colors">
-            <SettingsTile
-              testId="link-privacy-policy"
-              icon={<Info className="w-5 h-5" />}
-              title="About MoneyMapper"
-              subtitle="Version 1.0.0 (Production build)"
-              onClick={() => navigate('/privacy')}
-            />
-          </div>
-        </div>
-
-        {/* 8. Logout Session Button */}
-        <div className="pt-2">
+        {/* Action Button: Edit Profile Data */}
+        <div className="relative z-10 flex items-center gap-3 shrink-0 self-start md:self-center">
           <button
             type="button"
-            data-testid="btn-logout"
-            onClick={() => setShowLogoutDialog(true)}
-            className="w-full py-3.5 rounded-2xl border-2 border-rose-500/60 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-98"
+            onClick={() => navigate('/master-data')}
+            className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-zinc-200 text-xs font-bold transition-all cursor-pointer flex items-center gap-2"
           >
-            <LogOut className="w-4 h-4" />
-            <span>Logout Session</span>
+            <User className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+            <span>Edit Profile Data</span>
           </button>
         </div>
+      </div>
 
-        {/* 9. Trust Badges Row BELOW Logout */}
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <div
-            data-testid="trust-badge-ssl"
-            className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[9px] font-black tracking-wider uppercase"
-          >
-            SSL SECURED
+      {/* 2-Column Responsive Desktop Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: Membership & Milestones (Col Span 7) */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* 2. SUBSCRIPTION CARD */}
+          <div>
+            <SectionLabel label="MEMBERSHIP STATUS" />
+            <div
+              data-testid="subscription-card"
+              onClick={() => navigate('/subscription')}
+              className={`cursor-pointer rounded-2xl p-6 transition-all hover:scale-[1.005] active:scale-[0.995] relative overflow-hidden flex flex-col justify-between shadow-xl ${
+                isPro
+                  ? 'bg-gradient-to-br from-[#4F46E5] via-[#6366F1] to-[#7C3AED] text-white shadow-indigo-600/20'
+                  : 'bg-gradient-to-br from-slate-800 to-slate-900 text-white'
+              }`}
+            >
+              {/* Subtle background ambient blur */}
+              <div className="absolute right-0 top-0 w-64 h-full bg-white/5 pointer-events-none rounded-full blur-2xl transform translate-x-12 -translate-y-6" />
+
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-[10px] font-black tracking-wider uppercase">
+                    {isPro ? 'WEALTH SELECT (PRO)' : 'BASIC ACCESS (FREE)'}
+                  </span>
+                  {isPro ? (
+                    <Crown className="w-5 h-5 text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]" />
+                  ) : (
+                    <Lock className="w-5 h-5 text-white/80" />
+                  )}
+                </div>
+
+                <h3 className="text-lg sm:text-xl font-black mb-1.5 text-white">
+                  {isPro ? 'MoneyMapper Pro Membership' : 'MoneyMapper Free Membership'}
+                </h3>
+                <p className="text-xs text-white/85 leading-relaxed font-medium">
+                  {isPro
+                    ? 'All 5 Financial Pillars, Screener Intelligence & AI Assistant Unlocked.'
+                    : 'Free Tier — Upgrade to PRO to unlock full screeners, AI assistant & deep insights.'}
+                </p>
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-white/15 flex justify-end relative z-10">
+                <span className="text-white text-xs font-bold hover:underline transition-all flex items-center gap-1">
+                  <span>Tap to manage membership</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            </div>
           </div>
-          <div
-            data-testid="trust-badge-sebi"
-            className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[9px] font-black tracking-wider uppercase"
-          >
-            SEBI CERTIFIED
+
+          {/* 3. Section GAMIFIED MILESTONES */}
+          <div>
+            <SectionLabel label="GAMIFIED MILESTONES" />
+            <div className="rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.06]">
+              {/* Progress Row */}
+              <div className="p-5 md:p-6 space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 dark:border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                      <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
+                    </div>
+                    <div>
+                      <div className="text-base font-black text-slate-900 dark:text-white">
+                        LVL {levelInfo.level}
+                      </div>
+                      <div className="text-[10px] font-bold tracking-wider text-slate-500 dark:text-zinc-400 uppercase mt-0.5">
+                        Financial Navigator
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs font-black text-indigo-600 dark:text-indigo-400">
+                    {totalXp} / {levelInfo.maxXp} XP
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="h-3 w-full bg-slate-100 dark:bg-[#121528] border border-slate-200/60 dark:border-white/[0.06] rounded-full overflow-hidden p-0.5">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+                    style={{ width: `${Math.min(100, Math.max(0, levelInfo.progress * 100))}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Badges & Achievements tile */}
+              <SettingsTile
+                icon={<Trophy className="w-5 h-5" />}
+                title="Badges & Achievements"
+                subtitle="Review your earned financial milestones"
+                onClick={() => navigate('/achievements')}
+              />
+
+              {/* Horizontally scrollable row of round emoji-only badges */}
+              {unlockedBadges.length > 0 && (
+                <div className="px-5 pb-5 pt-1 flex items-center gap-3 overflow-x-auto scrollbar-none">
+                  {unlockedBadges.map((item) => (
+                    <div
+                      key={item.id}
+                      className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-white/[0.05] border border-purple-500/20 flex items-center justify-center text-2xl shrink-0 shadow-xs hover:scale-105 transition-transform"
+                    >
+                      {item.emoji}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Invite a Friend tile */}
+              <SettingsTile
+                icon={<UserPlus className="w-5 h-5" />}
+                title="Invite a Friend"
+                subtitle="Help others improve their financial score"
+                onClick={handleInviteFriend}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Preferences, Support, and Actions (Col Span 5) */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* 4. Section SECURITY & PREFERENCES */}
+          <div>
+            <SectionLabel label="SECURITY & PREFERENCES" />
+            <div className="rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.06]">
+              {/* My Profile */}
+              <SettingsTile
+                testId="link-master-data"
+                icon={<User className="w-5 h-5" />}
+                title="My Profile"
+                subtitle="Manage your 52 core identity & pillar data fields"
+                onClick={() => navigate('/master-data')}
+              />
+
+              {/* Dark Mode */}
+              <SettingsTile
+                icon={isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                title="Dark Mode"
+                subtitle="Optimizes interface for low-light conditions"
+                trailing={
+                  <ToggleSwitch
+                    checked={isDark}
+                    onChange={handleToggleDarkMode}
+                    ariaLabel="Dark mode toggle"
+                    testId="toggle-dark-mode"
+                  />
+                }
+              />
+            </div>
+          </div>
+
+          {/* 5. Section SUPPORT & COMPLIANCE */}
+          <div>
+            <SectionLabel label="SUPPORT & ABOUT" />
+            <div className="rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.06]">
+              <SettingsTile
+                testId="btn-support-modal"
+                icon={<Headphones className="w-5 h-5" />}
+                title="Help & Support"
+                subtitle="Contact us via WhatsApp or Email"
+                onClick={() => setShowSupportModal(true)}
+              />
+
+              <SettingsTile
+                testId="btn-faq-modal"
+                icon={<HelpCircle className="w-5 h-5" />}
+                title="FAQ"
+                subtitle="Learn how MoneyMapper works"
+                onClick={() => setShowFaqModal(true)}
+              />
+
+              <SettingsTile
+                testId="btn-share-feedback"
+                icon={<MessageSquare className="w-5 h-5" />}
+                title="Share your Feedback"
+                subtitle="Help us improve MoneyMapper"
+                onClick={handleShareFeedback}
+              />
+
+              <SettingsTile
+                testId="link-privacy-policy"
+                icon={<Info className="w-5 h-5" />}
+                title="About MoneyMapper"
+                subtitle="Version 1.0.0 (Production build)"
+                onClick={() => navigate('/privacy')}
+              />
+            </div>
+          </div>
+
+          {/* 6. Logout Session Button & Trust Badges */}
+          <div className="space-y-4 pt-1">
+            <button
+              type="button"
+              data-testid="btn-logout"
+              onClick={() => setShowLogoutDialog(true)}
+              className="w-full py-3.5 px-4 rounded-xl border border-rose-500/40 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout Session</span>
+            </button>
+
+            {/* Trust Badges Row BELOW Logout */}
+            <div className="flex items-center justify-center gap-3 pt-1">
+              <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+              <div
+                data-testid="trust-badge-ssl"
+                className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-black tracking-wider uppercase"
+              >
+                SSL SECURED
+              </div>
+              <div
+                data-testid="trust-badge-sebi"
+                className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-black tracking-wider uppercase"
+              >
+                SEBI CERTIFIED
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Logout Confirmation Modal */}
       {showLogoutDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-md p-4 animate-fadeIn">
           <div
             data-testid="logout-dialog"
-            className="w-full max-w-sm rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/30 p-6 shadow-2xl space-y-4 text-center"
+            className="w-full max-w-sm rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 p-6 shadow-2xl space-y-4 text-center"
           >
             <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center text-xl">
               🚪
@@ -561,7 +557,7 @@ export const ProfilePage: React.FC = () => {
                 type="button"
                 data-testid="logout-cancel-btn"
                 onClick={() => setShowLogoutDialog(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-bold text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition"
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-bold text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -569,7 +565,7 @@ export const ProfilePage: React.FC = () => {
                 type="button"
                 data-testid="logout-confirm-btn"
                 onClick={handleConfirmLogout}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black transition shadow-lg"
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black transition shadow-lg cursor-pointer"
               >
                 Log out
               </button>
@@ -580,10 +576,10 @@ export const ProfilePage: React.FC = () => {
 
       {/* Help & Support Modal */}
       {showSupportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-md p-4 animate-fadeIn">
           <div
             data-testid="support-modal"
-            className="w-full max-w-sm rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/30 p-6 shadow-2xl space-y-4"
+            className="w-full max-w-sm rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 p-6 shadow-2xl space-y-4"
           >
             <h3 className="text-base font-black text-slate-900 dark:text-white text-center">
               How can we help?
@@ -595,7 +591,7 @@ export const ProfilePage: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setShowSupportModal(false)}
-                className="w-full p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-200 flex items-center gap-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition"
+                className="w-full p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-200 flex items-center gap-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition cursor-pointer"
               >
                 <div className="w-9 h-9 rounded-xl bg-[#25D366] text-white flex items-center justify-center text-lg shrink-0">
                   💬
@@ -611,7 +607,7 @@ export const ProfilePage: React.FC = () => {
               <a
                 href="mailto:info@moneymapper.in?subject=Help%20Requested&body=Hi%20Team%2C%0A%0AI%20need%20help%20with..."
                 onClick={() => setShowSupportModal(false)}
-                className="w-full p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 text-indigo-800 dark:text-indigo-200 flex items-center gap-3 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition"
+                className="w-full p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 text-indigo-800 dark:text-indigo-200 flex items-center gap-3 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition cursor-pointer"
               >
                 <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg shrink-0">
                   ✉️
@@ -628,7 +624,7 @@ export const ProfilePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowSupportModal(false)}
-              className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-bold text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition mt-2"
+              className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-bold text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition mt-2 cursor-pointer"
             >
               Cancel
             </button>
@@ -638,19 +634,19 @@ export const ProfilePage: React.FC = () => {
 
       {/* FAQ Modal */}
       {showFaqModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-md p-4 animate-fadeIn">
           <div
             data-testid="faq-modal"
-            className="w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/30 p-6 shadow-2xl space-y-4"
+            className="w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 p-6 shadow-2xl space-y-4"
           >
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-gray-800">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
               <h3 className="text-base font-black text-slate-900 dark:text-white">
                 FAQ
               </h3>
               <button
                 type="button"
                 onClick={() => setShowFaqModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
               >
                 ✕
               </button>
@@ -660,7 +656,7 @@ export const ProfilePage: React.FC = () => {
               {FAQS.map((faq, idx) => (
                 <div
                   key={idx}
-                  className="p-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800 space-y-2"
+                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#121528] border border-slate-200/80 dark:border-white/[0.08] space-y-2"
                 >
                   <div
                     onClick={() => setExpandedFaqIndex(expandedFaqIndex === idx ? null : idx)}
@@ -684,7 +680,7 @@ export const ProfilePage: React.FC = () => {
                     />
                   </div>
                   {expandedFaqIndex === idx && (
-                    <p className="text-xs text-slate-600 dark:text-gray-400 pt-1 leading-relaxed border-t border-slate-200/60 dark:border-zinc-800">
+                    <p className="text-xs text-slate-600 dark:text-gray-300 pt-2 leading-relaxed border-t border-slate-200/60 dark:border-white/[0.08]">
                       {faq.answer}
                     </p>
                   )}
