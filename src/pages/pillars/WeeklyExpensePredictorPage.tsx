@@ -2,14 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWeeklyTracker } from '../../hooks/useWeeklyTracker';
 import { useToast } from '../../context/ToastContext';
-import { AdvisoryService } from '../../services/marketAdvisor';
 import {
   Lock,
   CheckCircle2,
   Sparkles,
   Lightbulb,
   LineChart,
-  Target,
 } from 'lucide-react';
 
 const EXPENSE_ADVISORIES: Record<string, string[]> = {
@@ -133,14 +131,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
   const [dialogAdvice, setDialogAdvice] = useState<string>('');
 
   // Recommended Expense Action (computed once per load)
-  const [recommendedExpenseAction, setRecommendedExpenseAction] = useState<string>('');
+  const [recommendedExpenseAction, setRecommendedExpenseAction] = useState<string>('Review your Household Efficiency ratio monthly to spot minor optimizations.');
   const adviceComputedRef = useRef(false);
 
   useEffect(() => {
     if (!loading && !adviceComputedRef.current) {
       adviceComputedRef.current = true;
-      const advice = AdvisoryService.getAdvisoryText('expenses', expenseScore);
-      setRecommendedExpenseAction(advice || '');
+      setRecommendedExpenseAction('Review your Household Efficiency ratio monthly to spot minor optimizations.');
     }
   }, [loading, expenseScore]);
 
@@ -237,22 +234,12 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
         {/* Subtle Ambient Glow on the Right */}
         <div className="hidden dark:block absolute right-0 top-0 w-80 h-full bg-gradient-to-l from-purple-900/20 to-transparent pointer-events-none" />
 
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 dark:border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
-            <Target className="w-6 h-6" />
+        <div className="relative z-10">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            EXPENSE SCORE
           </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              EXPENSE SCORE
-            </div>
-            <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
-              {Math.round(expenseScore)}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1.5 font-medium">
-              {expenseScore >= 70
-                ? 'Great spending control this month'
-                : "Let's bring more control to your spending"}
-            </p>
+          <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
+            {Math.round(expenseScore)}
           </div>
         </div>
 

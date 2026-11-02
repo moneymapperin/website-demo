@@ -12,7 +12,6 @@ import {
   Sparkles,
   PlusCircle,
   MinusCircle,
-  TrendingUp,
   Briefcase,
   PieChart,
   Coins,
@@ -232,22 +231,12 @@ export const MutualFundPillarPage: React.FC = () => {
         {/* Subtle Ambient Glow on the Right */}
         <div className="hidden dark:block absolute right-0 top-0 w-80 h-full bg-gradient-to-l from-cyan-900/20 via-indigo-900/10 to-transparent pointer-events-none" />
 
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/15 border border-cyan-500/25 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-            <TrendingUp className="w-6 h-6" />
+        <div className="relative z-10">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            GLOBAL PILLAR SCORE
           </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              GLOBAL PILLAR SCORE
-            </div>
-            <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
-              {Math.round(p.investmentScore)}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 font-medium">
-              {p.investmentScore >= 70
-                ? 'Your portfolio allocation is on track'
-                : 'Boost your regular SIPs and balance equity-debt ratio'}
-            </p>
+          <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
+            {Math.round(p.investmentScore)}
           </div>
         </div>
 
@@ -286,7 +275,6 @@ export const MutualFundPillarPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">Total Wealth Assets</h3>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Cumulative portfolio value across all asset classes</p>
               </div>
             </div>
             <span className="text-2xl sm:text-3xl font-black text-[#059669] dark:text-[#10B981] tracking-tight">
@@ -382,7 +370,6 @@ export const MutualFundPillarPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">Monthly SIP Contribution</h3>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Active automated systematic investments</p>
               </div>
             </div>
             <span className="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400 shrink-0">

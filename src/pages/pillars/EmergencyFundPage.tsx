@@ -14,7 +14,6 @@ import {
 import {
   Edit3,
   Sparkles,
-  ShieldPlus,
   Wallet,
 } from 'lucide-react';
 
@@ -168,22 +167,12 @@ export const EmergencyFundPage: React.FC = () => {
         {/* Subtle Ambient Glow on the Right */}
         <div className="hidden dark:block absolute right-0 top-0 w-80 h-full bg-gradient-to-l from-emerald-900/20 via-purple-900/10 to-transparent pointer-events-none" />
 
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-            <ShieldPlus className="w-6 h-6" />
+        <div className="relative z-10">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            EMERGENCY SAVINGS SCORE
           </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              EMERGENCY SAVINGS SCORE
-            </div>
-            <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
-              {Math.round(p.savingsScore)}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 font-medium">
-              {p.savingsScore >= 70
-                ? 'Your emergency readiness is strong'
-                : 'Build a 6-month safety cushion for stability'}
-            </p>
+          <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
+            {Math.round(p.savingsScore)}
           </div>
         </div>
 

@@ -7,7 +7,6 @@ import {
 } from '../../models/pillars/income';
 import { getAnnualInflationRate } from '../../utils/dartRandom';
 import {
-  BarChart3,
   Wallet,
   TrendingUp,
   PieChart,
@@ -92,22 +91,12 @@ export const IncomePillarPage: React.FC = () => {
         {/* Subtle Ambient Glow on the Right */}
         <div className="hidden dark:block absolute right-0 top-0 w-80 h-full bg-gradient-to-l from-purple-900/20 to-transparent pointer-events-none" />
 
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
-            <BarChart3 className="w-6 h-6" />
+        <div className="relative z-10">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            INCOME SCORE
           </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              INCOME SCORE
-            </div>
-            <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
-              {p.finalPillarScore}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 font-medium">
-              {p.finalPillarScore >= 70
-                ? 'Your income position looks good'
-                : 'Consider diversifying into passive streams'}
-            </p>
+          <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
+            {p.finalPillarScore}
           </div>
         </div>
 

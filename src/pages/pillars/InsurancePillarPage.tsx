@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ShieldCheck } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 import {
   calculateInsurancePillar,
@@ -71,22 +71,12 @@ export const InsurancePillarPage: React.FC = () => {
         {/* Subtle Ambient Glow on the Right */}
         <div className="hidden dark:block absolute right-0 top-0 w-80 h-full bg-gradient-to-l from-indigo-900/20 via-teal-900/10 to-transparent pointer-events-none" />
 
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-12 h-12 rounded-xl bg-teal-500/10 dark:bg-teal-500/15 border border-teal-500/25 dark:border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0 shadow-[0_0_15px_rgba(20,184,166,0.15)]">
-            <ShieldCheck className="w-6 h-6" />
+        <div className="relative z-10">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            PROTECTION SCORE
           </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              PROTECTION SCORE
-            </div>
-            <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
-              {Math.round(p.protectionScore)}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 font-medium">
-              {p.protectionScore >= 70
-                ? 'Your coverage position is strong'
-                : 'Safeguard your family with adequate term & health covers'}
-            </p>
+          <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
+            {Math.round(p.protectionScore)}
           </div>
         </div>
 
@@ -218,9 +208,6 @@ export const InsurancePillarPage: React.FC = () => {
               <div className="text-sm font-bold text-slate-900 dark:text-white">
                 Term & Life Gap
               </div>
-              <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                Recommended 15x annual income cushion
-              </div>
             </div>
             <span
               data-testid="term-gap-text"
@@ -241,9 +228,6 @@ export const InsurancePillarPage: React.FC = () => {
             <div>
               <div className="text-sm font-bold text-slate-900 dark:text-white">
                 Health Gap
-              </div>
-              <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                Recommended 10x medical emergency buffer
               </div>
             </div>
             <span
