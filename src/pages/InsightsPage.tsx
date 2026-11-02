@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { RefreshCw, TrendingUp, PieChart, Lock, ArrowRight } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
+import { useToast } from '../context/ToastContext';
 
 export interface PickItem {
   isStock?: boolean;
@@ -24,10 +25,17 @@ export async function loadMoneyMapperPicks(
     const updatedAt = parseInt(localStorage.getItem('picks_updated_at') || '0', 10);
     const now = Date.now();
 
-    // 24 hours (86,400,000 ms) validity
+    // 24 hours (86,400,000 ms) validity: valid only if 5 items with at least 1 MF and 1 Stock
     if (!forceRefresh && cachedJson && now - updatedAt < 86400000) {
       try {
-        return JSON.parse(cachedJson);
+        const parsed = JSON.parse(cachedJson);
+        if (Array.isArray(parsed) && parsed.length === 5) {
+          const mfCount = parsed.filter((p: any) => !p.isStock).length;
+          const stockCount = parsed.filter((p: any) => p.isStock).length;
+          if (mfCount >= 1 && stockCount >= 1) {
+            return parsed;
+          }
+        }
       } catch {
         // Corrupted cache fallback
       }
@@ -35,12 +43,13 @@ export async function loadMoneyMapperPicks(
 
     // 1. Fetch MF Recommendations ("moderate")
     const mfRecs = await api.getMutualFundRecommendations('moderate', rng);
-    // Shuffle and take 3
-    const shuffledMFs = [...mfRecs].sort(() => rng() - 0.5);
-    const topMFs = shuffledMFs.slice(0, 3).map((f) => ({
+    const scoredMFs = (mfRecs || []).map((f: any) => ({
       ...f,
+      score: 70 + ((f.name?.length || 0) % 28),
       isStock: false,
     }));
+    const shuffledMFs = [...scoredMFs].sort(() => rng() - 0.5);
+    const topMFs = shuffledMFs.filter((m) => (m.score ?? 0) >= 70).slice(0, 3);
 
     // 2. Fetch Stocks with score >= 70
     const stocks = await api.getPickStocks();
@@ -53,9 +62,11 @@ export async function loadMoneyMapperPicks(
     // 3. Combine and shuffle
     const combined = [...topMFs, ...topStocks].sort(() => rng() - 0.5);
 
-    // 4. Save to cache
-    localStorage.setItem('cached_picks_json', JSON.stringify(combined));
-    localStorage.setItem('picks_updated_at', now.toString());
+    // 4. Save to cache only when complete (3 MF + 2 stocks = 5 total)
+    if (combined.length === 5 && topMFs.length === 3 && topStocks.length === 2) {
+      localStorage.setItem('cached_picks_json', JSON.stringify(combined));
+      localStorage.setItem('picks_updated_at', now.toString());
+    }
 
     return combined;
   } catch (e) {
@@ -67,6 +78,28 @@ export async function loadMoneyMapperPicks(
 export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
   const navigate = useNavigate();
   const { isPro } = usePlan();
+  const { showToast } = useToast();
+
+  const handlePickClick = (pick: PickItem, index: number) => {
+    const isLocked = !isPro && index > 0;
+    if (isLocked) {
+      showToast({
+        message: 'Upgrade to PRO to unlock all expert picks! 🚀',
+        backgroundColor: '#F59E0B',
+        action: {
+          label: 'UPGRADE',
+          onClick: () => navigate('/subscription'),
+        },
+      });
+      return;
+    }
+
+    if (pick.isStock) {
+      navigate('/stock-screener');
+    } else {
+      navigate('/mf-recommendations?risk=moderate');
+    }
+  };
 
   const [newsItems, setNewsItems] = useState<any[]>([]);
   const [blogItems, setBlogItems] = useState<any[]>([]);
@@ -273,7 +306,8 @@ export const InsightsPage: React.FC<{ rng?: () => number }> = ({ rng }) => {
                     <div
                       key={idx}
                       data-testid={`pick-card-${idx}`}
-                      className={`relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 cursor-default transition-all ${
+                      onClick={() => handlePickClick(pick, idx)}
+                      className={`relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 cursor-pointer transition-all hover:border-indigo-400 ${
                         isLocked ? 'overflow-hidden' : ''
                       }`}
                     >

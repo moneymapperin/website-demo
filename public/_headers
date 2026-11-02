@@ -6,3 +6,35 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; frame-src https://api.razorpay.com https://checkout.razorpay.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mfapi.in https://api.razorpay.com https://lumberjack.razorpay.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# Authenticated pages - prevent caching of sensitive screens
+/dashboard
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/dashboard/*
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/profile
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/weekly
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/weekly/*
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/pillars/*
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/insights
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/ai-assistant
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/subscription
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/onboarding
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/master-data
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/corporate-dashboard
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/corporate-dashboard/*
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/achievements
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+/referral
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0

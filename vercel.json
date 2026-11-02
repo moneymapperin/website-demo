@@ -1,5 +1,10 @@
 {
+  "redirects": [
+    { "source": "/data-deletion-request.html", "destination": "/delete_my_data", "permanent": true },
+    { "source": "/data-deletion-request", "destination": "/delete_my_data", "permanent": true }
+  ],
   "rewrites": [
+    { "source": "/delete_my_data", "destination": "/delete_my_data.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

@@ -1,6 +1,8 @@
+import React from 'react';
 import { navigateTo, scrollToLandingSection } from '../lib/navigation';
 import { PhoneMockup } from './PhoneMockup';
 import { FeatureCards } from './FeatureCards';
+import { ShieldCheck, Smartphone, ArrowRight, Laptop } from 'lucide-react';
 
 export const Hero: React.FC = () => {
   return (
@@ -8,7 +10,7 @@ export const Hero: React.FC = () => {
       {/* Background Radial Glow & Ambient Lighting */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[1000px] h-[650px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/25 via-[#1a1138]/20 to-transparent blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-1/3 right-10 w-[550px] h-[550px] bg-brand-violet/15 rounded-full blur-[130px] pointer-events-none -z-10" />
-      
+
       {/* Subtle curved tech line / mesh in background */}
       <svg
         className="absolute bottom-10 left-1/4 w-[750px] h-[350px] text-purple-600/10 pointer-events-none -z-10"
@@ -35,16 +37,18 @@ export const Hero: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
           {/* Left Column: Headline, Subtext, Buttons, Social Proof & Press Logos */}
           <div className="lg:col-span-6 flex flex-col items-start text-left z-10">
-            
-            {/* Pill Badge */}
-            <div
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#171329] border border-brand-purple/30 text-xs font-medium text-purple-300 shadow-sm shadow-brand-purple/20 mb-6 backdrop-blur-sm"
-            >
-              <span className="text-brand-magenta text-sm leading-none">✦</span>
-              <span>AI-Powered Financial Navigation</span>
+            {/* Pill Badges */}
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#171329] border border-brand-purple/30 text-xs font-medium text-purple-300 shadow-sm shadow-brand-purple/20 backdrop-blur-sm">
+                <span className="text-brand-magenta text-sm leading-none">✦</span>
+                <span>AI-Powered Financial Navigation</span>
+              </div>
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-semibold text-emerald-300">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Bank-Grade Privacy</span>
+              </div>
             </div>
 
             {/* Headline */}
@@ -56,18 +60,19 @@ export const Hero: React.FC = () => {
             </h1>
 
             {/* Subtext */}
-            <p className="text-base sm:text-lg text-white/60 font-normal leading-relaxed max-w-xl mb-8">
-              One app. Five pillars. Complete financial clarity. Track, Analyze &amp; Grow your wealth with AI.
+            <p className="text-base sm:text-lg text-white/65 font-normal leading-relaxed max-w-xl mb-8">
+              One app. Five pillars. Complete financial clarity. Track expenses, analyze income streams, predict weekly budgets, and grow your wealth with 24/7 AI guidance.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-9 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-4 mb-8 w-full sm:w-auto">
               <button
                 id="hero-get-started-btn"
                 onClick={() => navigateTo('/register')}
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold text-white bg-brand-gradient hover:opacity-95 active:scale-[0.98] shadow-xl shadow-brand-purple/30 transition-all text-base focus:outline-none cursor-pointer"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold text-white bg-brand-gradient hover:opacity-95 active:scale-[0.98] shadow-xl shadow-brand-purple/30 transition-all text-base focus:outline-none cursor-pointer flex items-center justify-center gap-2"
               >
-                Get Started Free
+                <span>Get Started Free</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 id="hero-explore-features-btn"
@@ -78,17 +83,31 @@ export const Hero: React.FC = () => {
               </button>
             </div>
 
+            {/* Trust & Device Sync Strip */}
+            <div className="pt-6 border-t border-white/[0.08] w-full flex flex-wrap items-center justify-between gap-4 text-xs text-white/50">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-purple-400" />
+                <Laptop className="w-4 h-4 text-pink-400" />
+                <span>Mobile App + Web Dashboard Synced</span>
+              </div>
+              <button
+                onClick={() => scrollToLandingSection('dashboard-preview')}
+                className="text-purple-300 hover:text-white font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                <span>Interactive Preview</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Right Column: Realistic Phone Mockup + 4 Stacked Feature Cards */}
           <div className="lg:col-span-6 flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-6 z-10">
-            {/* Realistic Phone Mockup matching exact orientation in reference image 01 */}
+            {/* Realistic Phone Mockup matching exact orientation in reference */}
             <PhoneMockup className="transition-transform duration-300 hover:scale-[1.01]" />
 
             {/* 4 Feature-Teaser Cards */}
             <FeatureCards />
           </div>
-
         </div>
       </div>
     </section>

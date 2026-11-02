@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Rocket } from 'lucide-react';
+import { useFeatureFlags } from '../../context/FeatureFlagContext';
+import { FeatureKey } from '../../services/featureFlagService';
 
 interface ScoreCardConfig {
   id: string;
@@ -11,6 +14,7 @@ interface ScoreCardConfig {
   cardType: 'stock' | 'mf' | 'insurance' | 'ipo';
   route?: string;
   isComingSoon?: boolean;
+  featureKey?: FeatureKey;
 }
 
 const CARDS: ScoreCardConfig[] = [
@@ -23,6 +27,7 @@ const CARDS: ScoreCardConfig[] = [
     color: '#10B981',
     cardType: 'stock',
     route: '/market/stocks',
+    featureKey: 'stock_screener',
   },
   {
     id: 'mf',
@@ -33,6 +38,7 @@ const CARDS: ScoreCardConfig[] = [
     color: '#3B82F6',
     cardType: 'mf',
     route: '/market/funds',
+    featureKey: 'mutual_funds',
   },
   {
     id: 'insurance',
@@ -43,6 +49,7 @@ const CARDS: ScoreCardConfig[] = [
     color: '#A855F7',
     cardType: 'insurance',
     route: '/market/insurance',
+    featureKey: 'insurance',
   },
   {
     id: 'ipo',
@@ -59,8 +66,12 @@ const CARDS: ScoreCardConfig[] = [
 export const ScoreCardsGrid: React.FC = () => {
   const navigate = useNavigate();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { isEnabled } = useFeatureFlags();
 
   const handleClick = (card: ScoreCardConfig) => {
+    if (card.featureKey && !isEnabled(card.featureKey)) {
+      return;
+    }
     if (card.isComingSoon) {
       setToastMessage('IPO Score coming soon!');
       setTimeout(() => setToastMessage(null), 2500);
@@ -77,20 +88,28 @@ export const ScoreCardsGrid: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {CARDS.map((card) => {
+          const isCardEnabled = !card.featureKey || isEnabled(card.featureKey);
+
           return (
             <div
               key={card.id}
               onClick={() => handleClick(card)}
               role="button"
-              tabIndex={0}
+              tabIndex={isCardEnabled ? 0 : -1}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') handleClick(card);
+                if (isCardEnabled && (e.key === 'Enter' || e.key === ' ')) {
+                  handleClick(card);
+                }
               }}
               style={{
                 borderColor: `${card.color}59`,
                 boxShadow: `0 6px 16px ${card.color}14`,
               }}
-              className="group cursor-pointer relative h-[185px] rounded-[22px] bg-white dark:bg-[#0D0E15] border-[1.5px] p-3.5 flex flex-col justify-between overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+              className={`relative h-[185px] rounded-[22px] bg-white dark:bg-[#0D0E15] border-[1.5px] p-3.5 flex flex-col justify-between overflow-hidden transition-all duration-200 ${
+                isCardEnabled
+                  ? 'group cursor-pointer hover:-translate-y-0.5 hover:shadow-lg'
+                  : 'cursor-default'
+              }`}
               data-testid={`score-card-${card.id}`}
             >
               {/* Background Wave Graphic & Watermark Icon */}
@@ -203,6 +222,19 @@ export const ScoreCardsGrid: React.FC = () => {
                   </svg>
                 </div>
               </div>
+
+              {/* Flutter lines 1642-1670: Blurred Live Soon Overlay if feature flag is disabled */}
+              {!isCardEnabled && (
+                <div
+                  data-testid={`score-card-${card.id}-locked`}
+                  className="absolute inset-0 z-20 backdrop-blur-[6px] bg-black/40 flex flex-col items-center justify-center rounded-[inherit]"
+                >
+                  <Rocket size={28} className="text-white" />
+                  <span className="text-white font-bold text-[16px] tracking-[1.1px] mt-1">
+                    Live Soon
+                  </span>
+                </div>
+              )}
             </div>
           );
         })}

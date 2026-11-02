@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Deletion Request | MoneyMapper</title>
+<meta name="description" content="Request permanent deletion of your personal data from MoneyMapper under the Digital Personal Data Protection Act, 2023.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    try {
+      var mode = localStorage.getItem('theme_mode');
+      var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      if (mode === 'light' || (!mode && prefersLight)) {
+        document.documentElement.classList.add('light');
+      }
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="/legal-pages.css">
+<style>
+  .del-form { margin-top: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .del-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .del-field { display: flex; flex-direction: column; margin-bottom: 16px; }
+  .del-field label { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .del-field label .req { color: #ef4444; margin-left: 2px; }
+  .del-field input, .del-field textarea {
+    width: 100%; font-family: inherit; font-size: 15px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .del-field textarea { min-height: 110px; resize: vertical; }
+  .del-field input:focus, .del-field textarea:focus { border-color: var(--brand-purple); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
+  .del-field.invalid input, .del-field.invalid textarea { border-color: #ef4444; }
+  .del-error { display: none; font-size: 12px; color: #ef4444; margin-top: 4px; }
+  .del-field.invalid .del-error { display: block; }
+  .del-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .del-btn {
+    width: 100%; border: 0; cursor: pointer; font-family: inherit; font-size: 15px; font-weight: 700; color: #fff;
+    background: var(--brand-gradient); border-radius: 12px; padding: 14px 20px; transition: opacity .15s, transform .05s;
+  }
+  .del-btn:hover { background: var(--brand-gradient-hover); }
+  .del-btn:active { transform: scale(0.99); }
+  .del-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .del-status { display: none; margin-top: 16px; padding: 14px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+  .del-status.success { display: block; background: var(--callout-india-bg); border: 1px solid var(--callout-india-border); color: var(--body-text); }
+  .del-status.error { display: block; background: var(--callout-crit-bg); border: 1px solid var(--callout-crit-border); color: var(--body-text); }
+  @media (max-width: 600px) { .del-grid { grid-template-columns: 1fr; gap: 0; } .del-form { padding: 18px; } }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <a href="/" class="brand-link" aria-label="MoneyMapper Home">
+      <img src="/src/assets/logo.png" alt="MoneyMapper" class="logo-img" />
+      <span class="brand-name">MoneyMapper</span>
+    </a>
+    <a href="/" class="btn-home">Back to Home</a>
+  </div>
+</nav>
+
+<header>
+  <div class="brand">MoneyMapper</div>
+  <h1>Data Deletion Request</h1>
+  <p>Exercise your Right to Erasure under the Digital Personal Data Protection Act, 2023 (DPDPA)</p>
+</header>
+
+<div class="wrap">
+
+  <div class="callout critical">
+    <span class="title">&#9888;&#65039; Permanent Action</span>
+    Once processed, deletion of your account and personal data is permanent and cannot be undone. Data we are legally required to retain (for example, financial or tax records) may be kept only for the period the law requires.
+  </div>
+
+  <p>Please fill in the details below. Use the same email address and phone number that are linked to your MoneyMapper account so that we can verify your request. Read how we handle your data in our <a href="privacy-policy.html">Privacy Policy</a>.</p>
+
+  <form id="deletion-form" class="del-form" novalidate autocomplete="on">
+    <div class="del-grid">
+      <div class="del-field" data-field="first_name">
+        <label for="first_name">First Name<span class="req">*</span></label>
+        <input type="text" id="first_name" name="first_name" maxlength="80" autocomplete="given-name" required>
+        <span class="del-error">Please enter your first name.</span>
+      </div>
+      <div class="del-field" data-field="last_name">
+        <label for="last_name">Last Name<span class="req">*</span></label>
+        <input type="text" id="last_name" name="last_name" maxlength="80" autocomplete="family-name" required>
+        <span class="del-error">Please enter your last name.</span>
+      </div>
+    </div>
+
+    <div class="del-field" data-field="email">
+      <label for="email">Email ID<span class="req">*</span></label>
+      <input type="email" id="email" name="email" maxlength="254" autocomplete="email" required>
+      <span class="del-error">Please enter a valid email address.</span>
+    </div>
+
+    <div class="del-field" data-field="phone">
+      <label for="phone">Phone Number<span class="req">*</span></label>
+      <input type="tel" id="phone" name="phone" maxlength="15" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" required>
+      <span class="del-error">Please enter a valid 10-digit mobile number.</span>
+    </div>
+
+    <div class="del-field" data-field="reason">
+      <label for="reason">Why are you deleting your data?<span class="req">*</span></label>
+      <textarea id="reason" name="reason" maxlength="1000" required></textarea>
+      <span class="del-error">Please tell us the reason (at least 5 characters).</span>
+    </div>
+
+    <div class="del-hp" aria-hidden="true">
+      <label for="website">Leave this field empty</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <button type="submit" id="submit-btn" class="del-btn">Submit Deletion Request</button>
+    <div id="form-status" role="status" aria-live="polite"></div>
+  </form>
+
+  <p style="margin-top:24px;">Questions? Write to <a href="mailto:info@moneymapper.in">info@moneymapper.in</a> or see our <a href="grievance-redressal-policy.html">Grievance Redressal Policy</a>.</p>
+
+</div>
+
+<footer>&copy; 2026 Monezra Mapper Private Limited. All rights reserved.</footer>
+
+<script src="/delete_my_data.js"></script>
+</body>
+</html>

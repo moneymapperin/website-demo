@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, CheckCircle2 } from 'lucide-react';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 import { authService } from '../services/authService';
 
 export const ForgotPasswordPage: React.FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export const ForgotPasswordPage: React.FC = () => {
       title="Reset Password"
       subtitle="Enter your email to receive password reset instructions"
       showBack
+      onBack={() => navigate('/login')}
       maxWidth="md"
     >
       <div className="bg-[#0D0E15] border border-[#27272A] rounded-[24px] p-6 sm:p-8 shadow-xl">

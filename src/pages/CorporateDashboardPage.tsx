@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiService } from '../services/apiService';
 import { authService } from '../services/authService';
+import { AnnouncementPopup } from '../components/common/AnnouncementPopup';
 
 export const MIN_COHORT_SIZE = 5;
 
@@ -181,63 +182,62 @@ export const CorporateDashboardPage: React.FC = () => {
   // 1. INTRO SCREEN
   if (showIntro) {
     return (
-      <div
-        data-testid="corporate-intro-screen"
-        className="min-h-screen w-full flex flex-col justify-center bg-[#07110F] text-white p-6 sm:p-12 transition-colors duration-300"
-      >
-        <div className="max-w-xl mx-auto w-full space-y-8">
-          <div>
-            <span className="text-[#35C4C4] font-bold text-xs uppercase tracking-wider">
-              MoneyMapper Intelligence
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mt-3 leading-tight">
-              Workforce stress is a silent productivity leak.
-            </h1>
-          </div>
-
-          <div className="min-h-[48px] flex items-center">
-            <p
-              key={problemIndex}
-              data-testid="corporate-problem-statement"
-              className="text-[#F1B957] font-bold text-base sm:text-lg animate-fadeIn"
-            >
-              {PROBLEMS[problemIndex]}
-            </p>
-          </div>
-
-          {/* Web Scan Panel */}
-          <div
-            data-testid="corporate-scan-panel"
-            className="p-6 rounded-2xl bg-[#0D1B18] border border-white/10 space-y-4 shadow-xl"
-          >
-            <div className="flex items-center justify-between text-xs font-bold text-zinc-400">
-              <span>AI Workforce Scan</span>
-              <span>{Math.round(scanProgress * 100)}%</span>
+      <>
+        <AnnouncementPopup />
+        <div
+          data-testid="corporate-intro-screen"
+          className="min-h-screen w-full flex flex-col justify-center bg-[#07110F] text-white p-6 sm:p-12 transition-colors duration-300"
+        >
+          <div className="max-w-xl mx-auto w-full space-y-8">
+            <div>
+              <span className="text-[#35C4C4] font-bold text-xs uppercase tracking-wider">
+                MoneyMapper Intelligence
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-black text-white mt-3 leading-tight">
+                Workforce stress is a silent productivity leak.
+              </h1>
             </div>
 
-            <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[#44D18C] transition-all duration-300"
-                style={{ width: `${Math.min(100, scanProgress * 100)}%` }}
-              />
-            </div>
-
-            <p className="text-xs text-zinc-400">
-              Use the mobile app QR scanner to sign in on other devices
-            </p>
-
-            <div className="pt-2">
-              <button
-                data-testid="continue-to-dashboard-btn"
-                onClick={handleContinueToDashboard}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/30 active:scale-98 transition-all"
+            <div className="min-h-[48px] flex items-center">
+              <p
+                key={problemIndex}
+                data-testid="corporate-problem-statement"
+                className="text-[#F1B957] font-bold text-base sm:text-lg animate-fadeIn"
               >
-                Continue to Dashboard
-              </button>
+                {PROBLEMS[problemIndex]}
+              </p>
+            </div>
+
+            {/* Web Scan Panel */}
+            <div
+              data-testid="corporate-scan-panel"
+              className="p-6 rounded-2xl bg-[#0D1B18] border border-white/10 space-y-4 shadow-xl"
+            >
+              <div className="flex items-center justify-between text-xs font-bold text-zinc-400">
+                <span>AI Workforce Scan</span>
+                <span>{Math.round(scanProgress * 100)}%</span>
+              </div>
+
+              <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-[#44D18C] transition-all duration-300"
+                  style={{ width: `${Math.min(100, scanProgress * 100)}%` }}
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  data-testid="continue-to-dashboard-btn"
+                  onClick={handleContinueToDashboard}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/30 active:scale-98 transition-all"
+                >
+                  Continue to Dashboard
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -267,12 +267,14 @@ export const CorporateDashboardPage: React.FC = () => {
   );
 
   return (
-    <div
-      data-testid="corporate-dashboard-page"
-      className={`min-h-screen ${
-        isDark ? 'bg-[#0B1115] text-zinc-100' : 'bg-slate-50 text-zinc-900'
-      } transition-colors duration-200`}
-    >
+    <>
+      <AnnouncementPopup />
+      <div
+        data-testid="corporate-dashboard-page"
+        className={`min-h-screen ${
+          isDark ? 'bg-[#0B1115] text-zinc-100' : 'bg-slate-50 text-zinc-900'
+        } transition-colors duration-200`}
+      >
       {/* 2. CORPORATE TOP APP BAR */}
       <header
         className={`sticky top-0 z-30 border-b ${
@@ -752,6 +754,7 @@ export const CorporateDashboardPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };

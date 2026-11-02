@@ -68,24 +68,6 @@ export class AuthService {
     if (this._currentUser?.id) {
       return this._currentUser.id;
     }
-    // Synchronous fallback by reading Supabase persisted session from localStorage
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
-            const raw = localStorage.getItem(key);
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              const id = parsed?.user?.id;
-              if (id) return id;
-            }
-          }
-        }
-      } catch {
-        // ignore parse error
-      }
-    }
     return null;
   }
 
@@ -154,13 +136,29 @@ export class AuthService {
           key.startsWith('corp_stats_') ||
           key.startsWith('mm_cache_') ||
           key.startsWith('mm_cache_ts_') ||
-          (key.startsWith('sb-') && key.endsWith('-auth-token'))
+          key.startsWith('sb-')
         ) {
           keysToRemove.push(key);
         }
       }
     }
     keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+    // Remove sb-*-auth-token entries from sessionStorage
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      try {
+        const sessionKeysToRemove: string[] = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && key.startsWith('sb-')) {
+            sessionKeysToRemove.push(key);
+          }
+        }
+        sessionKeysToRemove.forEach((key) => sessionStorage.removeItem(key));
+      } catch {
+        // ignore
+      }
+    }
 
     // Clear in-memory cache and in-flight API requests
     try {

@@ -19,6 +19,7 @@ import { FinancialBreakdownSection } from '../components/dashboard/FinancialBrea
 import { QuotesSection } from '../components/dashboard/QuotesSection';
 import { DashboardFooter } from '../components/dashboard/DashboardFooter';
 import { DashboardEmptyState } from '../components/dashboard/DashboardEmptyState';
+import { AnnouncementPopup } from '../components/common/AnnouncementPopup';
 import logo3dImg from '../assets/app/log_3d_hd.png';
 
 export const DashboardPage: React.FC = () => {
@@ -148,67 +149,76 @@ export const DashboardPage: React.FC = () => {
   // 1. Loading State (Flutter line 2248: DashboardHeaderSkeleton + DashboardSkeleton)
   if (isDashboardLoading && !data && !error) {
     return (
-      <div className="w-full min-h-screen bg-mm-background dark:bg-mm-darkBackground" data-testid="dashboard-loading-state">
-        <DashboardHeaderSkeleton />
-        <DashboardSkeleton />
-      </div>
+      <>
+        <AnnouncementPopup />
+        <div className="w-full min-h-screen bg-mm-background dark:bg-mm-darkBackground" data-testid="dashboard-loading-state">
+          <DashboardHeaderSkeleton />
+          <DashboardSkeleton />
+        </div>
+      </>
     );
   }
 
   // 2. Error State (Flutter lines 1821-1841)
   if (error && !isPending && !data) {
     return (
-      <div className="w-full min-h-screen bg-mm-background dark:bg-mm-darkBackground" data-testid="dashboard-screen">
-        {renderHeader()}
-        <div
-          className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center"
-          data-testid="dashboard-error-view"
-        >
-          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-500 flex items-center justify-center mb-4">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
-            {error}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
-            Could not load dashboard data
-          </p>
-          <button
-            onClick={handleRetry}
-            className="px-6 py-2.5 rounded-xl bg-mm-primary text-white font-bold text-sm shadow hover:bg-mm-primary/90 transition-colors"
-            data-testid="dashboard-retry-btn"
+      <>
+        <AnnouncementPopup />
+        <div className="w-full min-h-screen bg-mm-background dark:bg-mm-darkBackground" data-testid="dashboard-screen">
+          {renderHeader()}
+          <div
+            className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center"
+            data-testid="dashboard-error-view"
           >
-            Retry
-          </button>
+            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-500 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
+              {error}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
+              Could not load dashboard data
+            </p>
+            <button
+              onClick={handleRetry}
+              className="px-6 py-2.5 rounded-xl bg-mm-primary text-white font-bold text-sm shadow hover:bg-mm-primary/90 transition-colors"
+              data-testid="dashboard-retry-btn"
+            >
+              Retry
+            </button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // 3. Empty State (Calculations Pending / 404 / 401 / No profile data, lines 1843-1949)
   if (isPending || !data) {
     return (
-      <div className="w-full min-h-screen bg-mm-background dark:bg-mm-darkBackground pb-12" data-testid="dashboard-screen">
-        {renderHeader()}
-        <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
-          <DashboardEmptyState
-            userName={userName}
-            userEmail={userEmail}
-            goldData={goldData}
-            isGoldLoading={isGoldLoading}
-          />
+      <>
+        <AnnouncementPopup />
+        <div className="w-full min-h-screen bg-mm-background dark:bg-mm-darkBackground pb-12" data-testid="dashboard-screen">
+          {renderHeader()}
+          <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
+            <DashboardEmptyState
+              userName={userName}
+              userEmail={userEmail}
+              goldData={goldData}
+              isGoldLoading={isGoldLoading}
+            />
+          </div>
+          <div className="mt-8">
+            <DashboardFooter />
+          </div>
         </div>
-        <div className="mt-8">
-          <DashboardFooter />
-        </div>
-      </div>
+      </>
     );
   }
 
@@ -287,84 +297,87 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div
-      className="w-full min-h-screen bg-mm-background dark:bg-mm-darkBackground pb-12"
-      data-testid="dashboard-screen"
-    >
-      {/* Top Banner & Header Bar */}
-      {renderHeader()}
+    <>
+      <AnnouncementPopup />
+      <div
+        className="w-full min-h-screen bg-mm-background dark:bg-mm-darkBackground pb-12"
+        data-testid="dashboard-screen"
+      >
+        {/* Top Banner & Header Bar */}
+        {renderHeader()}
 
-      {/* Main Responsive Content Grid (1 col mobile, 2 to 3 cols desktop) */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* Left Column / Main Dashboard Content (7 cols on desktop) */}
-          <div className="lg:col-span-7 space-y-5">
-            {/* 1. Core Financial Fitness & Net Position Card (lines 575-868) */}
-            <FinancialPositionCard
-              data={data}
-              netPosition={netPosition}
-              isPro={isPro}
-              isFeatureAccessible={canAccessPremium}
-            />
+        {/* Main Responsive Content Grid (1 col mobile, 2 to 3 cols desktop) */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Left Column / Main Dashboard Content (7 cols on desktop) */}
+            <div className="lg:col-span-7 space-y-5">
+              {/* 1. Core Financial Fitness & Net Position Card (lines 575-868) */}
+              <FinancialPositionCard
+                data={data}
+                netPosition={netPosition}
+                isPro={isPro}
+                isFeatureAccessible={canAccessPremium}
+              />
 
-            {/* 2. Pro Banners (lines 1607-1819) */}
-            <ProBanners isPro={isPro} />
+              {/* 2. Pro Banners (lines 1607-1819) */}
+              <ProBanners isPro={isPro} />
 
-            {/* 3. Estimated Weekly Spending Limit (lines 2125-2205) */}
-            <EstimatedSpendingLimit
-              monthlyIncome={monthlyIncome}
-              expenseScore={data.pillars?.['expenses']?.score}
-            />
+              {/* 3. Estimated Weekly Spending Limit (lines 2125-2205) */}
+              <EstimatedSpendingLimit
+                monthlyIncome={monthlyIncome}
+                expenseScore={data.pillars?.['expenses']?.score}
+              />
 
-            {/* 4. Financial Breakdown (5 Pillars, lines 922-1048) */}
-            <FinancialBreakdownSection
-              data={data}
-              monthlyIncome={monthlyIncome}
-              monthlyExpenses={monthlyExpenses}
-              emergencyCurrent={emergencyCurrent}
-              sipRecommendation={sipRecommendation}
-              isPro={isPro}
-              isFeatureAccessible={canAccessPremium}
-              canAccessPremium={canAccessPremium}
-              onLockedClick={handleLockedPillar}
-            />
+              {/* 4. Financial Breakdown (5 Pillars, lines 922-1048) */}
+              <FinancialBreakdownSection
+                data={data}
+                monthlyIncome={monthlyIncome}
+                monthlyExpenses={monthlyExpenses}
+                emergencyCurrent={emergencyCurrent}
+                sipRecommendation={sipRecommendation}
+                isPro={isPro}
+                isFeatureAccessible={canAccessPremium}
+                canAccessPremium={canAccessPremium}
+                onLockedClick={handleLockedPillar}
+              />
+            </div>
+
+            {/* Right Column / Screener Tools & Calculators (5 cols on desktop) */}
+            <div className="lg:col-span-5 space-y-5">
+              {/* Live Gold Ticker (24K Gold, lines 1253-1353) */}
+              <GoldTicker goldData={goldData} isLoading={isGoldLoading} />
+
+              {/* MoneyMapper Score Cards (2x2 Screener Grid, lines 1355-1450) */}
+              <ScoreCardsGrid />
+
+              {/* Live Financial Calculator Widget (lines 2214-2227) */}
+              <LiveFinancialCalculator
+                monthlyIncome={monthlyIncome > 0 ? monthlyIncome : 70000}
+                monthlyExpenses={monthlyExpenses}
+                availableBalance={
+                  (monthlyIncome > 0 ? monthlyIncome : 70000) - monthlyExpenses
+                }
+                emergencyCurrent={emergencyCurrent}
+                emergencyTarget={emergencyTarget}
+                sipRecommendation={sipRecommendation}
+                wealthAllocations={wealthAllocations}
+                isSipLocked={!canAccessPremium}
+                showSipTrialBadge={!isPro && canAccessPremium}
+              />
+            </div>
           </div>
 
-          {/* Right Column / Screener Tools & Calculators (5 cols on desktop) */}
-          <div className="lg:col-span-5 space-y-5">
-            {/* Live Gold Ticker (24K Gold, lines 1253-1353) */}
-            <GoldTicker goldData={goldData} isLoading={isGoldLoading} />
-
-            {/* MoneyMapper Score Cards (2x2 Screener Grid, lines 1355-1450) */}
-            <ScoreCardsGrid />
-
-            {/* Live Financial Calculator Widget (lines 2214-2227) */}
-            <LiveFinancialCalculator
-              monthlyIncome={monthlyIncome > 0 ? monthlyIncome : 70000}
-              monthlyExpenses={monthlyExpenses}
-              availableBalance={
-                (monthlyIncome > 0 ? monthlyIncome : 70000) - monthlyExpenses
-              }
-              emergencyCurrent={emergencyCurrent}
-              emergencyTarget={emergencyTarget}
-              sipRecommendation={sipRecommendation}
-              wealthAllocations={wealthAllocations}
-              isSipLocked={!canAccessPremium}
-              showSipTrialBadge={!isPro && canAccessPremium}
-            />
+          {/* 5. Financial Quotes of Wisdom (Centered & Wide across bottom of Dashboard) */}
+          <div className="mt-8 max-w-5xl mx-auto w-full">
+            <QuotesSection />
           </div>
-        </div>
 
-        {/* 5. Financial Quotes of Wisdom (Centered & Wide across bottom of Dashboard) */}
-        <div className="mt-8 max-w-5xl mx-auto w-full">
-          <QuotesSection />
-        </div>
-
-        {/* Global Footer (lines 2070-2097) */}
-        <div className="mt-8">
-          <DashboardFooter />
-        </div>
-      </main>
-    </div>
+          {/* Global Footer (lines 2070-2097) */}
+          <div className="mt-8">
+            <DashboardFooter />
+          </div>
+        </main>
+      </div>
+    </>
   );
 };

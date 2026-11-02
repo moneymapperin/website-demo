@@ -16,13 +16,24 @@ export interface CorporateAdminRecord {
   company_name: string;
 }
 
-export const MF_API_URL = 'https://api.mfapi.in/mf';
+export const getMfApiUrl = (): string => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    if (import.meta.env.VITE_MF_API_URL) return import.meta.env.VITE_MF_API_URL;
+    if (import.meta.env.MODE !== 'test' && import.meta.env.DEV && typeof window !== 'undefined') {
+      return '/mfapi/mf';
+    }
+  }
+  return 'https://api.mfapi.in/mf';
+};
+
+export const MF_API_URL = getMfApiUrl();
 
 // Cache configuration
 export const CACHE_PREFIX = 'mm_cache_';
 export const CACHE_TS_PREFIX = 'mm_cache_ts_';
 
 // TTLs matching Flutter: short (10m), medium (1h), long (4h), mfapi (12h)
+export const TTL_FRESH_MS = 15 * 1000;
 export const TTL_SHORT_MS = 10 * 60 * 1000;
 export const TTL_MEDIUM_MS = 60 * 60 * 1000;
 export const TTL_LONG_MS = 4 * 60 * 60 * 1000;
@@ -210,7 +221,7 @@ export class ApiService {
     }
 
     const cacheKey = `profile_${userId}`;
-    const cached = this.readCache(cacheKey, TTL_MEDIUM_MS);
+    const cached = this.readCache(cacheKey, TTL_FRESH_MS);
     if (cached !== null && cached !== undefined) {
       return { data: cached };
     }
@@ -237,6 +248,10 @@ export class ApiService {
           },
         });
       } catch (e) {
+        const stale = this.readCache(cacheKey, Infinity);
+        if (stale !== null && stale !== undefined) {
+          return { data: stale };
+        }
         if (e instanceof ApiException) throw e;
         this.logErrorResilient(e, 'getMasterProfile');
         throw new ApiException(ResilienceUtils.sanitizeErrorMessage(e), 500);
@@ -363,7 +378,7 @@ export class ApiService {
     }
 
     const cacheKey = `dashboard_${userId}`;
-    const cached = this.readCache(cacheKey, TTL_SHORT_MS);
+    const cached = this.readCache(cacheKey, TTL_FRESH_MS);
     if (cached !== null && cached !== undefined) {
       return cached;
     }
@@ -438,6 +453,10 @@ export class ApiService {
           },
         });
       } catch (e) {
+        const stale = this.readCache<Record<string, any>>(cacheKey, Infinity);
+        if (stale !== null && stale !== undefined) {
+          return stale;
+        }
         if (e instanceof ApiException) throw e;
         this.logErrorResilient(e, 'getDashboard');
         throw new ApiException(ResilienceUtils.sanitizeErrorMessage(e), 500);
@@ -567,7 +586,7 @@ export class ApiService {
   ): Promise<any[]> {
     const cacheKey = `mf_recs_${riskAppetite.toLowerCase()}`;
     const cached = this.readCache(cacheKey, TTL_LONG_MS);
-    if (cached !== null && cached !== undefined) return cached;
+    if (cached !== null && cached !== undefined && (!Array.isArray(cached) || cached.length > 0)) return cached;
 
     try {
       const allSchemes = await this._fetchSchemesList();
@@ -595,7 +614,9 @@ export class ApiService {
         )
       );
 
-      this.updateCache(cacheKey, recommended);
+      if (recommended.length > 0) {
+        this.updateCache(cacheKey, recommended);
+      }
       return recommended;
     } catch (e) {
       this.logErrorResilient(e, 'getMutualFundRecommendations_LIVE');
@@ -606,7 +627,7 @@ export class ApiService {
   private async _fetchSchemesList(): Promise<any[]> {
     // 12-hour in-memory cache for the 2MB JSON
     const cached = this.readCache('mfapi_list', TTL_MFAPI_MS);
-    if (cached) return cached;
+    if (cached && (!Array.isArray(cached) || cached.length > 0)) return cached;
 
     return await ResilienceUtils.retry({
       context: 'MFAPI_List_Fetch',
@@ -616,11 +637,14 @@ export class ApiService {
         const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         try {
-          const res = await fetch(MF_API_URL, { signal: controller.signal });
+          const url = getMfApiUrl();
+          const res = await fetch(url, { signal: controller.signal });
           clearTimeout(timeoutId);
           if (!res.ok) throw new Error('MFAPI_DOWN');
           const data = await res.json();
-          this.updateCache('mfapi_list', data, true);
+          if (Array.isArray(data) && data.length > 0) {
+            this.updateCache('mfapi_list', data, true);
+          }
           return data;
         } catch (err) {
           clearTimeout(timeoutId);
@@ -681,8 +705,7 @@ export class ApiService {
     const targetMonth = month ?? now.getMonth() + 1;
     const targetYear = year ?? now.getFullYear();
     const cacheKey = `weekly_${userId}_${targetYear}_${targetMonth}`;
-
-    const cached = this.readCache(cacheKey, TTL_SHORT_MS);
+    const cached = this.readCache(cacheKey, TTL_FRESH_MS);
     if (cached !== null && cached !== undefined) {
       return { data: cached };
     }
@@ -709,9 +732,42 @@ export class ApiService {
           },
         });
       } catch (e) {
+        const stale = this.readCache(cacheKey, Infinity);
+        if (stale !== null && stale !== undefined) {
+          return { data: stale };
+        }
         if (e instanceof ApiException) throw e;
         this.logErrorResilient(e, 'getWeeklyCurrent');
         throw new ApiException(ResilienceUtils.sanitizeErrorMessage(e), 500);
+      }
+    });
+  }
+
+  async getAllWeeklyLogs(userId?: string): Promise<any[]> {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const uid = userId || sessionData?.session?.user?.id;
+    if (!uid) return [];
+
+    const cacheKey = `weekly_logs_all_${uid}`;
+    const cached = this.readCache(cacheKey, TTL_FRESH_MS);
+    if (cached !== null && cached !== undefined) return cached;
+
+    return this._dedupe(cacheKey, async () => {
+      try {
+        const { data, error } = await supabase
+          .from('weekly_logs')
+          .select('week_index, log_month, log_year, status')
+          .eq('user_id', uid);
+
+        if (error) throw error;
+        const result = data || [];
+        this.updateCache(cacheKey, result);
+        return result;
+      } catch (e) {
+        const stale = this.readCache<any[]>(cacheKey, Infinity);
+        if (stale !== null && stale !== undefined) return stale;
+        this.logErrorResilient(e, 'getAllWeeklyLogs');
+        return [];
       }
     });
   }
@@ -767,7 +823,7 @@ export class ApiService {
       if (error) throw error;
 
       // Cache Busting
-      this.clearCache([`weekly_${userId}_${targetYear}_${targetMonth}`, `dashboard_${userId}`]);
+      this.clearCache([`weekly_${userId}_${targetYear}_${targetMonth}`, `dashboard_${userId}`, `weekly_logs_all_${userId}`]);
 
       return { status: 'success' };
     } catch (e) {

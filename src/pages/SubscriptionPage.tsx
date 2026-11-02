@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RotateCw } from 'lucide-react';
+import { RotateCw, Info } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
 import { useToast } from '../context/ToastContext';
@@ -363,6 +363,18 @@ export const SubscriptionPage: React.FC = () => {
             `Get Financially Free (${selectedPlan.totalBilledPrice})`
           )}
         </button>
+
+        {/* Terms and conditions apply note */}
+        <div className="flex justify-center pt-2">
+          <a
+            href="/terms-and-conditions.html"
+            data-testid="terms-and-conditions-link"
+            className="group inline-flex flex-col items-center justify-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors cursor-pointer p-1.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <Info className="w-4 h-4 text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors" />
+            <span className="font-medium">Terms and conditions apply</span>
+          </a>
+        </div>
       </div>
 
       {paymentLoading && (

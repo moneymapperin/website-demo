@@ -84,6 +84,32 @@ export function useDashboard(): UseDashboardResult {
     };
   }, [fetchDashboard]);
 
+  useEffect(() => {
+    if (!userId) return;
+
+    const handleFocus = () => {
+      if (userId) {
+        fetchDashboard();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && userId) {
+        fetchDashboard();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [userId, fetchDashboard]);
+
   const isPending =
     statusCode === 404 ||
     statusCode === 401 ||

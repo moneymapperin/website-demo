@@ -7,7 +7,6 @@ import path from 'path';
 import { QrLoginPanel } from '../components/QrLoginPanel';
 import { LoginPage } from '../pages/LoginPage';
 import { supabase } from '../lib/supabase';
-import { apiService } from '../services/apiService';
 import { AuthProvider, AuthContext } from '../context/AuthContext';
 
 const visitedRoutes: string[] = [];
@@ -186,8 +185,6 @@ describe('Rebuilt QrLoginPanel (Supabase Realtime Contract)', () => {
       error: null,
     });
 
-    const getCorporateAdminSpy = vi.spyOn(apiService, 'getCorporateAdmin').mockResolvedValue(null);
-
     render(
       <MemoryRouter initialEntries={['/login']}>
         <Routes>
@@ -226,29 +223,22 @@ describe('Rebuilt QrLoginPanel (Supabase Realtime Contract)', () => {
     expect(deleteSpy).toHaveBeenCalled();
     expect(eqSpy).toHaveBeenCalledWith('session_token', token);
 
-    // apiService.getCorporateAdmin called with session user's email
-    expect(getCorporateAdminSpy).toHaveBeenCalledWith('standard@user.com');
-
-    // Navigated to /dashboard
+    // Navigated to /dashboard (home page)
     await waitFor(() => {
       expect(visitedRoutes).toContain('/dashboard');
     });
   });
 
   // ---------------------------------------------------------------------------
-  // 4B. UPDATE payload -> setSession -> delete() -> admin=true -> /corporate-dashboard
+  // 4B. UPDATE payload -> setSession -> delete() -> navigated to /dashboard (home page)
   // ---------------------------------------------------------------------------
-  it('4B. handles UPDATE for corporate admin: setSession called, row deleted, navigated to /corporate-dashboard', async () => {
+  it('4B. handles UPDATE for any user: setSession called, row deleted, navigated to /dashboard (not /corporate-dashboard)', async () => {
     const setSessionSpy = vi.spyOn(supabase.auth, 'setSession').mockResolvedValue({
       data: {
         session: { user: { email: 'admin@enterprise.com' } } as any,
         user: { email: 'admin@enterprise.com' } as any,
       },
       error: null,
-    });
-
-    const getCorporateAdminSpy = vi.spyOn(apiService, 'getCorporateAdmin').mockResolvedValue({
-      company_name: 'Enterprise Corp',
     });
 
     render(
@@ -286,10 +276,10 @@ describe('Rebuilt QrLoginPanel (Supabase Realtime Contract)', () => {
 
     expect(deleteSpy).toHaveBeenCalled();
     expect(eqSpy).toHaveBeenCalledWith('session_token', token);
-    expect(getCorporateAdminSpy).toHaveBeenCalledWith('admin@enterprise.com');
 
     await waitFor(() => {
-      expect(visitedRoutes).toContain('/corporate-dashboard');
+      expect(visitedRoutes).toContain('/dashboard');
+      expect(visitedRoutes).not.toContain('/corporate-dashboard');
     });
   });
 

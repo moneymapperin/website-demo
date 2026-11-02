@@ -4,9 +4,19 @@ import { authService } from '../services/authService';
 
 const IDLE_TIMEOUT_MINUTES = 15;
 const CHECK_INTERVAL_MS = 30000;
-const ACTIVITY_KEY = 'mm_last_activity';
 const IDLE_TIMEOUT_MS = IDLE_TIMEOUT_MINUTES * 60 * 1000;
 const ACTIVITY_WRITE_INTERVAL_MS = 5000;
+
+// In-memory tracker for last user activity timestamp (pure in-memory, no sessionStorage/localStorage)
+let inMemoryLastActivity: number | null = null;
+
+export function getInMemoryLastActivity(): number | null {
+  return inMemoryLastActivity;
+}
+
+export function resetInMemoryLastActivity(): void {
+  inMemoryLastActivity = null;
+}
 
 export function useIdleLogout(): void {
   const navigate = useNavigate();
@@ -20,39 +30,24 @@ export function useIdleLogout(): void {
       if (!force && now - lastActivityWrite < ACTIVITY_WRITE_INTERVAL_MS) return;
 
       lastActivityWrite = now;
-      try {
-        localStorage.setItem(ACTIVITY_KEY, String(now));
-      } catch {
-        // Ignore unavailable localStorage.
-      }
+      inMemoryLastActivity = now;
     };
 
     const checkIdle = async () => {
       if (isLoggingOut) return;
 
-      let lastActivity: string | null;
-      try {
-        lastActivity = localStorage.getItem(ACTIVITY_KEY);
-      } catch {
+      if (inMemoryLastActivity === null || !Number.isFinite(inMemoryLastActivity)) {
         return;
       }
 
-      if (lastActivity === null || !Number.isFinite(Number(lastActivity))) {
-        return;
-      }
-
-      if (Date.now() - Number(lastActivity) > IDLE_TIMEOUT_MS) {
+      if (Date.now() - inMemoryLastActivity > IDLE_TIMEOUT_MS) {
         isLoggingOut = true;
         try {
           await authService.logout();
         } catch {
           // Continue redirecting if remote sign-out fails.
         }
-        try {
-          localStorage.removeItem(ACTIVITY_KEY);
-        } catch {
-          // Ignore unavailable localStorage.
-        }
+        inMemoryLastActivity = null;
         navigate('/login', { replace: true });
       }
     };

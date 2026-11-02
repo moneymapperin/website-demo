@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { navigateTo } from '../lib/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, QrCode } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 
 export const Navbar: React.FC = () => {
@@ -10,6 +10,9 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { label: 'Home', sectionId: 'home' },
     { label: 'Features', sectionId: 'features' },
+    { label: 'Dashboard', sectionId: 'dashboard-preview' },
+    { label: 'How It Works', sectionId: 'how-it-works' },
+    { label: 'Benefits', sectionId: 'benefits' },
     { label: 'Insights', sectionId: 'insights' },
     { label: 'Pricing', sectionId: 'pricing' },
     { label: 'About Us', sectionId: 'about' },
@@ -26,21 +29,21 @@ export const Navbar: React.FC = () => {
       observer?.disconnect();
       observer = new IntersectionObserver(
         (entries) => {
-        if (window.scrollY <= 0) {
-          setActiveSection('home');
-          return;
-        }
+          if (window.scrollY <= 0) {
+            setActiveSection('home');
+            return;
+          }
 
-        const visibleSections = entries.filter((entry) => entry.isIntersecting);
-        if (visibleSections.length === 0) return;
+          const visibleSections = entries.filter((entry) => entry.isIntersecting);
+          if (visibleSections.length === 0) return;
 
-        const activeEntry = visibleSections.reduce((closest, entry) =>
-          Math.abs(entry.boundingClientRect.top - window.innerHeight * 0.425) <
-          Math.abs(closest.boundingClientRect.top - window.innerHeight * 0.425)
-            ? entry
-            : closest
-        );
-        setActiveSection(activeEntry.target.id);
+          const activeEntry = visibleSections.reduce((closest, entry) =>
+            Math.abs(entry.boundingClientRect.top - window.innerHeight * 0.425) <
+            Math.abs(closest.boundingClientRect.top - window.innerHeight * 0.425)
+              ? entry
+              : closest
+          );
+          setActiveSection(activeEntry.target.id);
         },
         {
           rootMargin: `-${Math.round(window.innerHeight * 0.4)}px 0px -${Math.round(window.innerHeight * 0.55)}px 0px`,
@@ -101,27 +104,32 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#0b0a14]/80 backdrop-blur-md border-b border-white/[0.06] transition-all">
+    <header className="sticky top-0 z-40 w-full bg-[#0b0a14]/85 backdrop-blur-md border-b border-white/[0.06] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Left: Brand Logo & Name */}
         <button
           type="button"
           onClick={() => scrollToSection('home')}
           aria-label="MoneyMapper Home"
-          className="flex items-center gap-3 cursor-pointer select-none group"
+          className="flex items-center gap-3 cursor-pointer select-none group shrink-0"
         >
           <img
             src={logoImg}
             alt="MoneyMapper"
             className="h-9 w-9 object-contain group-hover:scale-105 transition-transform duration-200"
           />
-          <span className="text-xl font-bold tracking-tight text-white group-hover:text-white/90">
-            MoneyMapper
-          </span>
+          <div className="text-left">
+            <span className="text-xl font-bold tracking-tight text-white group-hover:text-white/90 block leading-tight">
+              MoneyMapper
+            </span>
+            <span className="text-[10px] text-purple-300 font-medium block leading-none">
+              Personal Wealth OS
+            </span>
+          </div>
         </button>
 
         {/* Center: Desktop Nav Links */}
-        <nav className="hidden md:flex items-center gap-8 lg:gap-10">
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
           {navLinks.map((link) => (
             <button
               key={link.sectionId}
@@ -135,7 +143,15 @@ export const Navbar: React.FC = () => {
         </nav>
 
         {/* Right: Auth Action Buttons */}
-        <div className="hidden sm:flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => navigateTo('/login')}
+            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-300 hover:text-white bg-[#161426] hover:bg-[#1f1b36] border border-purple-500/30 rounded-full transition-all cursor-pointer"
+            title="Scan QR code from mobile app to log in"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>QR Login</span>
+          </button>
           <button
             id="nav-login-btn"
             onClick={handleLoginClick}
@@ -153,20 +169,20 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Mobile Hamburger Toggle */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex lg:hidden items-center gap-2">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-white/70 hover:text-white rounded-lg focus:outline-none"
+            className="p-2 text-white/70 hover:text-white rounded-lg focus:outline-none cursor-pointer"
             aria-label="Toggle Navigation Menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6 text-white" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0e0c1a] border-b border-white/10 px-6 py-4 space-y-3 animate-fade-in">
+        <div className="lg:hidden bg-[#0e0c1a] border-b border-white/10 px-6 py-4 space-y-2.5 animate-fade-in max-h-[80vh] overflow-y-auto">
           {navLinks.map((link) => (
             <button
               key={link.sectionId}
@@ -180,13 +196,13 @@ export const Navbar: React.FC = () => {
           <div className="pt-4 border-t border-white/10 flex flex-col gap-2.5">
             <button
               onClick={handleLoginClick}
-              className="w-full py-2.5 text-center text-sm font-medium text-white/90 bg-[#161426] border border-white/10 rounded-full"
+              className="w-full py-2.5 text-center text-sm font-medium text-white/90 bg-[#161426] border border-white/10 rounded-full cursor-pointer"
             >
               Login
             </button>
             <button
               onClick={handleGetStartedClick}
-              className="w-full py-2.5 text-center text-sm font-medium text-white bg-brand-gradient rounded-full shadow-md shadow-brand-purple/20"
+              className="w-full py-2.5 text-center text-sm font-medium text-white bg-brand-gradient rounded-full shadow-md shadow-brand-purple/20 cursor-pointer"
             >
               Get Started
             </button>
@@ -198,4 +214,3 @@ export const Navbar: React.FC = () => {
 };
 
 export default Navbar;
-

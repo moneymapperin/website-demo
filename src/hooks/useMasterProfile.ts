@@ -95,5 +95,31 @@ export function useMasterProfile(): UseMasterProfileResult {
     };
   }, [fetchProfile]);
 
+  useEffect(() => {
+    if (!userId) return;
+
+    const handleFocus = () => {
+      if (userId) {
+        fetchProfile();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && userId) {
+        fetchProfile();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [userId, fetchProfile]);
+
   return { profile, isLoading, error, updateProfile, refetch: fetchProfile };
 }

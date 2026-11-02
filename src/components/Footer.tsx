@@ -39,9 +39,31 @@ export const Footer: React.FC = () => {
     { name: 'YouTube', icon: YoutubeIcon },
   ];
 
-  const productLinks = ['Features', 'Insights', 'AI Assistant', 'Pricing'];
-  const companyLinks = ['About Us', 'Careers', 'Blog', 'Contact Us'];
-  const supportLinks = ['Help Center', 'FAQs', 'Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Grievance Redressal Policy'];
+  const productLinks = [
+    { label: 'Features', sectionId: 'pillars', route: '/features' },
+    { label: 'Workspace', sectionId: 'dashboard-preview', route: '/' },
+    { label: 'Insights', sectionId: 'insights', route: '/explore-insights' },
+    { label: 'AI Assistant', sectionId: 'ai-assistant', route: '/features' },
+    { label: 'Pricing', sectionId: 'pricing', route: '/pricing' },
+  ];
+
+  const companyLinks = [
+    { label: 'About Us', sectionId: 'about', route: '/about' },
+    { label: 'Careers' },
+    { label: 'Blog' },
+    { label: 'Contact Us', sectionId: 'about', route: '/about' },
+  ];
+
+  const supportLinks = [
+    { label: 'Help Center' },
+    { label: 'FAQs' },
+    { label: 'Privacy Policy', href: '/privacy-policy.html' },
+    { label: 'Terms of Service', href: '/terms-and-conditions.html' },
+    { label: 'Cookie Policy', href: '/cookie-policy.html' },
+    { label: 'Grievance Redressal Policy', href: '/grievance-redressal-policy.html' },
+    { label: 'Disclaimer & Data Consent', href: '/disclaimer-and-data-processing-consent.html' },
+    { label: 'Data Deletion Request', href: '/delete_my_data' },
+  ];
 
   return (
     <footer className="relative bg-[#06040f] border-t border-white/[0.08] text-white">
@@ -50,7 +72,7 @@ export const Footer: React.FC = () => {
         {/* Main Footer Content Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           
-          {/* Left Column: Brand, Tagline & Socials */}
+          {/* Left Column: Brand, Tagline, Company Details & Socials */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2.5">
               <img
@@ -61,12 +83,12 @@ export const Footer: React.FC = () => {
               <span className="text-xl font-bold text-white tracking-tight">MoneyMapper</span>
             </div>
 
-            <p className="text-xs text-white/50 mt-3 mb-5 max-w-xs leading-relaxed">
-              Your AI-Powered Personal Money Manager
+            <p className="text-xs text-white/50 mt-3 mb-4 max-w-xs leading-relaxed">
+              Your AI-Powered Personal Wealth OS & Money Manager
             </p>
 
             {/* Circular Social Buttons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-5">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
                 return (
@@ -74,12 +96,29 @@ export const Footer: React.FC = () => {
                     key={social.name}
                     role="img"
                     aria-label={social.name}
-                    className="w-8 h-8 rounded-full bg-[#161326] border border-white/10 flex items-center justify-center text-white/70 shadow-sm cursor-default"
+                    className="w-8 h-8 rounded-full bg-[#161326] border border-white/10 flex items-center justify-center text-white/70 shadow-sm cursor-default hover:text-white hover:border-white/20 transition-colors"
                   >
                     <Icon className="w-3.5 h-3.5" />
                   </span>
                 );
               })}
+            </div>
+
+            {/* Company Info & Registered Address */}
+            <div className="text-xs text-white/50 leading-relaxed max-w-xs sm:max-w-sm border-t border-white/[0.06] pt-4 space-y-1">
+              <p className="font-semibold text-white/75">MONEZRAMAPPER Private Limited</p>
+              <p className="text-[11px] text-white/45">
+                Registered Address: Jawahar Nagar, D.S.S Stadium, Shop No. 3, Satna, Raghurajnagar, Madhya Pradesh, India - 485001
+              </p>
+              <div className="pt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-white/60">
+                <a href="mailto:info@moneymapper.in" className="hover:text-purple-300 transition-colors">
+                  info@moneymapper.in
+                </a>
+                <span>•</span>
+                <a href="tel:+918770835843" className="hover:text-purple-300 transition-colors">
+                  +91 8770835843
+                </a>
+              </div>
             </div>
           </div>
 
@@ -90,24 +129,14 @@ export const Footer: React.FC = () => {
             <div>
               <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Product</h3>
               <ul className="space-y-2">
-                {productLinks.map((link) => (
-                  <li key={link}>
-                    {link === 'Pricing' || link === 'Features' || link === 'Insights' ? (
-                      <button
-                        onClick={() => scrollToLandingSection(
-                          link === 'Pricing' ? 'pricing' : link === 'Features' ? 'features' : 'insights'
-                        )}
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                      >
-                        {link}
-                      </button>
-                    ) : (
-                      <span
-                        className="text-xs text-white/50 text-left py-0.5 w-full cursor-default"
-                      >
-                        {link}
-                      </span>
-                    )}
+                {productLinks.map((item) => (
+                  <li key={item.label}>
+                    <button
+                      onClick={() => scrollToLandingSection(item.sectionId)}
+                      className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                    >
+                      {item.label}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -117,62 +146,57 @@ export const Footer: React.FC = () => {
             <div>
               <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Company</h3>
               <ul className="space-y-2">
-                {companyLinks.map((link) => (
-                  <li key={link}>
-                    {link === 'About Us' ? (
+                {companyLinks.map((item) => (
+                  <li key={item.label}>
+                    {item.sectionId ? (
                       <button
-                        onClick={() => scrollToLandingSection('about')}
+                        onClick={() => scrollToLandingSection(item.sectionId!)}
                         className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
                       >
-                        {link}
+                        {item.label}
                       </button>
                     ) : (
                       <span className="text-xs text-white/50 text-left py-0.5 w-full cursor-default">
-                        {link}
+                        {item.label}
                       </span>
                     )}
                   </li>
                 ))}
+                <li>
+                  <a
+                    href="mailto:info@moneymapper.in"
+                    className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
+                  >
+                    info@moneymapper.in
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="tel:+918770835843"
+                    className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
+                  >
+                    +91 8770835843
+                  </a>
+                </li>
               </ul>
             </div>
 
-            {/* 3. Support */}
+            {/* 3. Support & Legal */}
             <div className="col-span-2 sm:col-span-1">
-              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Support</h3>
+              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Support & Legal</h3>
               <ul className="space-y-2">
-                {supportLinks.map((link) => (
-                  <li key={link}>
-                    {link === 'Privacy Policy' ? (
+                {supportLinks.map((item) => (
+                  <li key={item.label}>
+                    {item.href ? (
                       <a
-                        href="/privacy-policy.html"
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                        href={item.href}
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
                       >
-                        {link}
-                      </a>
-                    ) : link === 'Terms of Service' ? (
-                      <a
-                        href="/terms-and-conditions.html"
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                      >
-                        {link}
-                      </a>
-                    ) : link === 'Cookie Policy' ? (
-                      <a
-                        href="/cookie-policy.html"
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                      >
-                        {link}
-                      </a>
-                    ) : link === 'Grievance Redressal Policy' ? (
-                      <a
-                        href="/grievance-redressal-policy.html"
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
-                      >
-                        {link}
+                        {item.label}
                       </a>
                     ) : (
                       <span className="text-xs text-white/50 text-left py-0.5 w-full cursor-default">
-                        {link}
+                        {item.label}
                       </span>
                     )}
                   </li>
@@ -190,7 +214,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar: Copyright (left) & Security Badges (right) */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
           <div>
-            <span>© {new Date().getFullYear()} MoneyMapper. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} MoneyMapper (MONEZRAMAPPER Private Limited). All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6">

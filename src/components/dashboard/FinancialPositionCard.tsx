@@ -19,7 +19,7 @@ export const FinancialPositionCard: React.FC<FinancialPositionCardProps> = ({
   netPosition,
   isPro = false,
   isFeatureAccessible = true,
-  scorePtsFromLastMonth = 12,
+  scorePtsFromLastMonth,
 }) => {
   const navigate = useNavigate();
   const [showScoreModal, setShowScoreModal] = useState(false);
@@ -63,6 +63,10 @@ export const FinancialPositionCard: React.FC<FinancialPositionCardProps> = ({
   const currentRounded = Math.round(data.fitnessScore);
   const isPositive = stats.percentage >= 0;
   const pctString = `${isPositive ? '+' : ''}${stats.percentage.toFixed(1)}%`;
+  const pts = scorePtsFromLastMonth !== undefined
+    ? scorePtsFromLastMonth
+    : Math.round(stats.difference);
+  const isNegativePts = pts < 0;
 
   return (
     <div
@@ -129,16 +133,29 @@ export const FinancialPositionCard: React.FC<FinancialPositionCardProps> = ({
 
           {/* Improvement Badge */}
           <div className="inline-flex flex-col px-2.5 py-1.5 rounded-xl bg-gray-50 dark:bg-[#161B26] border border-gray-200 dark:border-[#272F40]">
-            <div className="flex items-center space-x-1 text-mm-vibrantGreen">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                  d="M5 10l7-7m0 0l7 7m-7-7v18"
-                />
-              </svg>
-              <span className="text-xs font-black">+{scorePtsFromLastMonth} pts</span>
+            <div className={`flex items-center space-x-1 ${isNegativePts ? 'text-mm-danger' : 'text-mm-vibrantGreen'}`}>
+              {isNegativePts ? (
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              ) : (
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M5 10l7-7m0 0l7 7m-7-7v18"
+                  />
+                </svg>
+              )}
+              <span className="text-xs font-black">
+                {pts >= 0 ? '+' : ''}{pts} pts
+              </span>
             </div>
             <span className="text-[9px] font-semibold text-gray-400 dark:text-white/40">
               from last month

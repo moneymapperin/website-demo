@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Rocket } from 'lucide-react';
+import { useFeatureFlag } from '../../context/FeatureFlagContext';
 import { formatGoldPrice_DashboardScreen } from '../../lib/formatters';
 import goldBrickImg from '../../assets/app/gold_brick.png';
 
@@ -10,6 +12,7 @@ export interface GoldTickerProps {
 
 export const GoldTicker: React.FC<GoldTickerProps> = ({ goldData, isLoading }) => {
   const navigate = useNavigate();
+  const isEnabled = useFeatureFlag('gold_rates');
   const price24k = Number(goldData?.['24K (999 Purity)'] ?? goldData?.price24k ?? 0);
 
   // Flutter lines 1254-1270: Show placeholder loader if data isn't ready yet
@@ -27,19 +30,31 @@ export const GoldTicker: React.FC<GoldTickerProps> = ({ goldData, isLoading }) =
     );
   }
 
+  const handleClick = () => {
+    if (isEnabled) {
+      navigate('/market/gold');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isEnabled && (e.key === 'Enter' || e.key === ' ')) {
+      navigate('/market/gold');
+    }
+  };
+
   // Flutter lines 1275-1353
   return (
     <div
-      onClick={() => navigate('/market/gold')}
-      className="mb-4 relative h-[110px] rounded-[20px] bg-white dark:bg-mm-darkCard border-[1.5px] border-[#D4AF37]/30 shadow-[0_4px_16px_rgba(212,175,55,0.08)] cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-[0_6px_20px_rgba(212,175,55,0.16)] hover:border-[#D4AF37]/50"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      className={`mb-4 relative h-[110px] rounded-[20px] bg-white dark:bg-mm-darkCard border-[1.5px] border-[#D4AF37]/30 shadow-[0_4px_16px_rgba(212,175,55,0.08)] overflow-hidden transition-all duration-200 ${
+        isEnabled
+          ? 'cursor-pointer hover:shadow-[0_6px_20px_rgba(212,175,55,0.16)] hover:border-[#D4AF37]/50'
+          : 'cursor-default'
+      }`}
       data-testid="gold-ticker"
       role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          navigate('/market/gold');
-        }
-      }}
+      tabIndex={isEnabled ? 0 : -1}
     >
       {/* Real Gold Image from Flutter Assets (lines 1303-1311) */}
       <img
@@ -60,6 +75,19 @@ export const GoldTicker: React.FC<GoldTickerProps> = ({ goldData, isLoading }) =
           {formatGoldPrice_DashboardScreen(price24k)}
         </span>
       </div>
+
+      {/* Flutter lines 1354-1381: Blurred Live Soon Overlay if gold_rates flag is disabled */}
+      {!isEnabled && (
+        <div
+          data-testid="gold-ticker-locked-overlay"
+          className="absolute inset-0 z-20 backdrop-blur-[6px] bg-black/40 flex flex-col items-center justify-center rounded-[inherit]"
+        >
+          <Rocket size={28} className="text-white" />
+          <span className="text-white font-bold text-[16px] tracking-[1.1px] mt-1">
+            Live Soon
+          </span>
+        </div>
+      )}
     </div>
   );
 };

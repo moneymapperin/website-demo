@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { v4 as uuidv4 } from 'uuid';
 import { RefreshCw, QrCode, CheckCircle2 } from 'lucide-react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { apiService } from '../services/apiService';
 import { setQrAuthInProgress } from '../context/AuthContext';
 
 const isTestEnv =
@@ -36,6 +35,12 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
   useEffect(() => {
     navigateRef.current = navigate;
   }, [navigate]);
+
+  const location = useLocation();
+  const locationRef = useRef(location);
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
 
   const [sessionToken, setSessionToken] = useState<string>('');
   const [status, setStatus] = useState<QrSessionStatus>(autoStart ? 'loading' : 'idle');
@@ -385,21 +390,9 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
           return;
         }
 
-        let corporateRecord = null;
-        try {
-          corporateRecord = await apiService.getCorporateAdmin(userEmail);
-        } catch {
-          corporateRecord = null;
-        }
-
-        if (corporateRecord) {
-          console.log('[QR_DEBUG] Right before navigate(...) called with path: /corporate-dashboard');
-          navigateRef.current('/corporate-dashboard', { replace: true });
-          return;
-        }
-
-        console.log('[QR_DEBUG] Right before navigate(...) called with path: /dashboard');
-        navigateRef.current('/dashboard', { replace: true });
+        const destination = (locationRef.current?.state as any)?.from?.pathname || '/dashboard';
+        console.log('[QR_DEBUG] Right before navigate(...) called with path:', destination);
+        navigateRef.current(destination, { replace: true });
       } catch {
         setQrAuthInProgress(false);
         isAuthenticatingRef.current = false;

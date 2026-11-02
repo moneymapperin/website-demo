@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { gamificationStore } from '../services/gamificationStore';
-import { ALL_BADGES } from '../services/badgeService';
+import { ALL_BADGES, loadDerivedGamification } from '../services/badgeService';
 import { APP_COLORS } from '../theme/tokens';
 import { ArrowLeft, CheckCircle2, Award, Flame } from 'lucide-react';
 
@@ -17,15 +17,18 @@ export const AchievementsPage: React.FC = () => {
   const [streak, setStreak] = useState<number>(0);
 
   useEffect(() => {
-    const xp = gamificationStore.getTotalXp();
-    const info = gamificationStore.getLevelInfo(xp);
-    const badges = gamificationStore.getUnlockedBadges();
-    const streakCount = gamificationStore.getStreak();
+    async function loadAchievements() {
+      const streakCount = gamificationStore.getStreak();
+      setStreak(streakCount);
 
-    setTotalXp(xp);
-    setLevelInfo(info);
-    setUnlockedBadgeIds(badges);
-    setStreak(streakCount);
+      // Derive gamification directly from Supabase data (with gamificationStore fallback)
+      const gamification = await loadDerivedGamification();
+      setTotalXp(gamification.totalXp);
+      setLevelInfo(gamification.levelInfo);
+      setUnlockedBadgeIds(gamification.unlockedBadgeIds);
+    }
+
+    loadAchievements();
   }, []);
 
   return (
