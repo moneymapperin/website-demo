@@ -1,5 +1,5 @@
 import React from 'react';
-import { scrollToLandingSection } from '../lib/navigation';
+import { Link } from 'react-router-dom';
 import { Lock, Shield } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 
@@ -39,22 +39,21 @@ export const Footer: React.FC = () => {
     { name: 'YouTube', icon: YoutubeIcon },
   ];
 
-  const productLinks = [
-    { label: 'Features', sectionId: 'pillars', route: '/features' },
-    { label: 'Workspace', sectionId: 'dashboard-preview', route: '/' },
-    { label: 'Insights', sectionId: 'insights', route: '/explore-insights' },
-    { label: 'AI Assistant', sectionId: 'ai-assistant', route: '/features' },
-    { label: 'Pricing', sectionId: 'pricing', route: '/pricing' },
+  const productLinks: { label: string; path: string }[] = [
+    { label: 'Features', path: '/features' },
+    { label: 'Insights', path: '/explore-insights' },
+    { label: 'AI Assistant', path: '/features' },
+    { label: 'Pricing', path: '/pricing' },
   ];
 
-  const companyLinks = [
-    { label: 'About Us', sectionId: 'about', route: '/about' },
+  const companyLinks: { label: string; path?: string }[] = [
+    { label: 'About Us', path: '/about' },
     { label: 'Careers' },
     { label: 'Blog' },
-    { label: 'Contact Us', sectionId: 'about', route: '/about' },
+    { label: 'Contact Us', path: '/about' },
   ];
 
-  const supportLinks = [
+  const supportLinks: { label: string; href?: string }[] = [
     { label: 'Help Center' },
     { label: 'FAQs' },
     { label: 'Privacy Policy', href: '/privacy-policy.html' },
@@ -72,7 +71,7 @@ export const Footer: React.FC = () => {
         {/* Main Footer Content Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           
-          {/* Left Column: Brand, Tagline, Company Details & Socials */}
+          {/* Left Column: Brand, Tagline & Socials */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2.5">
               <img
@@ -83,12 +82,12 @@ export const Footer: React.FC = () => {
               <span className="text-xl font-bold text-white tracking-tight">MoneyMapper</span>
             </div>
 
-            <p className="text-xs text-white/50 mt-3 mb-4 max-w-xs leading-relaxed">
-              Your AI-Powered Personal Wealth OS & Money Manager
+            <p className="text-xs text-white/50 mt-3 mb-5 max-w-xs leading-relaxed">
+              Your AI-Powered Personal Money Manager
             </p>
 
             {/* Circular Social Buttons */}
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
                 return (
@@ -96,7 +95,7 @@ export const Footer: React.FC = () => {
                     key={social.name}
                     role="img"
                     aria-label={social.name}
-                    className="w-8 h-8 rounded-full bg-[#161326] border border-white/10 flex items-center justify-center text-white/70 shadow-sm cursor-default hover:text-white hover:border-white/20 transition-colors"
+                    className="w-8 h-8 rounded-full bg-[#161326] border border-white/10 flex items-center justify-center text-white/70 shadow-sm cursor-default"
                   >
                     <Icon className="w-3.5 h-3.5" />
                   </span>
@@ -105,20 +104,11 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Company Info & Registered Address */}
-            <div className="text-xs text-white/50 leading-relaxed max-w-xs sm:max-w-sm border-t border-white/[0.06] pt-4 space-y-1">
-              <p className="font-semibold text-white/75">MONEZRAMAPPER Private Limited</p>
-              <p className="text-[11px] text-white/45">
+            <div className="mt-5 text-xs text-white/50 leading-relaxed max-w-xs sm:max-w-sm">
+              <p className="font-semibold text-white/70">MONEZRAMAPPER Private Limited</p>
+              <p className="mt-1">
                 Registered Address: Jawahar Nagar, D.S.S Stadium, Shop No. 3, Satna, Raghurajnagar, Madhya Pradesh, India - 485001
               </p>
-              <div className="pt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-white/60">
-                <a href="mailto:info@moneymapper.in" className="hover:text-purple-300 transition-colors">
-                  info@moneymapper.in
-                </a>
-                <span>•</span>
-                <a href="tel:+918770835843" className="hover:text-purple-300 transition-colors">
-                  +91 8770835843
-                </a>
-              </div>
             </div>
           </div>
 
@@ -131,12 +121,12 @@ export const Footer: React.FC = () => {
               <ul className="space-y-2">
                 {productLinks.map((item) => (
                   <li key={item.label}>
-                    <button
-                      onClick={() => scrollToLandingSection(item.sectionId)}
-                      className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                    <Link
+                      to={item.path}
+                      className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
                     >
                       {item.label}
-                    </button>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -148,13 +138,13 @@ export const Footer: React.FC = () => {
               <ul className="space-y-2">
                 {companyLinks.map((item) => (
                   <li key={item.label}>
-                    {item.sectionId ? (
-                      <button
-                        onClick={() => scrollToLandingSection(item.sectionId!)}
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 w-full cursor-pointer"
+                    {item.path ? (
+                      <Link
+                        to={item.path}
+                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
                       >
                         {item.label}
-                      </button>
+                      </Link>
                     ) : (
                       <span className="text-xs text-white/50 text-left py-0.5 w-full cursor-default">
                         {item.label}
@@ -167,7 +157,7 @@ export const Footer: React.FC = () => {
                     href="mailto:info@moneymapper.in"
                     className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
                   >
-                    info@moneymapper.in
+                    Email: info@moneymapper.in
                   </a>
                 </li>
                 <li>
@@ -175,15 +165,15 @@ export const Footer: React.FC = () => {
                     href="tel:+918770835843"
                     className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
                   >
-                    +91 8770835843
+                    Phone: +918770835843
                   </a>
                 </li>
               </ul>
             </div>
 
-            {/* 3. Support & Legal */}
+            {/* 3. Support */}
             <div className="col-span-2 sm:col-span-1">
-              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Support & Legal</h3>
+              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Support</h3>
               <ul className="space-y-2">
                 {supportLinks.map((item) => (
                   <li key={item.label}>
@@ -214,7 +204,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar: Copyright (left) & Security Badges (right) */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
           <div>
-            <span>© {new Date().getFullYear()} MoneyMapper (MONEZRAMAPPER Private Limited). All rights reserved.</span>
+            <span>© {new Date().getFullYear()} MoneyMapper. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6">

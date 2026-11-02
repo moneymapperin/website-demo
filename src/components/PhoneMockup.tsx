@@ -247,34 +247,6 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({ className = '', style 
               </div>
             </div>
 
-            {/* 4. ESTIMATED SPENDING LIMIT */}
-            <div className="bg-[#18152c] border border-white/10 rounded-2xl p-3 shadow-md hover:border-indigo-400/30 transition-all">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[9px] font-bold tracking-wider text-white/50 uppercase">
-                  Estimated Spending Limit
-                </span>
-                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[8px] font-bold">
-                  ● Safe buffer
-                </span>
-              </div>
-              <div className="text-base font-black text-white font-mono">
-                ₹13,300 – ₹14,700
-              </div>
-              <div className="text-[8px] text-white/40 mt-0.5">This Week Tonight</div>
-            </div>
-
-            {/* 5. MONEYMAPPER SCORE CARDS PILLS */}
-            <div className="grid grid-cols-2 gap-1.5 pt-0.5">
-              <div className="rounded-xl bg-[#141124] border border-emerald-500/30 p-2 text-center">
-                <div className="text-[8px] text-white/50 font-bold uppercase">Stock Score</div>
-                <div className="text-xs font-black text-emerald-400 font-mono mt-0.5">75 / 100</div>
-              </div>
-              <div className="rounded-xl bg-[#141124] border border-blue-500/30 p-2 text-center">
-                <div className="text-[8px] text-white/50 font-bold uppercase">MF Score</div>
-                <div className="text-xs font-black text-blue-400 font-mono mt-0.5">82 / 100</div>
-              </div>
-            </div>
-
           </div>
 
           {/* Bottom Tab Bar */}

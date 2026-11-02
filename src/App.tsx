@@ -10,7 +10,7 @@ import { NavigationBridge } from './components/NavigationBridge';
 import { AppShell } from './components/app/AppShell';
 import { PublicLayout } from './components/PublicLayout';
 
-import { LandingPage } from './pages/LandingPage';
+import { HomePage } from './pages/HomePage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { InsightsMarketingPage } from './pages/InsightsMarketingPage';
 import { PricingPage } from './pages/PricingPage';
@@ -74,11 +74,10 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
               <FeatureFlagProvider>
                 <NavigationBridge />
                 <Routes>
-                  {/* 1. Landing Page (Full Interactive 10-Section Experience) */}
-                  <Route path="/" element={<LandingPage />} />
-
-                  {/* 1b. Public Dedicated Marketing Routes */}
+                  {/* 1. Landing Page */}
+                  {/* 1. Public Marketing Routes */}
                   <Route element={<PublicLayout />}>
+                    <Route path="/" element={<HomePage />} />
                     <Route path="/features" element={<FeaturesPage />} />
                     <Route path="/explore-insights" element={<InsightsMarketingPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
@@ -116,8 +115,6 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/corporate-login" element={<CorporateLoginPage />} />
-
-                  {/* Legal Pages & Static Policy Direct Access */}
                   <Route path="/privacy" element={<PrivacyPolicyPage />} />
                   <Route path="/disclaimer" element={<LegalRedirect url="/disclaimer-and-data-processing-consent.html" />} />
                   <Route path="/disclaimer-and-data-processing-consent.html" element={<LegalRedirect url="/disclaimer-and-data-processing-consent.html" />} />
@@ -131,7 +128,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                   <Route path="/data-deletion-request.html" element={<Navigate to="/delete_my_data" replace />} />
                   <Route path="/data-deletion-request" element={<Navigate to="/delete_my_data" replace />} />
 
-                  {/* 4. Legacy Flutter & Mobile Screen URL Redirects */}
+                  {/* 4. Canonical Redirects */}
                   <Route path="/main" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/assistant" element={<Navigate to="/ai-assistant" replace />} />
                   <Route path="/corporate/login" element={<Navigate to="/corporate-login" replace />} />
@@ -147,7 +144,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                   <Route path="/insurance_screener" element={<Navigate to="/insurance-screener" replace />} />
                   <Route path="/master_data" element={<Navigate to="/master-data" replace />} />
 
-                  {/* 5. Protected In-App Workspace Experience (Wrapped in responsive AppShell) */}
+                  {/* 5. Protected Routes wrapped in ProtectedRoute + AppShell */}
                   <Route
                     element={
                       <ProtectedRoute>
@@ -180,7 +177,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                     <Route path="/achievements" element={<AchievementsPage />} />
                     <Route path="/referral" element={<ReferralPage />} />
 
-                    {/* 5 Deep-Dive Financial Pillar Routes */}
+                    {/* Pillar Routes & Aliases */}
                     <Route
                       path="/pillars/expenses"
                       element={
@@ -256,7 +253,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                       }
                     />
 
-                    {/* Screener, Advisory & Live Market Tools */}
+                    {/* Screener & Market Routes */}
                     <Route
                       path="/gold-rates"
                       element={

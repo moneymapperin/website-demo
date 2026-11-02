@@ -17,7 +17,7 @@ export const AIAssistantSection: React.FC = () => {
   ];
 
   return (
-    <section id="ai-assistant" className="scroll-mt-24 relative py-16 lg:py-24 overflow-hidden">
+    <section className="relative py-16 lg:py-24 overflow-hidden">
       {/* Ambient background glow & soft lighting */}
       <div className="absolute top-1/3 left-1/4 w-[600px] h-[500px] bg-brand-purple/10 blur-[130px] pointer-events-none -z-10" />
       <div className="absolute top-1/2 right-1/4 w-[500px] h-[450px] bg-brand-magenta/10 blur-[140px] pointer-events-none -z-10" />
