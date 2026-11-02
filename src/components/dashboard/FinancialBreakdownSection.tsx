@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardData } from '../../models/dashboard';
 import { formatQuickStatsCurrency_DashboardScreen } from '../../lib/formatters';
+import { PiggyBank, Wallet, Landmark, Shield, TrendingUp } from 'lucide-react';
 
 export interface FinancialBreakdownSectionProps {
   data: DashboardData;
@@ -49,6 +50,7 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
       score: incomeScore,
       subtitle: fmtIncome,
       accentColor: '#10B981',
+      icon: PiggyBank,
       emoji: '💰',
       isLocked: false,
       showTrialBadge: false,
@@ -60,6 +62,7 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
       score: expensesScore,
       subtitle: fmtExpenses,
       accentColor: '#EF4444',
+      icon: Wallet,
       emoji: '💳',
       isLocked: false,
       showTrialBadge: false,
@@ -71,6 +74,7 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
       score: savingsScore,
       subtitle: fmtSavings,
       accentColor: '#3B82F6',
+      icon: Landmark,
       emoji: '🛡️',
       isLocked: !effectiveCanAccess,
       showTrialBadge: !isPro && effectiveCanAccess,
@@ -82,6 +86,7 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
       score: protectionScore,
       subtitle: fmtProtection,
       accentColor: '#A855F7',
+      icon: Shield,
       emoji: '☂️',
       isLocked: !effectiveCanAccess,
       showTrialBadge: !isPro && effectiveCanAccess,
@@ -93,6 +98,7 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
       score: investmentScore,
       subtitle: fmtInvestment,
       accentColor: '#F59E0B',
+      icon: TrendingUp,
       emoji: '📈',
       isLocked: !effectiveCanAccess,
       showTrialBadge: !isPro && effectiveCanAccess,
@@ -154,12 +160,16 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
               {/* 1. Glowing Icon Box */}
               <div
                 style={{
-                  backgroundColor: `${item.accentColor}2E`,
+                  backgroundColor: `${item.accentColor}24`,
                   borderColor: `${item.accentColor}4D`,
                 }}
-                className="w-8 h-8 rounded-[10px] border flex items-center justify-center text-sm flex-shrink-0 mr-2.5"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] border flex items-center justify-center flex-shrink-0 mr-3 shadow-sm"
               >
-                <span>{item.emoji}</span>
+                <item.icon
+                  className="w-4 h-4 sm:w-5 sm:h-5 transition-transform"
+                  style={{ color: item.accentColor }}
+                  strokeWidth={2}
+                />
               </div>
 
               {/* 2. Pillar Title Column */}
@@ -228,7 +238,7 @@ export const FinancialBreakdownSection: React.FC<FinancialBreakdownSectionProps>
                 style={{
                   backgroundColor: `${item.accentColor}1F`,
                 }}
-                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
               >
                 {item.isLocked ? (
                   <svg

@@ -14,11 +14,11 @@ import {
   NAV_ITEMS,
 } from '../../theme/tokens';
 import {
-  ShieldCheck,
+  PiggyBank,
   Wallet,
-  Target,
-  BarChart3,
-  ShieldPlus,
+  Landmark,
+  Shield,
+  TrendingUp,
   ChevronRight,
   Lock,
   Home,
@@ -43,21 +43,21 @@ const getSidebarPillarIcon = (title: string) => {
   switch (title) {
     case 'Protection':
     case 'Insurance Dashboard':
-      return ShieldCheck;
+      return Shield;
     case 'Income':
     case 'Income Pillar Matrix':
-      return Wallet;
+      return PiggyBank;
     case 'Expenses':
     case 'Weekly Expense Predictor':
-      return Target;
-    case 'Investment':
-    case 'Mutual Fund Dashboard':
-      return BarChart3;
+      return Wallet;
     case 'Emergency Savings':
     case 'Emergency Readiness':
-      return ShieldPlus;
+      return Landmark;
+    case 'Investment':
+    case 'Mutual Fund Dashboard':
+      return TrendingUp;
     default:
-      return ShieldCheck;
+      return Shield;
   }
 };
 
@@ -464,15 +464,20 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                        style={{
-                          backgroundColor: isLocked ? '#71717A20' : `${p.color}25`,
-                          color: isLocked ? '#71717A' : p.color,
-                        }}
-                      >
-                        {p.emoji}
-                      </div>
+                      {(() => {
+                        const DrawerIcon = getSidebarPillarIcon(p.title);
+                        return (
+                          <div
+                            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style={{
+                              backgroundColor: isLocked ? '#71717A20' : `${p.color}25`,
+                              color: isLocked ? '#71717A' : p.color,
+                            }}
+                          >
+                            <DrawerIcon className="w-4 h-4" />
+                          </div>
+                        );
+                      })()}
                       <div style={{ opacity: isLocked ? 0.5 : 1 }}>
                         <div className="text-xs font-black">{p.title}</div>
                         <div className="text-[10px] text-zinc-400">{p.desc}</div>

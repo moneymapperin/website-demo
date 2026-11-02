@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, CreditCard, BarChart2, Shield, PiggyBank } from 'lucide-react';
+import { ArrowLeft, PiggyBank, Wallet, Landmark, Shield, TrendingUp } from 'lucide-react';
 import logoImg from '../assets/app/log_3d_hd.png';
 
 interface AuthPageLayoutProps {
@@ -118,55 +118,55 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
               </p>
             </Link>
 
-            {/* 5 Financial Pillars Circular Icons Row with vibrant colors matching photo */}
-            <div className="flex items-center justify-center gap-3 sm:gap-5 md:gap-7 mt-4 select-none">
-              {/* 1. Income (Teal) */}
+            {/* 5 Financial Pillars Icons Row matching mobile app */}
+            <div className="flex items-center justify-center gap-2.5 sm:gap-4 md:gap-6 mt-4 select-none flex-wrap">
+              {/* 1. Income (Teal/Green) */}
               <div className="flex flex-col items-center gap-1.5 group cursor-default">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#00C49F] flex items-center justify-center text-white shadow-[0_0_16px_rgba(0,196,159,0.5)] border border-white/20 transition-transform group-hover:scale-110">
-                  <span className="text-base sm:text-lg font-black leading-none">₹</span>
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[12px] bg-[#10B981]/20 border border-[#10B981]/50 flex items-center justify-center text-[#10B981] shadow-[0_0_16px_rgba(16,185,129,0.35)] transition-transform group-hover:scale-110">
+                  <PiggyBank className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2} />
                 </div>
                 <span className="text-[11px] sm:text-xs font-semibold text-white/90 tracking-wide">
                   Income
                 </span>
               </div>
 
-              {/* 2. Expenses (Rose/Pink) */}
+              {/* 2. Expenses (Red) */}
               <div className="flex flex-col items-center gap-1.5 group cursor-default">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#F43F5E] flex items-center justify-center text-white shadow-[0_0_16px_rgba(244,63,94,0.5)] border border-white/20 transition-transform group-hover:scale-110">
-                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[12px] bg-[#EF4444]/20 border border-[#EF4444]/50 flex items-center justify-center text-[#EF4444] shadow-[0_0_16px_rgba(239,68,68,0.35)] transition-transform group-hover:scale-110">
+                  <Wallet className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2} />
                 </div>
                 <span className="text-[11px] sm:text-xs font-semibold text-white/90 tracking-wide">
                   Expenses
                 </span>
               </div>
 
-              {/* 3. Investment (Blue) */}
+              {/* 3. Emergency Savings (Blue) */}
               <div className="flex flex-col items-center gap-1.5 group cursor-default">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#0084FF] flex items-center justify-center text-white shadow-[0_0_16px_rgba(0,132,255,0.5)] border border-white/20 transition-transform group-hover:scale-110">
-                  <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[12px] bg-[#3B82F6]/20 border border-[#3B82F6]/50 flex items-center justify-center text-[#3B82F6] shadow-[0_0_16px_rgba(59,130,246,0.35)] transition-transform group-hover:scale-110">
+                  <Landmark className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2} />
+                </div>
+                <span className="text-[11px] sm:text-xs font-semibold text-white/90 tracking-wide">
+                  Emergency Savings
+                </span>
+              </div>
+
+              {/* 4. Protection (Purple) */}
+              <div className="flex flex-col items-center gap-1.5 group cursor-default">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[12px] bg-[#A855F7]/20 border border-[#A855F7]/50 flex items-center justify-center text-[#A855F7] shadow-[0_0_16px_rgba(168,85,247,0.35)] transition-transform group-hover:scale-110">
+                  <Shield className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2} />
+                </div>
+                <span className="text-[11px] sm:text-xs font-semibold text-white/90 tracking-wide">
+                  Protection
+                </span>
+              </div>
+
+              {/* 5. Investment (Gold/Amber) */}
+              <div className="flex flex-col items-center gap-1.5 group cursor-default">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[12px] bg-[#F59E0B]/20 border border-[#F59E0B]/50 flex items-center justify-center text-[#F59E0B] shadow-[0_0_16px_rgba(245,158,11,0.35)] transition-transform group-hover:scale-110">
+                  <TrendingUp className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={2} />
                 </div>
                 <span className="text-[11px] sm:text-xs font-semibold text-white/90 tracking-wide">
                   Investment
-                </span>
-              </div>
-
-              {/* 4. Insurance (Purple) */}
-              <div className="flex flex-col items-center gap-1.5 group cursor-default">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#8B5CF6] flex items-center justify-center text-white shadow-[0_0_16px_rgba(139,92,246,0.5)] border border-white/20 transition-transform group-hover:scale-110">
-                  <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
-                </div>
-                <span className="text-[11px] sm:text-xs font-semibold text-white/90 tracking-wide">
-                  Insurance
-                </span>
-              </div>
-
-              {/* 5. Savings (Gold/Amber) */}
-              <div className="flex flex-col items-center gap-1.5 group cursor-default">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#F59E0B] flex items-center justify-center text-white shadow-[0_0_16px_rgba(245,158,11,0.5)] border border-white/20 transition-transform group-hover:scale-110">
-                  <PiggyBank className="w-4 h-4 sm:w-5 sm:h-5" />
-                </div>
-                <span className="text-[11px] sm:text-xs font-semibold text-white/90 tracking-wide">
-                  Savings
                 </span>
               </div>
             </div>
