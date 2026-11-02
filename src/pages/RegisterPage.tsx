@@ -53,7 +53,7 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <AuthPageLayout showBack maxWidth="lg">
+    <AuthPageLayout showBack onBack={() => navigate('/')} maxWidth="lg">
       <div className="bg-[#080E2A]/90 backdrop-blur-xl border border-[#1E3268] rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-[0_12px_40px_rgba(0,145,255,0.15)]">
         <div className="mb-5 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">

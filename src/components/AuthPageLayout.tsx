@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, CreditCard, BarChart2, Shield, PiggyBank } from 'lucide-react';
 import logoImg from '../assets/app/log_3d_hd.png';
 
@@ -88,33 +88,35 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
             <button
               type="button"
               onClick={handleBack}
-              className="absolute left-0 top-1 p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5 text-xs font-semibold"
+              className="absolute left-0 top-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white transition-all flex items-center gap-1.5 text-xs font-semibold cursor-pointer z-20 shadow-sm"
               aria-label="Go back"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">Back</span>
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
             </button>
           )}
 
           {/* Centered Logo & Branding matching Image photo */}
           <div className="flex flex-col items-center text-center">
-            {/* 3D Glowing Emblem */}
-            <div className="relative mb-1.5 flex items-center justify-center">
-              <div className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#0091FF]/35 blur-xl scale-125 pointer-events-none" />
-              <img
-                src={logoImg}
-                alt="MoneyMapper Logo"
-                className="w-14 h-14 sm:w-16 sm:h-16 object-contain relative z-10 drop-shadow-[0_0_18px_rgba(0,145,255,0.8)] select-none"
-              />
-            </div>
+            {/* Clickable 3D Logo & Title to Landing Page */}
+            <Link to="/" className="flex flex-col items-center text-center group cursor-pointer" aria-label="MoneyMapper Home">
+              <div className="relative mb-1.5 flex items-center justify-center">
+                <div className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#0091FF]/35 blur-xl scale-125 pointer-events-none group-hover:bg-[#0091FF]/50 transition-all" />
+                <img
+                  src={logoImg}
+                  alt="MoneyMapper Logo"
+                  className="w-14 h-14 sm:w-16 sm:h-16 object-contain relative z-10 drop-shadow-[0_0_18px_rgba(0,145,255,0.8)] select-none group-hover:scale-105 transition-transform"
+                />
+              </div>
 
-            {/* Brand Title & Subtitle */}
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              {title || 'MoneyMapper'}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium mt-0.5">
-              {subtitle || 'Your Personal Money Manager'}
-            </p>
+              {/* Brand Title & Subtitle */}
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight group-hover:text-white/95 transition-colors">
+                {title || 'MoneyMapper'}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 font-medium mt-0.5">
+                {subtitle || 'Your Personal Money Manager'}
+              </p>
+            </Link>
 
             {/* 5 Financial Pillars Circular Icons Row with vibrant colors matching photo */}
             <div className="flex items-center justify-center gap-3 sm:gap-5 md:gap-7 mt-4 select-none">

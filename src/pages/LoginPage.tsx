@@ -157,7 +157,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <AuthPageLayout maxWidth="5xl">
+    <AuthPageLayout showBack onBack={() => navigate('/')} maxWidth="5xl">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
         {/* Left Column: Login Form Card */}
         <div className="lg:col-span-7 bg-[#080E2A]/90 backdrop-blur-xl border border-[#1E3268] rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-[0_12px_40px_rgba(0,145,255,0.15)] flex flex-col justify-between">
