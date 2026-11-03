@@ -189,8 +189,6 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               <Wallet className="w-7 h-7 text-white drop-shadow-sm" />
             </div>
 
-            <div className="h-11 w-[1px] bg-white/10 hidden sm:block" />
-
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
                 EXPENSE SCORE
@@ -201,24 +199,58 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Center: Glowing Wave Chart Graphic */}
-          <div className="hidden sm:flex flex-1 items-center justify-center px-2 max-w-[180px] h-16 pointer-events-none select-none relative z-10">
-            <svg className="w-full h-16 overflow-visible" viewBox="0 0 200 70" fill="none">
+          {/* Glowing Background Wave Graphic spanning from center across to rings */}
+          <div className="absolute inset-y-0 left-[28%] right-0 hidden md:block pointer-events-none select-none overflow-hidden">
+            <svg
+              className="w-full h-full"
+              viewBox="0 0 700 130"
+              fill="none"
+              preserveAspectRatio="none"
+            >
               <defs>
-                <linearGradient id="expWaveLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <linearGradient id="expWaveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.4" />
-                  <stop offset="50%" stopColor="#818CF8" stopOpacity="0.85" />
-                  <stop offset="100%" stopColor="#A855F7" stopOpacity="1" />
+                  <stop offset="30%" stopColor="#818CF8" stopOpacity="0.85" />
+                  <stop offset="65%" stopColor="#A855F7" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#D946EF" stopOpacity="0.85" />
                 </linearGradient>
-                <filter id="expWaveGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="0" stdDeviation="3.5" floodColor="#A855F7" floodOpacity="0.6" />
+                <linearGradient id="expWaveFill" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#A855F7" stopOpacity="0.22" />
+                  <stop offset="60%" stopColor="#6366F1" stopOpacity="0.06" />
+                  <stop offset="100%" stopColor="#6366F1" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="expWaveSecondary" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.2" />
+                  <stop offset="50%" stopColor="#818CF8" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#A855F7" stopOpacity="0.2" />
+                </linearGradient>
+                <filter id="expWaveGlow" x="-20%" y="-30%" width="140%" height="160%">
+                  <feGaussianBlur stdDeviation="4.5" result="glow" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
                 </filter>
               </defs>
+              {/* Translucent ambient wave fill under main curve */}
               <path
-                d="M0 60 Q 30 60, 60 40 T 130 25 T 200 35"
+                d="M 0 115 C 130 110, 200 85, 300 50 C 390 18, 470 18, 540 40 C 600 58, 650 55, 700 35 L 700 130 L 0 130 Z"
+                fill="url(#expWaveFill)"
+              />
+              {/* Secondary subtle wave ribbon */}
+              <path
+                d="M 0 120 C 140 115, 230 95, 320 65 C 410 38, 490 35, 560 55 C 620 72, 665 65, 700 45"
                 fill="none"
-                stroke="url(#expWaveLineGrad)"
-                strokeWidth="3"
+                stroke="url(#expWaveSecondary)"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              {/* Primary glowing neon crest wave */}
+              <path
+                d="M 0 115 C 130 110, 200 85, 300 50 C 390 18, 470 18, 540 40 C 600 58, 650 55, 700 35"
+                fill="none"
+                stroke="url(#expWaveGrad)"
+                strokeWidth="3.5"
                 strokeLinecap="round"
                 filter="url(#expWaveGlow)"
               />
@@ -251,9 +283,23 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
 
         {/* Current Week Card (Right ~40%) */}
         <div
-          className="lg:col-span-5 relative overflow-hidden p-5 sm:p-6 rounded-[24px] bg-[#0B0D1B]/95 border border-white/[0.08] shadow-lg backdrop-blur-md flex items-center justify-between"
+          className="lg:col-span-5 relative overflow-hidden p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-indigo-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex items-center justify-between"
         >
-          <div className="flex items-center gap-3.5">
+          {/* Subtle Wave Graphic matching mockup */}
+          <div className="absolute inset-y-0 right-0 w-3/5 hidden sm:block pointer-events-none select-none overflow-hidden">
+            <svg className="w-full h-full" viewBox="0 0 300 100" fill="none" preserveAspectRatio="none">
+              <path
+                d="M 0 80 C 80 75, 160 35, 300 50"
+                stroke="url(#expWaveGrad)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                fill="none"
+                opacity="0.6"
+              />
+            </svg>
+          </div>
+
+          <div className="flex items-center gap-3.5 relative z-10">
             <div className="w-12 h-12 rounded-xl bg-purple-600/20 border border-purple-500/35 flex items-center justify-center text-purple-300 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
               <Target className="w-6 h-6 text-purple-300" />
             </div>
@@ -265,7 +311,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
             </div>
           </div>
 
-          <span className="px-3 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 text-xs font-bold tracking-wider uppercase">
+          <span className="px-3 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 text-xs font-bold tracking-wider uppercase relative z-10">
             CURRENT WEEK
           </span>
         </div>
