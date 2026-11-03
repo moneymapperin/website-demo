@@ -210,7 +210,7 @@ export function calculateMonthWeeks(
     const hasLog = Boolean(log);
     // App lock rule: is_locked = !isCurrent && log == null && (weekIndex > 3)
     const isLocked = !isCurrent && !hasLog && weekIndex > 3;
-    const isSubmitted = hasLog;
+    const isSubmitted = log && typeof log.is_submitted === 'boolean' ? log.is_submitted : hasLog;
 
     // Progressive Adaptive Ranges
     let rFixed: [number, number];

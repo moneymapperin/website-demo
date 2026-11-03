@@ -8,18 +8,21 @@ import {
   InvestmentPillarData,
 } from '../../models/pillars/investments';
 import {
+  TrendingUp,
+  Briefcase,
+  Layers,
+  Coins,
+  Link2,
   Edit3,
   Sparkles,
   PlusCircle,
   MinusCircle,
-  Briefcase,
-  PieChart,
-  Coins,
 } from 'lucide-react';
 
-const SectionLabel: React.FC<{ label: string }> = ({ label }) => (
-  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 pl-1 mb-2.5">
-    {label}
+const SectionHeader: React.FC<{ icon: React.ReactNode; label: string }> = ({ icon, label }) => (
+  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 pl-1 mb-2.5">
+    {icon}
+    <span>{label}</span>
   </div>
 );
 
@@ -179,45 +182,49 @@ export const MutualFundPillarPage: React.FC = () => {
       amount: p.equity,
       tag: 'High Growth',
       key: 'totalEquityInvestments',
-      dotBg: 'bg-blue-500',
-      colorText: 'text-blue-600 dark:text-blue-400',
+      dotBg: 'bg-[#38BDF8]',
+      glowClass: 'shadow-[0_0_8px_rgba(56,189,248,0.6)]',
+      colorText: 'text-[#38BDF8]',
       barBg: 'bg-gradient-to-r from-blue-600 to-sky-400',
-      shadowClass: 'shadow-[0_0_12px_rgba(59,130,246,0.4)]',
+      shadowClass: 'shadow-[0_0_12px_rgba(56,189,248,0.6)]',
     },
     {
       label: 'Mutual Fund',
       amount: p.debt,
       tag: 'Stability',
       key: 'totalDebtInvestments',
-      dotBg: 'bg-orange-500',
-      colorText: 'text-orange-600 dark:text-orange-400',
+      dotBg: 'bg-[#FB923C]',
+      glowClass: 'shadow-[0_0_8px_rgba(251,146,60,0.6)]',
+      colorText: 'text-[#FB923C]',
       barBg: 'bg-gradient-to-r from-orange-600 to-amber-400',
-      shadowClass: 'shadow-[0_0_12px_rgba(249,115,22,0.4)]',
+      shadowClass: 'shadow-[0_0_12px_rgba(251,146,60,0.6)]',
     },
     {
       label: 'Gold',
       amount: p.gold,
       tag: 'Hedge',
       key: 'totalGoldInvestments',
-      dotBg: 'bg-amber-500',
-      colorText: 'text-amber-600 dark:text-amber-400',
+      dotBg: 'bg-[#FBBF24]',
+      glowClass: 'shadow-[0_0_8px_rgba(251,191,36,0.6)]',
+      colorText: 'text-[#FBBF24]',
       barBg: 'bg-gradient-to-r from-amber-500 to-yellow-400',
-      shadowClass: 'shadow-[0_0_12px_rgba(245,158,11,0.4)]',
+      shadowClass: 'shadow-[0_0_12px_rgba(251,191,36,0.6)]',
     },
     {
       label: 'Real Estate',
       amount: p.realEstate,
       tag: 'Passive Assets',
       key: 'totalRealEstateInvestments',
-      dotBg: 'bg-purple-500',
-      colorText: 'text-purple-600 dark:text-purple-400',
+      dotBg: 'bg-[#A855F7]',
+      glowClass: 'shadow-[0_0_8px_rgba(168,85,247,0.6)]',
+      colorText: 'text-[#A855F7]',
       barBg: 'bg-gradient-to-r from-purple-600 to-pink-400',
-      shadowClass: 'shadow-[0_0_12px_rgba(168,85,247,0.4)]',
+      shadowClass: 'shadow-[0_0_12px_rgba(168,85,247,0.6)]',
     },
   ];
 
   return (
-    <div className="w-full px-8 lg:px-10 py-6 space-y-6">
+    <div className="w-full px-4 sm:px-8 lg:px-10 py-6 space-y-5 max-w-7xl mx-auto">
       {/* Invisible SEO / Title element */}
       <h1 className="sr-only" data-testid="investments-page-title">
         Investment Analysis
@@ -226,126 +233,168 @@ export const MutualFundPillarPage: React.FC = () => {
       {/* 1. SCORE HEADER CARD */}
       <div
         data-testid="investments-score-header"
-        className="relative overflow-hidden p-6 sm:p-7 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
+        className="relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-[#0A0B1A]/95 border border-indigo-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
-        {/* Subtle Ambient Glow on the Right */}
-        <div className="hidden dark:block absolute right-0 top-0 w-80 h-full bg-gradient-to-l from-cyan-900/20 via-indigo-900/10 to-transparent pointer-events-none" />
+        {/* Subtle Ambient Glow */}
+        <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-purple-900/20 via-indigo-900/10 to-transparent pointer-events-none" />
 
-        <div className="relative z-10">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            GLOBAL PILLAR SCORE
+        {/* Left: Icon Box + Score Details */}
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1E40AF] border border-blue-400/40 shadow-[0_0_20px_rgba(37,99,235,0.45)] flex items-center justify-center shrink-0">
+            <TrendingUp className="w-7 h-7 text-white drop-shadow-sm" />
           </div>
-          <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
-            {Math.round(p.investmentScore)}
+
+          <div className="h-11 w-[1px] bg-white/10 hidden sm:block" />
+
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+              GLOBAL PILLAR SCORE
+            </div>
+            <div className="text-4xl sm:text-5xl font-black text-white mt-1 leading-none tracking-tight">
+              {Math.round(p.investmentScore)}
+            </div>
           </div>
         </div>
 
+        {/* Center: Glowing Wave Graphic */}
+        <div className="hidden lg:flex flex-1 items-center justify-center px-4 max-w-[280px] xl:max-w-[340px] h-16 pointer-events-none select-none relative z-10">
+          <svg className="w-full h-16 overflow-visible" viewBox="0 0 300 70" fill="none">
+            <defs>
+              <linearGradient id="invWaveLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.4" />
+                <stop offset="35%" stopColor="#6366F1" stopOpacity="0.85" />
+                <stop offset="70%" stopColor="#A855F7" stopOpacity="1" />
+                <stop offset="100%" stopColor="#C084FC" stopOpacity="0.8" />
+              </linearGradient>
+              <linearGradient id="invWaveFillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#A855F7" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#A855F7" stopOpacity="0" />
+              </linearGradient>
+              <filter id="invWaveGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#A855F7" floodOpacity="0.6" />
+              </filter>
+            </defs>
+            <path
+              d="M0 65 Q 40 65, 80 50 T 160 30 T 230 18 T 300 35 L 300 70 L 0 70 Z"
+              fill="url(#invWaveFillGrad)"
+            />
+            <path
+              d="M0 65 Q 40 65, 80 50 T 160 30 T 230 18 T 300 35"
+              fill="none"
+              stroke="url(#invWaveLineGrad)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              filter="url(#invWaveGlow)"
+            />
+          </svg>
+        </div>
+
+        {/* Right: Asset Mix & SIP Health Score Rings */}
         <div className="flex items-center gap-6 relative z-10 self-end sm:self-center">
-          {/* Asset Mix Circle */}
+          {/* Asset Mix Ring */}
           <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#0284C7] dark:border-[#38BDF8] flex items-center justify-center text-base font-black text-slate-900 dark:text-white bg-sky-50 dark:bg-sky-950/30 shadow-[0_0_15px_rgba(56,189,248,0.25)]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#38BDF8] flex items-center justify-center text-base font-black text-white bg-[#071324] shadow-[0_0_18px_rgba(56,189,248,0.35)]">
               {Math.round(p.assetBalanceScore)}
             </div>
-            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 mt-1.5">
+            <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
               Asset Mix
             </span>
           </div>
 
-          {/* SIP Health Circle */}
+          {/* SIP Health Ring */}
           <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#059669] dark:border-[#10B981] flex items-center justify-center text-base font-black text-slate-900 dark:text-white bg-emerald-50 dark:bg-emerald-950/30 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#10B981] flex items-center justify-center text-base font-black text-white bg-[#052018] shadow-[0_0_18px_rgba(16,185,129,0.35)]">
               {Math.round(p.sipScore)}
             </div>
-            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 mt-1.5">
+            <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
               SIP Health
             </span>
           </div>
         </div>
       </div>
 
-      {/* 2. PORTFOLIO BREAKDOWN */}
-      <div>
-        <SectionLabel label="PORTFOLIO BREAKDOWN" />
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-5">
-          {/* Top row */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-                <Briefcase className="w-5 h-5" />
+      {/* 2. PORTFOLIO BREAKDOWN & ALLOCATION HEALTH (2-Col Grid) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Column 1: PORTFOLIO BREAKDOWN */}
+        <div>
+          <SectionHeader
+            icon={<Briefcase className="w-4 h-4 text-purple-400" />}
+            label="PORTFOLIO BREAKDOWN"
+          />
+          <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+            {/* Total Wealth Assets Row */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-blue-600/20 border border-blue-500/35 flex items-center justify-center text-blue-400 shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.2)]">
+                  <Briefcase className="w-5 h-5" />
+                </div>
+                <div className="text-sm font-bold text-white">
+                  Total Wealth Assets
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Total Wealth Assets</h3>
-              </div>
+              <span className="text-xl sm:text-2xl font-black text-[#38BDF8] tracking-tight">
+                {formatInr(p.totalInvested)}
+              </span>
             </div>
-            <span className="text-2xl sm:text-3xl font-black text-[#059669] dark:text-[#10B981] tracking-tight">
-              {formatInr(p.totalInvested)}
-            </span>
-          </div>
 
-          <div className="border-t border-slate-100 dark:border-white/[0.06]" />
+            <div className="border-t border-white/[0.06]" />
 
-          {/* 4 Asset rows */}
-          <div className="space-y-3.5">
-            {portfolioRows.map((row) => (
-              <div key={row.key} className="flex items-center justify-between gap-4 pl-1">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-2.5 h-2.5 rounded-full ${row.dotBg} shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.6)]`} />
-                  <div className="min-w-0">
-                    <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                      {row.label}
-                    </div>
-                    <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                      {row.tag}
+            {/* 4 Asset Rows */}
+            <div className="space-y-3">
+              {portfolioRows.map((row) => (
+                <div key={row.key} className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-2.5 h-2.5 rounded-full ${row.dotBg} shrink-0 ${row.glowClass}`} />
+                    <div>
+                      <div className="text-sm font-bold text-white">
+                        {row.label}
+                      </div>
+                      <div className="text-xs text-zinc-400">
+                        {row.tag}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <span className="text-sm sm:text-base font-bold text-white">
+                      {formatInr(row.amount)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => openQuickEdit(row.label, row.key, row.amount)}
+                      className="p-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                      title={`Edit ${row.label}`}
+                      aria-label={`Edit ${row.label}`}
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2.5 shrink-0">
-                  <span className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                    {formatInr(row.amount)}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => openQuickEdit(row.label, row.key, row.amount)}
-                    className="p-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
-                    title={`Edit ${row.label}`}
-                    aria-label={`Edit ${row.label}`}
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 3. ALLOCATION HEALTH */}
-      <div>
-        <SectionLabel label="ALLOCATION HEALTH" />
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-5">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-purple-500/10 dark:bg-purple-500/15 border border-purple-500/25 dark:border-purple-500/30 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
-              <PieChart className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Allocation Breakdown
-            </h3>
-          </div>
-
-          <div className="space-y-4 pt-1">
+        {/* Column 2: ALLOCATION HEALTH */}
+        <div>
+          <SectionHeader
+            icon={<Layers className="w-4 h-4 text-purple-400" />}
+            label="ALLOCATION HEALTH"
+          />
+          <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+            <span className="sr-only">Allocation Breakdown</span>
             {portfolioRows.map((row) => {
               const pct = p.totalInvested > 0 ? (row.amount / p.totalInvested) * 100 : 0;
               return (
-                <div key={`alloc-${row.key}`} className="space-y-2">
+                <div key={`alloc-${row.key}`} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-700 dark:text-zinc-300">
+                    <span className="font-semibold text-white">
                       {row.label}
                     </span>
                     <span className={`font-black ${row.colorText}`}>
                       {pct.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="h-3 w-full bg-slate-100 dark:bg-[#121528] border border-slate-200/60 dark:border-white/[0.06] rounded-full overflow-hidden p-0.5">
+                  <div className="h-2.5 w-full bg-zinc-800/80 rounded-full overflow-hidden shadow-inner">
                     <div
                       className={`h-full ${row.barBg} ${row.shadowClass} rounded-full transition-all duration-500`}
                       style={{ width: `${Math.min(100, Math.max(1, pct))}%` }}
@@ -358,129 +407,174 @@ export const MutualFundPillarPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. SIP ANALYSIS */}
+      {/* 3. SIP ANALYSIS (Full Width) */}
       <div>
-        <SectionLabel label="SIP ANALYSIS" />
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-5">
-          {/* Top row */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/25 dark:border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                <Coins className="w-5 h-5" />
+        <SectionHeader
+          icon={<Coins className="w-4 h-4 text-purple-400" />}
+          label="SIP ANALYSIS"
+        />
+        <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+            {/* Left Column: Monthly SIP Contribution & Details */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/35 flex items-center justify-center text-blue-400 shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.2)]">
+                    <Link2 className="w-5 h-5" />
+                  </div>
+                  <span className="text-sm font-bold text-white">
+                    Monthly SIP Contribution
+                  </span>
+                </div>
+                <span className="text-xl sm:text-2xl font-black text-[#38BDF8] tracking-tight">
+                  {formatInr(p.monthlySipTotal)}
+                </span>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Monthly SIP Contribution</h3>
+
+              <div className="space-y-3 pt-1">
+                {/* Mutual Fund SIP */}
+                <div className="flex items-center justify-between gap-4 pl-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#FB923C] shrink-0 shadow-[0_0_8px_rgba(251,146,60,0.6)]" />
+                    <span className="text-sm font-bold text-white">
+                      Mutual Fund SIP
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <span className="text-sm sm:text-base font-bold text-orange-400">
+                      {formatInr(p.sipDebt)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => openManageSip('Mutual Fund SIP', 'mfSips', 'monthlySipDebt', p.mfSips)}
+                      className="p-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                      title="Manage Mutual Fund SIP"
+                      aria-label="Manage Mutual Fund SIP"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Gold SIP */}
+                <div className="flex items-center justify-between gap-4 pl-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#FBBF24] shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                    <span className="text-sm font-bold text-white">
+                      Gold SIP
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <span className="text-sm sm:text-base font-bold text-amber-400">
+                      {formatInr(p.sipGold)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => openManageSip('Gold SIP', 'goldSips', 'monthlySipGold', p.goldSips)}
+                      className="p-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                      title="Manage Gold SIP"
+                      aria-label="Manage Gold SIP"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-            <span className="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400 shrink-0">
-              {formatInr(p.monthlySipTotal)}
-            </span>
-          </div>
 
-          <div className="border-t border-slate-100 dark:border-white/[0.06]" />
-
-          <div className="space-y-3.5">
-            {/* Mutual Fund SIP */}
-            <div className="flex items-center justify-between gap-4 pl-1">
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0 shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
-                <span className="text-sm font-bold text-slate-900 dark:text-white">
-                  Mutual Fund SIP
+            {/* Right Column: Monthly Shortfall (Gap) */}
+            <div className="lg:border-l lg:border-white/[0.08] lg:pl-6 space-y-3.5">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm font-bold text-[#F43F5E]">
+                  Monthly Shortfall (Gap)
+                </span>
+                <span className="text-xl sm:text-2xl font-black text-[#F43F5E] tracking-tight">
+                  {formatInr(p.sipGap)}
                 </span>
               </div>
-              <div className="flex items-center gap-2.5 shrink-0">
-                <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
-                  {formatInr(p.sipDebt)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => openManageSip('Mutual Fund SIP', 'mfSips', 'monthlySipDebt', p.mfSips)}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-orange-600 dark:text-orange-400 transition-all cursor-pointer"
-                  title="Manage Mutual Fund SIP"
-                  aria-label="Manage Mutual Fund SIP"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </button>
+
+              {/* Shortfall Progress Bar */}
+              <div className="h-2.5 w-full bg-zinc-800/80 rounded-full overflow-hidden shadow-inner">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]"
+                  style={{
+                    width: `${Math.min(100, Math.max(5, (p.sipProgress || 0) * 100))}%`,
+                  }}
+                />
+              </div>
+
+              {/* Footnote text */}
+              <div className="text-xs text-zinc-400 italic">
+                Increase your monthly SIP by {formatInr(p.sipGap)} to reach your financial potential.
               </div>
             </div>
-
-            {/* Gold SIP */}
-            <div className="flex items-center justify-between gap-4 pl-1">
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                <span className="text-sm font-bold text-slate-900 dark:text-white">
-                  Gold SIP
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5 shrink-0">
-                <span className="text-sm font-bold text-amber-600 dark:text-amber-400">
-                  {formatInr(p.sipGold)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => openManageSip('Gold SIP', 'goldSips', 'monthlySipGold', p.goldSips)}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-amber-600 dark:text-amber-400 transition-all cursor-pointer"
-                  title="Manage Gold SIP"
-                  aria-label="Manage Gold SIP"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100 dark:border-white/[0.06]" />
-
-          {/* Monthly Shortfall */}
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-bold text-rose-600 dark:text-rose-400">
-              Monthly Shortfall (Gap)
-            </span>
-            <span className="text-base sm:text-lg font-black text-rose-600 dark:text-rose-400 shrink-0">
-              {formatInr(p.sipGap)}
-            </span>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="h-3 w-full bg-slate-100 dark:bg-[#121528] border border-slate-200/60 dark:border-white/[0.06] rounded-full overflow-hidden p-0.5">
-            <div
-              className={`h-full ${
-                (p.sipProgress || 0) >= 0.8
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
-                  : 'bg-gradient-to-r from-amber-500 to-rose-400 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
-              } rounded-full transition-all duration-500`}
-              style={{
-                width: `${Math.min(100, Math.max(5, (p.sipProgress || 0) * 100))}%`,
-              }}
-            />
-          </div>
-
-          {/* Message under progress */}
-          <div className="text-xs text-slate-500 dark:text-zinc-400 italic">
-            {(p.sipProgress || 0) >= 1
-              ? 'Excellent! You are meeting your 20% savings target.'
-              : `Increase your monthly SIP by ${formatInr(p.sipGap)} to reach your financial potential.`}
           </div>
         </div>
       </div>
 
-      {/* 5. Optimize Now Button */}
+      {/* 4. OPTIMIZE NOW Button */}
       <button
         type="button"
         data-testid="investments-optimize-btn"
         onClick={() => navigate('/master-data?target=investment')}
-        className="w-full py-4 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#4338CA] hover:from-[#4338CA] hover:to-[#3730A3] text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full py-4 rounded-[20px] bg-gradient-to-r from-[#6366F1] via-[#7C3AED] to-[#9333EA] hover:opacity-95 text-white font-black text-xs uppercase tracking-widest shadow-[0_0_25px_rgba(124,58,237,0.4)] transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
       >
         <Sparkles className="w-4 h-4" />
-        <span>Optimize Now</span>
+        <span>OPTIMIZE NOW</span>
       </button>
 
-      {/* 6. Manage SIP Modal */}
+      {/* Quick Edit Modal */}
+      {editField && (
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-white">
+              Update {editField.title}
+            </h3>
+            <form onSubmit={handleQuickEditSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                  Amount (₹)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">₹</span>
+                  <input
+                    type="number"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-white/10 bg-[#121528] text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-zinc-600"
+                    placeholder="Enter amount"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditField(null)}
+                  className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6366F1] text-white font-black text-xs shadow-lg shadow-indigo-600/30 cursor-pointer"
+                >
+                  {isUpdating ? 'Updating...' : 'Update'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Manage SIP Modal */}
       {activeSipModal && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+          <div className="bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between pb-1">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base sm:text-lg font-bold text-white">
                 Manage {activeSipModal.title}
               </h3>
               <button
@@ -492,7 +586,7 @@ export const MutualFundPillarPage: React.FC = () => {
                       : null
                   )
                 }
-                className="p-1 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
+                className="p-1 rounded-lg text-indigo-400 hover:bg-white/[0.05] transition-colors cursor-pointer"
                 title="Add SIP"
                 aria-label="Add SIP"
               >
@@ -500,137 +594,86 @@ export const MutualFundPillarPage: React.FC = () => {
               </button>
             </div>
 
-            {activeSipModal.list.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400 dark:text-zinc-500">
-                No SIPs added yet.
-              </div>
-            ) : (
-              <div className="space-y-3 overflow-y-auto max-h-[50vh] pr-1 py-1">
-                {activeSipModal.list.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    {/* Fund Name Input */}
-                    <input
-                      type="text"
-                      placeholder="Fund Name"
-                      value={item.name}
-                      onChange={(e) => updateSipItem(idx, 'name', e.target.value)}
-                      className="flex-1 min-w-0 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#121528] text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
-                    />
-
-                    {/* Amount Input with ₹ prefix */}
-                    <div className="relative w-24 sm:w-28 shrink-0">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 text-xs font-semibold">
-                        ₹
-                      </span>
+            <div className="overflow-y-auto space-y-3 flex-1 pr-1">
+              {activeSipModal.list.length === 0 ? (
+                <div className="text-center py-6 text-xs text-zinc-400">
+                  No SIPs added. Click the + button above to add one.
+                </div>
+              ) : (
+                activeSipModal.list.map((item, index) => (
+                  <div
+                    key={`sip-${index}`}
+                    className="p-3 rounded-xl border border-white/10 bg-[#121528] space-y-2 relative group"
+                  >
+                    <div className="flex items-center justify-between gap-2">
                       <input
-                        type="number"
-                        placeholder="Amount"
-                        value={item.amount}
-                        onChange={(e) => updateSipItem(idx, 'amount', e.target.value)}
-                        className="w-full pl-6 pr-2 py-2 text-xs rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#121528] text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                        type="text"
+                        placeholder="Fund or Asset Name"
+                        value={item.name}
+                        onChange={(e) => updateSipItem(index, 'name', e.target.value)}
+                        className="bg-transparent border-b border-white/10 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 w-full pb-1"
                       />
-                    </div>
-
-                    {/* Date Selector */}
-                    <div className="flex flex-col items-center shrink-0">
-                      <span className="text-[8px] font-bold text-slate-400 dark:text-zinc-500">
-                        DATE
-                      </span>
-                      <select
-                        value={item.date}
-                        onChange={(e) => updateSipItem(idx, 'date', Number(e.target.value))}
-                        className="px-1.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#121528] text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                      <button
+                        type="button"
+                        onClick={() => removeSipItem(index)}
+                        className="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"
+                        title="Remove SIP"
+                        aria-label="Remove SIP"
                       >
-                        {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                          <option key={d} value={d}>
-                            {d}
-                          </option>
-                        ))}
-                      </select>
+                        <MinusCircle className="w-4 h-4" />
+                      </button>
                     </div>
 
-                    {/* Remove Button */}
-                    <button
-                      type="button"
-                      onClick={() => removeSipItem(idx)}
-                      className="p-1 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors shrink-0 cursor-pointer"
-                      title="Remove SIP"
-                      aria-label="Remove SIP"
-                    >
-                      <MinusCircle className="w-4 h-4" />
-                    </button>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <label className="text-[10px] text-zinc-400 block mb-0.5">Amount (₹)</label>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          value={item.amount}
+                          onChange={(e) => updateSipItem(index, 'amount', e.target.value)}
+                          className="w-full px-2 py-1 rounded bg-[#0A0B1A] border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-zinc-400 block mb-0.5">SIP Date (1-31)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={31}
+                          placeholder="Date"
+                          value={item.date}
+                          onChange={(e) => updateSipItem(index, 'date', e.target.value)}
+                          className="w-full px-2 py-1 rounded bg-[#0A0B1A] border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
 
-            <div className="pt-2 flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={handleSaveSipList}
-                className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.99] cursor-pointer"
-              >
-                Save & Sync Portfolio
-              </button>
+            <div className="flex justify-between items-center pt-2 border-t border-white/10">
               <button
                 type="button"
                 onClick={() => setActiveSipModal(null)}
-                className="w-full py-2 text-xs font-semibold text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
               >
                 Cancel
               </button>
+              <button
+                type="button"
+                onClick={handleSaveSipList}
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6366F1] text-white font-black text-xs shadow-lg shadow-indigo-600/30 cursor-pointer"
+              >
+                Save & Sync Portfolio
+              </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* 7. Quick Edit Modal */}
-      {editField && (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              Update {editField.title}
-            </h3>
-            <form onSubmit={handleQuickEditSubmit} className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300 block mb-1">
-                  New Amount (₹)
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 text-sm font-semibold">
-                    ₹
-                  </span>
-                  <input
-                    type="number"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#121528] text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500"
-                    placeholder="Enter amount"
-                    autoFocus
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setEditField(null)}
-                  className="px-4 py-2 text-xs font-bold text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isUpdating}
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 cursor-pointer"
-                >
-                  {isUpdating ? 'Updating...' : 'Update'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
     </div>
   );
 };
+
+export default MutualFundPillarPage;

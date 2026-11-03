@@ -1,87 +1,42 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWeeklyTracker } from '../../hooks/useWeeklyTracker';
 import { useToast } from '../../context/ToastContext';
 import {
+  Wallet,
   Lock,
   CheckCircle2,
   Sparkles,
   Lightbulb,
-  LineChart,
+  TrendingUp,
+  Target,
+  BarChart3,
+  X,
 } from 'lucide-react';
 
 const EXPENSE_ADVISORIES: Record<string, string[]> = {
   '1-10': [
-    'Stop all non-essential spending immediately - no dining out, subscriptions, or shopping this month.',
-    'List every expense from the last 30 days to see exactly where money is leaking.',
     "Cancel every subscription you haven't used in the last 30 days, starting today.",
     "Separate 'needs' (rent, food, EMI) from 'wants' and cut every 'want' this month.",
-    "Call your lenders today to discuss restructuring any EMI you're struggling to pay.",
-    'Avoid taking any new loan or credit card to cover daily expenses - it deepens the crisis.',
-    'Move to a stricter, cash-only system for groceries and daily spends for the next 30 days.',
-    'Negotiate rent or move to lower-cost housing if rent exceeds 40% of your income.',
-    'Pause all discretionary shopping (clothes, gadgets, entertainment) until expenses stabilize.',
-    'Talk to family about temporarily sharing costs (food, rent) while you stabilize.',
-    'Use public transport instead of cabs/fuel wherever possible to cut daily costs immediately.',
-    'Switch to home-cooked meals entirely - eating out is one of the fastest expense leaks.',
-    "Check for any auto-debit you've forgotten about and cancel it within the next 24 hours.",
-    'Avoid EMI-based purchases of any kind (gadgets, appliances) until your situation stabilizes.',
-    'Ask utility providers about installment or hardship plans if bills are piling up.',
-    'Set a hard daily spending limit and track every rupee against it without exception.',
-    'Delay any planned travel or big-ticket purchase until your expenses are under control.',
-    'Consolidate multiple small debts into one manageable plan to stop juggling payments.',
-    'Ask for salary advance from your employer only as an absolute last resort, not a routine.',
-    'Create a bare-minimum survival budget covering only rent, food, and essential bills.',
+    'Move to cash or debit-only for 2 weeks to immediately stop credit card overspending.',
   ],
   '11-20': [
     'Build your first monthly budget covering rent, food, bills, EMI, and savings as fixed categories.',
     'Track every expense for 30 days using a simple app or notebook - awareness is the first fix.',
     'Identify your top 3 spending leaks (subscriptions, food delivery, impulse buys) and cut them by half.',
-    'Set a weekly cash/UPI limit for discretionary spending and stick to it strictly.',
-    'Review all EMIs and loans - list interest rates and prioritize paying off the highest-rate one first.',
-    "Cancel at least 2 subscriptions you're not using regularly, starting this week.",
-    'Move fixed bill payments to auto-debit to avoid late fees, but track them weekly.',
-    'Set a rule: no purchase above ₹2,000 without a 24-hour cooling-off period.',
-    'Reduce food delivery orders to twice a week and cook the rest at home.',
-    'Compare your rent/EMI to the 40% income rule and plan to bring it within limits.',
-    "Build a 'wants' jar - a fixed monthly amount for discretionary spends, nothing beyond it.",
-    'Review your mobile, OTT, and internet plans for cheaper alternatives with the same usage.',
-    'Set a goal to reduce total monthly expenses by 10% over the next 60 days.',
-    'Avoid using credit cards for daily expenses until you can pay the full bill each month.',
-    'List all due dates for bills/EMIs in one place to avoid late payment penalties.',
-    'Set a small emergency buffer goal (1 week of expenses) before any discretionary spending resumes.',
-    "Review your last 3 months' bank statement to spot recurring, avoidable expenses.",
-    'Switch one high-cost habit (branded groceries, daily cabs) to a lower-cost alternative this month.',
-    'Set a rule to pay EMIs and bills on the 1st, before any discretionary spending happens.',
-    'Have one no-spend day per week as a simple, repeatable discipline builder.',
   ],
   '21-30': [
     'Formalize your budget into fixed categories (needs, wants, savings, debt) with monthly limits for each.',
     'Set a target to bring total EMI + rent under 40% of your monthly take-home income.',
     'Track discretionary spending weekly and set a hard cap that reduces by 5% each month.',
-    'Review all subscriptions every quarter and cancel anything with under 2 uses per month.',
-    'Set up separate accounts for fixed expenses and discretionary spending to avoid overlap.',
-    'Build a 1-month expense buffer in a separate account before increasing any discretionary spend.',
-    'Negotiate one recurring bill (insurance, internet, phone plan) for a better rate this month.',
-    'Set a rule: any purchase above ₹5,000 needs a 48-hour wait and written justification.',
-    'Review your grocery and food delivery spend - aim to cut it by 15% this quarter.',
-    'Consolidate any high-interest debt into a lower-interest option if available to you.',
-    'Set a target to save the difference every time you find a cheaper alternative to a fixed cost.',
-    'Track your expense-to-income ratio monthly and aim to lower it by 2-3% each quarter.',
-    'Avoid lifestyle upgrades (new gadgets, upgraded plans) until your expense ratio stabilizes.',
-    'Set a clear EMI payoff order - highest interest rate first, while paying minimums on others.',
+  ],
+  high: [
     'Review annual expenses (insurance premiums, subscriptions) for consolidation and better rates.',
     'Build the habit of comparing prices before any purchase above ₹1,000.',
     "Set a monthly 'review day' to check spending against budget and course-correct early.",
     'Reduce impulse spending by unsubscribing from shopping app notifications and promotional emails.',
     'Set a target to keep discretionary spending under 20% of your take-home income.',
     "Track and reduce any 'convenience' spending (delivery fees, express charges) that adds up unnoticed.",
-  ],
-  high: [
-    'Your expense control is excellent. Automate remaining payments.',
-    "Focus on reducing 'lifestyle creep' by capping annual expense growth.",
-    'Review your Household Efficiency ratio monthly to spot minor optimizations.',
-    'Set a goal to redirect 100% of any expense-saving into appreciating assets.',
   ],
 };
 
@@ -102,44 +57,37 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
 
   const {
     loading,
-    isEmpty,
     weeks,
-    reportingWeek,
     currentViewWeekIndex,
-    expenseScore,
-    disciplineScore,
-    targetsHit,
-    disciplineMsg,
+    setCurrentViewWeekIndex,
+    reportingWeek,
     fixedDecision,
     flexibleDecision,
     savingsDecision,
     actualFixed,
     actualFlex,
     actualSaved,
-    setCurrentViewWeekIndex,
     handleDecision,
     submitWeek,
+    expenseScore,
+    disciplineScore,
+    targetsHit,
+    disciplineMsg,
   } = useWeeklyTracker();
 
-  // State for the "Log Exact Amount" modal
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // State for the Log Amount modal
   const [modalTarget, setModalTarget] = useState<'fixed' | 'flexible' | 'savings' | null>(null);
   const [modalAmount, setModalAmount] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // State for the Expense Advisory modal
   const [showAdvisoryDialog, setShowAdvisoryDialog] = useState<boolean>(false);
   const [dialogAdvice, setDialogAdvice] = useState<string>('');
 
-  // Recommended Expense Action (computed once per load)
-  const [recommendedExpenseAction, setRecommendedExpenseAction] = useState<string>('Review your Household Efficiency ratio monthly to spot minor optimizations.');
-  const adviceComputedRef = useRef(false);
-
-  useEffect(() => {
-    if (!loading && !adviceComputedRef.current) {
-      adviceComputedRef.current = true;
-      setRecommendedExpenseAction('Review your Household Efficiency ratio monthly to spot minor optimizations.');
-    }
-  }, [loading, expenseScore]);
+  // Recommended Expense Action
+  const recommendedExpenseAction =
+    'Review your Household Efficiency ratio monthly to spot minor optimizations.';
 
   const formatDateShort = (d: Date): string => {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -149,7 +97,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
     return `₹${Math.round(val).toLocaleString('en-IN')}`;
   };
 
-  const currentWeek = weeks[currentViewWeekIndex];
+  const currentWeek = weeks[currentViewWeekIndex] ?? weeks[0];
   const activeReportingWeek = reportingWeek ?? currentWeek;
   const isTargetWeekSubmitted = Boolean(activeReportingWeek?.is_submitted);
 
@@ -175,36 +123,41 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
   };
 
   const handleSubmitReport = async () => {
-    if (!activeReportingWeek || isTargetWeekSubmitted) return;
+    if (isTargetWeekSubmitted || isSubmitting) return;
 
     if (!fixedDecision || !flexibleDecision || !savingsDecision) {
       showToast('Please mark all three targets before submitting.');
       return;
     }
 
-    setIsSubmitting(true);
-    const res = await submitWeek();
-    setIsSubmitting(false);
-
-    if (res.success) {
-      showToast(`Weekly report for Week ${activeReportingWeek.index} submitted!`);
-    } else {
-      showToast(res.error || 'Failed to submit report');
+    try {
+      setIsSubmitting(true);
+      const res = await submitWeek();
+      if (res?.success) {
+        showToast('Weekly targets updated successfully! 🎉');
+      } else {
+        showToast(res?.error || 'Failed to submit report');
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to submit report');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleOpenAdvisoryDialog = () => {
-    setDialogAdvice(getRandomExpenseAdvice(expenseScore));
+    const advice = getRandomExpenseAdvice(expenseScore);
+    setDialogAdvice(advice);
     setShowAdvisoryDialog(true);
   };
 
-  const getCategoryLabel = (type: 'fixed' | 'flexible' | 'savings'): string => {
+  const getCategoryLabel = (type: 'fixed' | 'flexible' | 'savings') => {
     if (type === 'fixed') return 'Fixed Expenses';
     if (type === 'flexible') return 'Flexible Expenses';
     return 'Savings Goal';
   };
 
-  if (loading) {
+  if (loading && weeks.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -212,61 +165,113 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
     );
   }
 
-  if (isEmpty || !currentWeek || !activeReportingWeek) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <p className="text-zinc-400">Missing Data.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full px-8 lg:px-10 py-6 space-y-6">
+    <div className="w-full px-4 sm:px-8 lg:px-10 py-6 space-y-5 max-w-7xl mx-auto">
       <h1 data-testid="weekly-page-title" className="sr-only">
         Weekly Tracker
       </h1>
 
-      {/* 1. HERO EXPENSE SCORE Card */}
-      <div
-        data-testid="weekly-score-header"
-        className="relative overflow-hidden p-6 sm:p-7 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
-      >
-        {/* Subtle Ambient Glow on the Right */}
-        <div className="hidden dark:block absolute right-0 top-0 w-80 h-full bg-gradient-to-l from-purple-900/20 to-transparent pointer-events-none" />
+      {/* Row 1: HERO EXPENSE SCORE Card + Current Week Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* HERO EXPENSE SCORE Card (Left ~60% if current week shown, else full) */}
+        <div
+          data-testid="weekly-score-header"
+          className={`${
+            currentWeek?.is_current ? 'lg:col-span-7' : 'lg:col-span-12'
+          } relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-[#0A0B1A]/95 border border-indigo-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col sm:flex-row sm:items-center justify-between gap-6`}
+        >
+          {/* Subtle Ambient Glow */}
+          <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-purple-900/20 to-transparent pointer-events-none" />
 
-        <div className="relative z-10">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            EXPENSE SCORE
+          {/* Left: Wallet Icon Box + Score */}
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1E40AF] border border-blue-400/40 shadow-[0_0_20px_rgba(37,99,235,0.45)] flex items-center justify-center shrink-0">
+              <Wallet className="w-7 h-7 text-white drop-shadow-sm" />
+            </div>
+
+            <div className="h-11 w-[1px] bg-white/10 hidden sm:block" />
+
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+                EXPENSE SCORE
+              </div>
+              <div className="text-4xl sm:text-5xl font-black text-white mt-1 leading-none tracking-tight">
+                {Math.round(expenseScore)}
+              </div>
+            </div>
           </div>
-          <div className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mt-0.5 leading-none tracking-tight">
-            {Math.round(expenseScore)}
+
+          {/* Center: Glowing Wave Chart Graphic */}
+          <div className="hidden sm:flex flex-1 items-center justify-center px-2 max-w-[180px] h-16 pointer-events-none select-none relative z-10">
+            <svg className="w-full h-16 overflow-visible" viewBox="0 0 200 70" fill="none">
+              <defs>
+                <linearGradient id="expWaveLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.4" />
+                  <stop offset="50%" stopColor="#818CF8" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#A855F7" stopOpacity="1" />
+                </linearGradient>
+                <filter id="expWaveGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="3.5" floodColor="#A855F7" floodOpacity="0.6" />
+                </filter>
+              </defs>
+              <path
+                d="M0 60 Q 30 60, 60 40 T 130 25 T 200 35"
+                fill="none"
+                stroke="url(#expWaveLineGrad)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                filter="url(#expWaveGlow)"
+              />
+            </svg>
+          </div>
+
+          {/* Right: Discipline & Hit Rate Rings */}
+          <div className="flex items-center gap-5 relative z-10 self-end sm:self-center">
+            {/* Discipline Ring */}
+            <div className="flex flex-col items-center">
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#A855F7] flex items-center justify-center text-base font-black text-white bg-[#150a24] shadow-[0_0_18px_rgba(168,85,247,0.35)]">
+                {Math.round(disciplineScore)}
+              </div>
+              <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
+                Discipline
+              </span>
+            </div>
+
+            {/* Hit Rate Ring */}
+            <div className="flex flex-col items-center">
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#38BDF8] flex items-center justify-center text-base font-black text-white bg-[#071324] shadow-[0_0_18px_rgba(56,189,248,0.35)]">
+                {targetsHit}
+              </div>
+              <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
+                Hit Rate
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-6 relative z-10 shrink-0 self-end sm:self-center">
-          {/* Discipline Ring */}
-          <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#9333EA] dark:border-[#A855F7] flex items-center justify-center text-base font-black text-slate-900 dark:text-white bg-purple-50 dark:bg-purple-950/30 shadow-[0_0_15px_rgba(168,85,247,0.25)]">
-              {Math.round(disciplineScore)}
+        {/* Current Week Card (Right ~40%) */}
+        <div
+          className="lg:col-span-5 relative overflow-hidden p-5 sm:p-6 rounded-[24px] bg-[#0B0D1B]/95 border border-white/[0.08] shadow-lg backdrop-blur-md flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-purple-600/20 border border-purple-500/35 flex items-center justify-center text-purple-300 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+              <Target className="w-6 h-6 text-purple-300" />
             </div>
-            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 mt-1.5">
-              Discipline
-            </span>
+            <div>
+              <h3 className="text-base font-bold text-white">Current Week</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Week {currentWeek?.index ?? 1} · {currentWeek ? `${formatDateShort(currentWeek.start)} - ${formatDateShort(currentWeek.end)}` : ''}
+              </p>
+            </div>
           </div>
 
-          {/* Hit Rate Ring */}
-          <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#059669] dark:border-[#10B981] flex items-center justify-center text-base font-black text-slate-900 dark:text-white bg-emerald-50 dark:bg-emerald-950/30 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
-              {targetsHit}
-            </div>
-            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 mt-1.5">
-              Hit Rate
-            </span>
-          </div>
+          <span className="px-3 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 text-xs font-bold tracking-wider uppercase">
+            CURRENT WEEK
+          </span>
         </div>
       </div>
 
-      {/* 2. Horizontal Desktop Week Selector Tabs */}
+      {/* Row 2: Horizontal Week Selector Strip */}
       <div className="grid grid-cols-5 gap-3">
         {weeks.map((w, idx) => {
           const isSelected = idx === currentViewWeekIndex;
@@ -284,13 +289,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               }}
               className={`py-3.5 px-3 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border ${
                 isSelected
-                  ? 'bg-[#4F46E5] border-2 border-[#6366F1] shadow-[0_0_20px_rgba(79,70,229,0.4)] text-white scale-[1.02]'
-                  : 'bg-white dark:bg-[#0B0D1B] border-slate-200/80 dark:border-white/[0.08] text-slate-600 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white shadow-xs dark:shadow-none'
-              } ${isLocked ? 'opacity-40 cursor-not-allowed hover:border-slate-200/80 dark:hover:border-white/[0.08]' : ''}`}
+                  ? 'bg-gradient-to-r from-[#4F46E5] to-[#6366F1] border-2 border-[#818CF8] shadow-[0_0_20px_rgba(99,102,241,0.4)] text-white scale-[1.02]'
+                  : 'bg-[#0B0D1B]/95 border-white/[0.08] text-zinc-400 hover:border-white/20 hover:text-white'
+              } ${isLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
             >
               <span
                 className={`text-[11px] font-semibold tracking-wide ${
-                  isSelected ? 'text-white/90' : 'text-slate-500 dark:text-zinc-400'
+                  isSelected ? 'text-white' : 'text-zinc-400'
                 }`}
               >
                 Week {w.index}
@@ -299,16 +304,14 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 {isLocked ? (
                   <Lock
                     data-testid={`week-tab-lock-${w.index}`}
-                    className="w-4 h-4 text-slate-400 dark:text-zinc-500"
+                    className="w-4 h-4 text-zinc-500"
                   />
-                ) : isDone ? (
-                  <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                ) : isDone || isSelected ? (
+                  <div className="w-4 h-4 rounded-full border border-sky-400 flex items-center justify-center text-[10px] text-sky-400">
+                    ✓
+                  </div>
                 ) : (
-                  <span
-                    className={`text-xs font-bold ${
-                      isSelected ? 'text-white' : 'text-slate-700 dark:text-zinc-200'
-                    }`}
-                  >
+                  <span className="text-xs font-bold text-zinc-200">
                     {formatDateShort(w.start)}
                   </span>
                 )}
@@ -318,290 +321,301 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
         })}
       </div>
 
-      {/* 3. Week N Target Overview (Shown when selected week is current week) */}
-      {currentWeek.is_current && (
-        <div
-          data-testid="current-week-overview-card"
-          className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-4"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                <span className="text-[#0284C7] dark:text-[#38BDF8]">Week {currentWeek.index}</span> Target Overview
-              </h2>
-              <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                {formatDateShort(currentWeek.start)} - {formatDateShort(currentWeek.end)}
+      {/* Row 3: 2-Column Grid (Week Target Overview + Observation on Left, Target Ranges on Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Left Column: Target Overview + Financial Observation */}
+        <div className="space-y-5">
+          {/* Week N Target Overview Card */}
+          {currentWeek?.is_current && (
+            <div
+              data-testid="current-week-overview-card"
+              className="p-5 sm:p-6 rounded-2xl bg-[#0B0D1B]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <BarChart3 className="w-5 h-5 text-purple-400 shrink-0" />
+                  <div>
+                    <h2 className="text-base font-bold text-white">
+                      <span className="text-[#38BDF8]">Week {currentWeek.index}</span> Target Overview
+                    </h2>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      {formatDateShort(currentWeek.start)} - {formatDateShort(currentWeek.end)}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <span className="px-3 py-1 rounded-full bg-indigo-500/10 dark:bg-[#4F46E5]/20 border border-indigo-500/30 dark:border-[#4F46E5]/40 text-indigo-600 dark:text-[#818CF8] text-[11px] font-bold tracking-wider uppercase">
-              CURRENT WEEK
-            </span>
-          </div>
 
-          <div className="space-y-3.5 pt-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-900 dark:text-white">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#0284C7] dark:bg-[#38BDF8] shrink-0 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
-                <span>Fixed Expenses</span>
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5 font-semibold text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#38BDF8] shrink-0 shadow-[0_0_8px_#38BDF8]" />
+                    <span>Fixed Expenses</span>
+                  </div>
+                  <span className="text-zinc-400">
+                    Range: {formatRupees(currentWeek.range_fixed[0])} – {formatRupees(currentWeek.range_fixed[1])}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5 font-semibold text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] shrink-0 shadow-[0_0_8px_#F59E0B]" />
+                    <span>Flexible Expenses</span>
+                  </div>
+                  <span className="text-zinc-400">
+                    Range: {formatRupees(currentWeek.range_flex[0])} – {formatRupees(currentWeek.range_flex[1])}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5 font-semibold text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#A855F7] shrink-0 shadow-[0_0_8px_#A855F7]" />
+                    <span>Savings Goal</span>
+                  </div>
+                  <span className="text-zinc-400">
+                    Range: {formatRupees(currentWeek.range_save[0])} – {formatRupees(currentWeek.range_save[1])}
+                  </span>
+                </div>
               </div>
-              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
-                Range: {formatRupees(currentWeek.range_fixed[0])} – {formatRupees(currentWeek.range_fixed[1])}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-900 dark:text-white">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] shrink-0 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                <span>Flexible Expenses</span>
-              </div>
-              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
-                Range: {formatRupees(currentWeek.range_flex[0])} – {formatRupees(currentWeek.range_flex[1])}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-900 dark:text-white">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                <span>Savings Goal</span>
-              </div>
-              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
-                Range: {formatRupees(currentWeek.range_save[0])} – {formatRupees(currentWeek.range_save[1])}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 4. Target Ranges Reporting Section */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-              Week {activeReportingWeek.index} Target Ranges
-            </h2>
-            <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-              {formatDateShort(activeReportingWeek.start)} - {formatDateShort(activeReportingWeek.end)}
-            </div>
-          </div>
-          {isTargetWeekSubmitted && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>COMPLETED</span>
             </div>
           )}
-        </div>
 
-        {/* 4A. Fixed Expenses Decision Block */}
-        <div data-testid="decision-card-fixed" className="space-y-3 pt-1">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-sm font-bold text-slate-900 dark:text-white">Fixed Expenses</span>
-            <div className="text-right">
-              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
-                Range: {formatRupees(activeReportingWeek.range_fixed[0])} – {formatRupees(activeReportingWeek.range_fixed[1])}
-              </span>
-              {actualFixed > 0 && (
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-2">
-                  (Logged: {formatRupees(actualFixed)})
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <button
-              type="button"
-              data-testid="fixed-missed-btn"
-              disabled={isTargetWeekSubmitted}
-              onClick={() => handleMarkMissed('fixed')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
-                fixedDecision === 'missed'
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
-                  : 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/15'
-              } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              Missed
-            </button>
-            <button
-              type="button"
-              data-testid="fixed-achieved-btn"
-              disabled={isTargetWeekSubmitted}
-              onClick={() => handleOpenAchievedModal('fixed')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
-                fixedDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
-                  : 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/15'
-              } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              Achieved
-            </button>
-          </div>
-        </div>
-
-        {/* 4B. Flexible Expenses Decision Block */}
-        <div data-testid="decision-card-flexible" className="space-y-3 pt-1">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-sm font-bold text-slate-900 dark:text-white">Flexible Expenses</span>
-            <div className="text-right">
-              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
-                Range: {formatRupees(activeReportingWeek.range_flex[0])} – {formatRupees(activeReportingWeek.range_flex[1])}
-              </span>
-              {actualFlex > 0 && (
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-2">
-                  (Logged: {formatRupees(actualFlex)})
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <button
-              type="button"
-              data-testid="flexible-missed-btn"
-              disabled={isTargetWeekSubmitted}
-              onClick={() => handleMarkMissed('flexible')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
-                flexibleDecision === 'missed'
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
-                  : 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/15'
-              } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              Missed
-            </button>
-            <button
-              type="button"
-              data-testid="flexible-achieved-btn"
-              disabled={isTargetWeekSubmitted}
-              onClick={() => handleOpenAchievedModal('flexible')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
-                flexibleDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
-                  : 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/15'
-              } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              Achieved
-            </button>
-          </div>
-        </div>
-
-        {/* 4C. Savings Goal Decision Block */}
-        <div data-testid="decision-card-savings" className="space-y-3 pt-1">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-sm font-bold text-slate-900 dark:text-white">Savings Goal</span>
-            <div className="text-right">
-              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-300">
-                Range: {formatRupees(activeReportingWeek.range_save[0])} – {formatRupees(activeReportingWeek.range_save[1])}
-              </span>
-              {actualSaved > 0 && (
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-2">
-                  (Logged: {formatRupees(actualSaved)})
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <button
-              type="button"
-              data-testid="savings-missed-btn"
-              disabled={isTargetWeekSubmitted}
-              onClick={() => handleMarkMissed('savings')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
-                savingsDecision === 'missed'
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
-                  : 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/30 text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/15'
-              } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              Missed
-            </button>
-            <button
-              type="button"
-              data-testid="savings-achieved-btn"
-              disabled={isTargetWeekSubmitted}
-              onClick={() => handleOpenAchievedModal('savings')}
-              className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
-                savingsDecision === 'achieved'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
-                  : 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30 text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/15'
-              } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              Achieved
-            </button>
-          </div>
-        </div>
-
-        {/* 4D. Submit Button */}
-        <div className="pt-2">
-          <button
-            type="button"
-            data-testid="submit-week-btn"
-            disabled={isTargetWeekSubmitted || isSubmitting}
-            onClick={handleSubmitReport}
-            className={`w-full py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
-              isTargetWeekSubmitted
-                ? 'bg-slate-200 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 cursor-not-allowed border border-slate-300 dark:border-white/5'
-                : 'bg-gradient-to-r from-[#4F46E5] to-[#4338CA] hover:from-[#4338CA] hover:to-[#3730A3] text-white shadow-indigo-600/30 active:scale-[0.99]'
-            }`}
+          {/* Financial Observation Card */}
+          <div
+            data-testid="weekly-observation-card"
+            className="p-5 sm:p-6 rounded-2xl bg-[#0B0D1B]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4"
           >
-            <span>
-              {isTargetWeekSubmitted
-                ? `SUBMITTED FOR WEEK ${activeReportingWeek.index}`
-                : isSubmitting
-                ? 'Submitting...'
-                : `SUBMIT REPORT FOR WEEK ${activeReportingWeek.index}`}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* 5. Financial Observation Card */}
-      <div
-        data-testid="weekly-observation-card"
-        className="p-6 rounded-2xl bg-white dark:bg-[#0B0D1B] border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-4"
-      >
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2.5 text-sm font-bold text-slate-900 dark:text-white">
-            <LineChart className="w-5 h-5 text-indigo-500 dark:text-indigo-400 shrink-0" />
-            <span>Financial Observation</span>
-          </div>
-
-          <button
-            type="button"
-            data-testid="expense-advice-chip"
-            onClick={handleOpenAdvisoryDialog}
-            className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 transition-all active:scale-95 cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Expense Advice</span>
-          </button>
-        </div>
-
-        <p className="text-sm text-slate-700 dark:text-zinc-300 leading-relaxed font-medium">
-          {disciplineMsg || 'Excellent discipline.'}
-        </p>
-
-        {recommendedExpenseAction && (
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#121528] border border-slate-200 dark:border-indigo-500/20 flex items-start gap-3.5">
-            <Lightbulb className="w-5 h-5 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                Recommended Expense Action
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2 text-sm font-bold text-white">
+                <TrendingUp className="w-4 h-4 text-purple-400 shrink-0" />
+                <span>Financial Observation</span>
               </div>
-              <p className="text-xs text-slate-700 dark:text-zinc-200 leading-relaxed font-medium">
-                {recommendedExpenseAction}
-              </p>
+
+              <button
+                type="button"
+                data-testid="expense-advice-chip"
+                onClick={handleOpenAdvisoryDialog}
+                className="px-3 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-indigo-400 text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-900/60 transition-all cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Expense Advice</span>
+              </button>
+            </div>
+
+            <p className="text-sm text-zinc-300 leading-relaxed font-medium">
+              {disciplineMsg || 'Excellent discipline.'}
+            </p>
+
+            {recommendedExpenseAction && (
+              <div className="p-4 rounded-xl bg-[#121528] border border-indigo-500/20 flex items-start gap-3.5">
+                <Lightbulb className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="text-xs font-bold text-indigo-400">
+                    Recommended Expense Action
+                  </div>
+                  <p className="text-xs text-zinc-200 leading-relaxed font-medium">
+                    {recommendedExpenseAction}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Week N Target Ranges Card */}
+        <div>
+          <div className="p-5 sm:p-6 rounded-2xl bg-[#0B0D1B]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Target className="w-5 h-5 text-purple-400 shrink-0" />
+                <div>
+                  <h3 className="text-base font-bold text-white">
+                    Week {activeReportingWeek.index} Target Ranges
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    {formatDateShort(activeReportingWeek.start)} - {formatDateShort(activeReportingWeek.end)}
+                  </p>
+                </div>
+              </div>
+              {isTargetWeekSubmitted && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-[11px] font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>COMPLETED</span>
+                </div>
+              )}
+            </div>
+
+            {/* Fixed Expenses Decision */}
+            <div data-testid="decision-card-fixed" className="space-y-2 pt-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-sm font-bold text-white">Fixed Expenses</span>
+                <div className="text-right">
+                  <span className="text-xs text-zinc-400">
+                    Range: {formatRupees(activeReportingWeek.range_fixed[0])} – {formatRupees(activeReportingWeek.range_fixed[1])}
+                  </span>
+                  {actualFixed > 0 && (
+                    <span className="text-xs font-bold text-[#10B981] ml-2">
+                      (Logged: {formatRupees(actualFixed)})
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <button
+                  type="button"
+                  data-testid="fixed-missed-btn"
+                  disabled={isTargetWeekSubmitted}
+                  onClick={() => handleMarkMissed('fixed')}
+                  className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
+                    fixedDecision === 'missed'
+                      ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                  } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  Missed
+                </button>
+                <button
+                  type="button"
+                  data-testid="fixed-achieved-btn"
+                  disabled={isTargetWeekSubmitted}
+                  onClick={() => handleOpenAchievedModal('fixed')}
+                  className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
+                    fixedDecision === 'achieved'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
+                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                  } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  Achieved
+                </button>
+              </div>
+            </div>
+
+            {/* Flexible Expenses Decision */}
+            <div data-testid="decision-card-flexible" className="space-y-2 pt-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-sm font-bold text-white">Flexible Expenses</span>
+                <div className="text-right">
+                  <span className="text-xs text-zinc-400">
+                    Range: {formatRupees(activeReportingWeek.range_flex[0])} – {formatRupees(activeReportingWeek.range_flex[1])}
+                  </span>
+                  {actualFlex > 0 && (
+                    <span className="text-xs font-bold text-[#10B981] ml-2">
+                      (Logged: {formatRupees(actualFlex)})
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <button
+                  type="button"
+                  data-testid="flexible-missed-btn"
+                  disabled={isTargetWeekSubmitted}
+                  onClick={() => handleMarkMissed('flexible')}
+                  className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
+                    flexibleDecision === 'missed'
+                      ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                  } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  Missed
+                </button>
+                <button
+                  type="button"
+                  data-testid="flexible-achieved-btn"
+                  disabled={isTargetWeekSubmitted}
+                  onClick={() => handleOpenAchievedModal('flexible')}
+                  className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
+                    flexibleDecision === 'achieved'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
+                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                  } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  Achieved
+                </button>
+              </div>
+            </div>
+
+            {/* Savings Goal Decision */}
+            <div data-testid="decision-card-savings" className="space-y-2 pt-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-sm font-bold text-white">Savings Goal</span>
+                <div className="text-right">
+                  <span className="text-xs text-zinc-400">
+                    Range: {formatRupees(activeReportingWeek.range_save[0])} – {formatRupees(activeReportingWeek.range_save[1])}
+                  </span>
+                  {actualSaved > 0 && (
+                    <span className="text-xs font-bold text-[#10B981] ml-2">
+                      (Logged: {formatRupees(actualSaved)})
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <button
+                  type="button"
+                  data-testid="savings-missed-btn"
+                  disabled={isTargetWeekSubmitted}
+                  onClick={() => handleMarkMissed('savings')}
+                  className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
+                    savingsDecision === 'missed'
+                      ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                  } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  Missed
+                </button>
+                <button
+                  type="button"
+                  data-testid="savings-achieved-btn"
+                  disabled={isTargetWeekSubmitted}
+                  onClick={() => handleOpenAchievedModal('savings')}
+                  className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
+                    savingsDecision === 'achieved'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
+                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                  } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  Achieved
+                </button>
+              </div>
+            </div>
+
+            {/* Submit / Status Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                data-testid="submit-week-btn"
+                disabled={isTargetWeekSubmitted || isSubmitting}
+                onClick={handleSubmitReport}
+                className={`w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  isTargetWeekSubmitted
+                    ? 'bg-[#181B2B] text-zinc-400 cursor-not-allowed border border-white/5'
+                    : 'bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:opacity-95 text-white shadow-[0_0_20px_rgba(99,102,241,0.35)] active:scale-[0.99]'
+                }`}
+              >
+                <span>
+                  {isTargetWeekSubmitted
+                    ? `SUBMITTED FOR WEEK ${activeReportingWeek.index}`
+                    : isSubmitting
+                    ? 'Submitting...'
+                    : `SUBMIT REPORT FOR WEEK ${activeReportingWeek.index}`}
+                </span>
+              </button>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* 6. Optimize Now Button */}
+      {/* Row 4: Full-Width OPTIMIZE NOW Button */}
       <button
         type="button"
         data-testid="weekly-optimize-btn"
         onClick={() => navigate('/master-data?target=expenses')}
-        className="w-full py-4 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#4338CA] hover:from-[#4338CA] hover:to-[#3730A3] text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#6366F1] via-[#8B5CF6] to-[#A855F7] hover:opacity-95 text-white font-black text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(168,85,247,0.35)] transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
       >
-        <Sparkles className="w-4 h-4" />
+        <Sparkles className="w-4 h-4 text-white" />
         <span>OPTIMIZE NOW</span>
       </button>
 
@@ -609,34 +623,41 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
       {modalTarget && activeReportingWeek && (
         <div
           data-testid="log-amount-modal"
-          className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
         >
-          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              Log {getCategoryLabel(modalTarget)} (Week {activeReportingWeek.index})
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Enter the exact amount for {getCategoryLabel(modalTarget)} for Week {activeReportingWeek.index}:
-            </p>
+          <div className="w-full max-w-md bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div>
+              <h3 className="text-lg font-bold text-white">
+                Log {getCategoryLabel(modalTarget)} (Week {activeReportingWeek.index})
+              </h3>
+              <p className="text-xs text-zinc-400 mt-1">
+                Enter the exact amount for {getCategoryLabel(modalTarget)} for Week {activeReportingWeek.index}:
+              </p>
+            </div>
+
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 text-sm font-bold">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-400">
                 ₹
               </span>
               <input
                 type="number"
                 data-testid="modal-amount-input"
+                autoFocus
+                placeholder="0"
                 value={modalAmount}
                 onChange={(e) => setModalAmount(e.target.value)}
-                className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#14102B] text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500"
-                placeholder="Amount (₹)"
-                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleConfirmAmount();
+                }}
+                className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#121528] border border-white/10 text-white font-bold text-base focus:outline-none focus:border-indigo-500 transition-colors"
               />
             </div>
-            <div className="flex justify-end gap-2 pt-2">
+
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setModalTarget(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white"
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
               >
                 Cancel
               </button>
@@ -644,41 +665,48 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 type="button"
                 data-testid="modal-confirm-btn"
                 onClick={handleConfirmAmount}
-                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30"
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#4F46E5] to-[#6366F1] shadow-lg shadow-indigo-600/30 hover:opacity-90 transition-opacity"
               >
-                Confirm &amp; Calculate Score
+                Save
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Expense Advisory Dialog Modal */}
+      {/* Advisory Modal */}
       {showAdvisoryDialog && (
         <div
           data-testid="expense-advisory-dialog"
-          className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
         >
-          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 text-center">
-            <div className="flex items-center justify-center gap-2 text-indigo-600 dark:text-indigo-400">
-              <Sparkles className="w-5 h-5" />
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Expense Advisory
-              </h3>
+          <div className="w-full max-w-md bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-indigo-400 font-bold text-sm">
+                <Sparkles className="w-4 h-4" />
+                <span>Expense Advisory</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAdvisoryDialog(false)}
+                className="p-1 rounded-lg text-zinc-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Based on your current score of {Math.round(expenseScore)}, here is a recommended action:
+            <p className="text-xs text-zinc-400">
+              Based on your current score of <span className="font-bold text-white">{Math.round(expenseScore)}</span>:
             </p>
 
-            <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-slate-800 dark:text-zinc-100 text-sm font-semibold leading-relaxed">
+            <div className="p-4 rounded-xl bg-[#121528] border border-indigo-500/20 text-xs text-zinc-200 leading-relaxed font-medium">
               {dialogAdvice}
             </div>
 
             <button
               type="button"
               onClick={() => setShowAdvisoryDialog(false)}
-              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+              className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#4F46E5] to-[#6366F1] shadow-lg shadow-indigo-600/30 hover:opacity-90 transition-opacity"
             >
               Got it!
             </button>
@@ -688,3 +716,5 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
     </div>
   );
 };
+
+export default WeeklyExpensePredictorPage;
