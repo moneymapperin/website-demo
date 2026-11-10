@@ -287,47 +287,29 @@ class LiveFinancialCalculator extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                const Icon(Icons.show_chart_rounded, size: 14, color: Color(0xFFF59E0B)),
-                                const SizedBox(width: 4),
+                                const Icon(Icons.show_chart_rounded, size: 16, color: Color(0xFFF59E0B)),
+                                const SizedBox(width: 5),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          'SIP',
-                                          style: TextStyle(
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.w900,
-                                            color: Color(0xFFF59E0B),
-                                            letterSpacing: 0.3,
-                                          ),
-                                        ),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: const Text(
+                                      'SIP RECOMMENDATION',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFFF59E0B),
+                                        letterSpacing: 0.3,
                                       ),
-                                      FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          'RECOMMENDATION',
-                                          style: TextStyle(
-                                            fontSize: 7.5,
-                                            fontWeight: FontWeight.w900,
-                                            color: const Color(0xFFF59E0B),
-                                            letterSpacing: 0.1,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                                 if (showSipTrialBadge) ...[
-                                  const SizedBox(width: 2),
+                                  const SizedBox(width: 4),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFF59E0B).withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(6),
@@ -336,7 +318,7 @@ class LiveFinancialCalculator extends StatelessWidget {
                                     child: const Text(
                                       'TRIAL: 1D',
                                       style: TextStyle(
-                                        fontSize: 7,
+                                        fontSize: 7.5,
                                         fontWeight: FontWeight.w900,
                                         color: Color(0xFFF59E0B),
                                       ),
@@ -345,27 +327,30 @@ class LiveFinancialCalculator extends StatelessWidget {
                                 ],
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 10),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 FittedBox(
                                   fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
                                   child: Text(
                                     _formatCurrency(sipRecommendation),
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.w900,
                                       color: isDark ? Colors.white : AppColors.textPrimaryLight,
+                                      letterSpacing: 0.2,
                                     ),
                                   ),
                                 ),
+                                const SizedBox(height: 2),
                                 Text(
                                   '/ month',
                                   style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark ? Colors.white54 : AppColors.textSecondaryLight,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? Colors.white60 : AppColors.textSecondaryLight,
                                   ),
                                 ),
                               ],

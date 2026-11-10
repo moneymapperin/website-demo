@@ -14,7 +14,10 @@ class AiAssistantScreen extends StatefulWidget {
   State<AiAssistantScreen> createState() => _AiAssistantScreenState();
 }
 
-class _AiAssistantScreenState extends State<AiAssistantScreen> {
+class _AiAssistantScreenState extends State<AiAssistantScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final ChatIntentService _chatService = ChatIntentService();
   final PremiumService _premiumService = PremiumService();
   final List<ChatMessage> _messages = [];
@@ -27,7 +30,6 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
   final List<Map<String, String>> _suggestions = [
     {'label': '📊 Reliance Stock', 'query': 'Reliance stock score'},
     {'label': '📈 SBI Mutual Fund', 'query': 'SBI Bluechip Mutual Fund'},
-    {'label': '🛡️ Health Insurance', 'query': 'HDFC Ergo Health Insurance'},
     {'label': '🚀 Upcoming IPOs', 'query': 'Upcoming IPO score'},
     {'label': '🚨 Emergency Fund', 'query': 'Emergency Fund'},
     {'label': '📅 Weekly Expenses', 'query': 'Weekly Expenses'},
@@ -175,58 +177,43 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Row(
-            children: [
-              Builder(
-                builder: (ctx) => IconButton(
-                  icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
-                  onPressed: () => Scaffold.of(ctx).openDrawer(),
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 48),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          "AI Assistant",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 18,
-                          ),
-                        ),
-                        if (!_isPro && _isAiAccessible) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.5), width: 0.8),
-                            ),
-                            child: const Text(
-                              'TRIAL: 1D LEFT',
-                              style: TextStyle(
-                                fontSize: 8.5,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFFF59E0B),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "AI Assistant",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 18,
                   ),
                 ),
-              ),
-            ],
+                if (!_isPro && _isAiAccessible) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.5), width: 0.8),
+                    ),
+                    child: const Text(
+                      'TRIAL: 1D LEFT',
+                      style: TextStyle(
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFF59E0B),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
           Positioned(
-            left: 55,
+            left: 16,
             bottom: -5,
             child: Image.asset(
               'assets/mascot no background -s.png',
@@ -253,6 +240,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

@@ -1,10 +1,37 @@
+import React, { useRef, useEffect } from 'react';
 import { navigateTo } from '../lib/navigation';
 import { PhoneMockup } from './PhoneMockup';
-import { FeatureCards } from './FeatureCards';
 
 export const Hero: React.FC = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v) {
+      v.muted = true;
+      v.play().catch(() => {});
+    }
+  }, []);
+
   return (
-    <section id="home" className="scroll-mt-24 relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
+    <section id="home" className="scroll-mt-24 relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 isolate">
+      {/* Dedicated Background Video Wrapper: subtle texture, auto-plays muted, hidden in light mode for readability */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none dark:block hidden" aria-hidden="true">
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover object-center opacity-40"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        >
+          <source src="/videos/hero-bg.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0b0a14]/40 via-[#0b0a14]/60 to-[#0b0a14]/90" />
+      </div>
+
       {/* Background Radial Glow & Ambient Lighting */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[1000px] h-[650px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/25 via-[#1a1138]/20 to-transparent blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-1/3 right-10 w-[550px] h-[550px] bg-brand-violet/15 rounded-full blur-[130px] pointer-events-none -z-10" />
@@ -33,7 +60,7 @@ export const Hero: React.FC = () => {
         />
       </svg>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           
           {/* Left Column: Headline, Subtext, Buttons, Social Proof & Press Logos */}
@@ -49,15 +76,15 @@ export const Hero: React.FC = () => {
 
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-[62px] xl:text-[68px] font-extrabold tracking-tight leading-[1.08] mb-6">
-              <span className="block text-white">Map Your Money.</span>
+              <span className="block text-white">Understand Your Money.</span>
               <span className="block bg-gradient-to-r from-[#9333ea] via-[#c026d3] to-[#ec4899] bg-clip-text text-transparent">
-                Build Your Future.
+                Own Your Future.
               </span>
             </h1>
 
             {/* Subtext */}
             <p className="text-base sm:text-lg text-white/60 font-normal leading-relaxed max-w-xl mb-8">
-              One app. Five pillars. Complete financial clarity. Track, Analyze &amp; Grow your wealth with AI.
+              A SMARTER WAY TO THINK ABOUT MONEY
             </p>
 
             {/* CTA Buttons */}
@@ -80,13 +107,10 @@ export const Hero: React.FC = () => {
 
           </div>
 
-          {/* Right Column: Realistic Phone Mockup + 4 Stacked Feature Cards */}
-          <div className="lg:col-span-6 flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-6 z-10">
+          {/* Right Column: Realistic Phone Mockup */}
+          <div className="lg:col-span-6 flex items-center justify-center lg:justify-end z-10">
             {/* Realistic Phone Mockup matching exact orientation in reference image 01 */}
-            <PhoneMockup className="transition-transform duration-300 hover:scale-[1.01]" />
-
-            {/* 4 Feature-Teaser Cards */}
-            <FeatureCards />
+            <PhoneMockup showOnboarding={true} className="transition-transform duration-300 hover:scale-[1.01]" />
           </div>
 
         </div>

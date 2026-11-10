@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 const SectionHeader: React.FC<{ icon: React.ReactNode; label: string }> = ({ icon, label }) => (
-  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 pl-1 mb-2.5">
+  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 pl-1 mb-2.5">
     {icon}
     <span>{label}</span>
   </div>
@@ -81,10 +81,10 @@ export const IncomePillarPage: React.FC = () => {
       {/* 1. HERO INCOME SCORE Card */}
       <div
         data-testid="income-score-header"
-        className="relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-[#0A0B1A]/95 border border-indigo-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6 min-h-[140px]"
+        className="relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200/80 dark:border-indigo-500/30 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6 min-h-[140px]"
       >
         {/* Subtle Ambient Glow */}
-        <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-purple-900/25 via-indigo-900/15 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-purple-100/60 dark:from-purple-900/25 via-indigo-50/40 dark:via-indigo-900/15 to-transparent pointer-events-none" />
 
         {/* Left: Coins Icon Box + Score Details */}
         <div className="flex items-center gap-4 relative z-10">
@@ -93,15 +93,15 @@ export const IncomePillarPage: React.FC = () => {
           </div>
 
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               INCOME SCORE
             </div>
             <div className="flex items-center gap-3 mt-1">
-              <span className="text-4xl sm:text-5xl font-black text-white leading-none tracking-tight">
+              <span className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white leading-none tracking-tight">
                 {p.finalPillarScore}
               </span>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-950/60 border border-indigo-500/40 text-xs font-semibold text-white/90 shadow-[0_0_12px_rgba(99,102,241,0.25)]">
-                <BarChart2 className="w-3.5 h-3.5 text-blue-400" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 text-xs font-semibold text-indigo-700 dark:text-white/90 shadow-sm dark:shadow-[0_0_12px_rgba(99,102,241,0.25)]">
+                <BarChart2 className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
                 <span>
                   {p.finalPillarScore >= 70
                     ? 'Good Position'
@@ -111,14 +111,14 @@ export const IncomePillarPage: React.FC = () => {
                 </span>
               </div>
             </div>
-            <p className="text-xs text-zinc-400 font-medium mt-1.5">
+            <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium mt-1.5">
               Your income position looks good.
             </p>
           </div>
         </div>
 
         {/* Glowing Background Wave Graphic spanning from center across to rings */}
-        <div className="absolute inset-y-0 left-[26%] right-0 hidden md:block pointer-events-none select-none overflow-hidden">
+        <div className="absolute inset-y-0 left-[26%] right-0 hidden md:block pointer-events-none select-none overflow-hidden opacity-35 dark:opacity-100">
           <svg
             className="w-full h-full"
             viewBox="0 0 700 130"
@@ -179,18 +179,18 @@ export const IncomePillarPage: React.FC = () => {
         <div className="flex items-center gap-6 relative z-10 self-end sm:self-center">
           {/* Active Ring */}
           <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#38BDF8] flex items-center justify-center text-base font-black text-white bg-[#071324] shadow-[0_0_18px_rgba(56,189,248,0.35)]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#38BDF8] flex items-center justify-center text-base font-black text-sky-700 dark:text-white bg-sky-50 dark:bg-[#071324] shadow-sm dark:shadow-[0_0_18px_rgba(56,189,248,0.35)]">
               {Math.round(p.activeScore)}
             </div>
-            <span className="text-[11px] font-bold text-zinc-400 mt-1.5">Active</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 mt-1.5">Active</span>
           </div>
 
           {/* Passive Ring */}
           <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#A855F7] flex items-center justify-center text-base font-black text-white bg-[#150a24] shadow-[0_0_18px_rgba(168,85,247,0.35)]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#A855F7] flex items-center justify-center text-base font-black text-purple-700 dark:text-white bg-purple-50 dark:bg-[#150a24] shadow-sm dark:shadow-[0_0_18px_rgba(168,85,247,0.35)]">
               {Math.round(p.passiveScore)}
             </div>
-            <span className="text-[11px] font-bold text-zinc-400 mt-1.5">Passive</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 mt-1.5">Passive</span>
           </div>
         </div>
       </div>
@@ -202,27 +202,27 @@ export const IncomePillarPage: React.FC = () => {
           {/* 2. EARNINGS OVERVIEW Card */}
           <div>
             <SectionHeader
-              icon={<Layers className="w-4 h-4 text-purple-400" />}
+              icon={<Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
               label="EARNINGS OVERVIEW"
             />
-            <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+            <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
               {/* Total Monthly Income Header Row */}
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-xl bg-purple-600/20 border border-purple-500/35 flex items-center justify-center text-purple-400 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                  <div className="w-11 h-11 rounded-xl bg-purple-50 dark:bg-purple-600/20 border border-purple-200 dark:border-purple-500/35 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 shadow-sm dark:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
                     <Wallet className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Total Monthly Income</h3>
-                    <p className="text-xs text-zinc-400 mt-0.5">Combined view of all your income streams</p>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Total Monthly Income</h3>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Combined view of all your income streams</p>
                   </div>
                 </div>
-                <span className="text-2xl sm:text-3xl font-black text-[#38BDF8] tracking-tight">
+                <span className="text-2xl sm:text-3xl font-black text-sky-600 dark:text-[#38BDF8] tracking-tight">
                   {p.hasProfileData ? formatIncomeCompact(total) : 'not available'}
                 </span>
               </div>
 
-              <div className="border-t border-white/[0.06]" />
+              <div className="border-t border-slate-100 dark:border-white/[0.06]" />
 
               {/* Inner Rows */}
               <div className="space-y-3.5 pt-1">
@@ -231,16 +231,16 @@ export const IncomePillarPage: React.FC = () => {
                   <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-[#38BDF8] shrink-0 shadow-[0_0_8px_#38BDF8]" />
                     <div>
-                      <div className="text-sm font-bold text-white">Active Income</div>
-                      <div className="text-xs text-zinc-400 mt-0.5">Salary, Business, Freelance</div>
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">Active Income</div>
+                      <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Salary, Business, Freelance</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm sm:text-base font-bold text-white">
+                    <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                       {p.hasProfileData ? formatIncomeCompact(p.activeIncome) : 'not available'}
                     </div>
                     {p.hasProfileData && (
-                      <div className="text-xs font-bold text-[#38BDF8] mt-0.5">
+                      <div className="text-xs font-bold text-sky-600 dark:text-[#38BDF8] mt-0.5">
                         {activePct.toFixed(1)}%
                       </div>
                     )}
@@ -252,16 +252,16 @@ export const IncomePillarPage: React.FC = () => {
                   <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-[#A855F7] shrink-0 shadow-[0_0_8px_#A855F7]" />
                     <div>
-                      <div className="text-sm font-bold text-white">Passive Income</div>
-                      <div className="text-xs text-zinc-400 mt-0.5">Rent, Dividends, Interest</div>
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">Passive Income</div>
+                      <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Rent, Dividends, Interest</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm sm:text-base font-bold text-white">
+                    <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                       {p.hasProfileData ? formatIncomeCompact(p.passiveIncome) : 'not available'}
                     </div>
                     {p.hasProfileData && (
-                      <div className="text-xs font-bold text-[#A855F7] mt-0.5">
+                      <div className="text-xs font-bold text-purple-600 dark:text-[#A855F7] mt-0.5">
                         {passivePct.toFixed(1)}%
                       </div>
                     )}
@@ -274,24 +274,24 @@ export const IncomePillarPage: React.FC = () => {
           {/* 3. NEXT YEAR INCOME FORECAST Card */}
           <div>
             <SectionHeader
-              icon={<TrendingUp className="w-4 h-4 text-purple-400" />}
+              icon={<TrendingUp className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
               label="NEXT YEAR INCOME FORECAST"
             />
-            <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+            <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 {/* Left Column: Icon + Projection Values */}
                 <div className="flex items-start gap-3.5">
-                  <div className="w-11 h-11 rounded-xl bg-blue-600/20 border border-blue-500/35 flex items-center justify-center text-blue-400 shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.2)]">
-                    <TrendingUp className="w-5 h-5 text-blue-400" />
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-600/20 border border-blue-200 dark:border-blue-500/35 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-sm dark:shadow-[0_0_12px_rgba(59,130,246,0.2)]">
+                    <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold uppercase text-indigo-400 tracking-wider">
+                    <span className="text-[11px] font-bold uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">
                       PROJECTED INCOME – FY {nextFyYear}
                     </span>
-                    <div className="text-xs text-zinc-400 mt-0.5 font-medium">
+                    <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 font-medium">
                       Projected Monthly Income
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black text-white mt-1 tracking-tight">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 tracking-tight">
                       {p.hasProfileData ? formatIncomeCompact(forecastMonthly) : 'not available'}
                     </div>
                   </div>
@@ -340,22 +340,22 @@ export const IncomePillarPage: React.FC = () => {
 
                 {/* Right Column: Growth Badge & Stats */}
                 <div className="text-right shrink-0">
-                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold">
                     <TrendingUp className="w-3.5 h-3.5" />
                     <span>+{rate.toFixed(2)}%</span>
                   </div>
-                  <div className="text-sm font-bold text-[#10B981] mt-1.5">
+                  <div className="text-sm font-bold text-emerald-600 dark:text-[#10B981] mt-1.5">
                     +{p.hasProfileData ? formatIncomeCompact(monthlyGrowth) : 'not available'} / mo
                   </div>
-                  <div className="text-[11px] text-zinc-400 mt-0.5">
+                  <div className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
                     {p.hasProfileData ? formatIncomeCompact(forecastAnnual) : 'not available'} / year
                   </div>
                 </div>
               </div>
 
               {/* Footnote */}
-              <div className="border-t border-white/[0.06] pt-3 flex items-center gap-2 text-zinc-400 text-xs">
-                <Info className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+              <div className="border-t border-slate-100 dark:border-white/[0.06] pt-3 flex items-center gap-2 text-slate-500 dark:text-zinc-400 text-xs">
+                <Info className="w-3.5 h-3.5 shrink-0 text-slate-400 dark:text-zinc-400" />
                 <span>
                   Annual forecast inflation-adjusted ({rate.toFixed(2)}% rate). Updated yearly on Jan 1st.
                 </span>
@@ -369,15 +369,15 @@ export const IncomePillarPage: React.FC = () => {
           {/* 4. INCOME MIX HEALTH Card */}
           <div>
             <SectionHeader
-              icon={<PieChart className="w-4 h-4 text-purple-400" />}
+              icon={<PieChart className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
               label="INCOME MIX HEALTH"
             />
-            <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+            <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/35 flex items-center justify-center text-purple-400 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-                  <PieChart className="w-5 h-5 text-purple-400" />
+                <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-600/20 border border-purple-200 dark:border-purple-500/35 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 shadow-sm dark:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                  <PieChart className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-sm font-bold text-white">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                   Income Breakdown
                 </h3>
               </div>
@@ -386,10 +386,10 @@ export const IncomePillarPage: React.FC = () => {
               <div className="w-full space-y-3.5 pt-1">
                 {/* Active Source Bar */}
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <span className="text-xs font-semibold text-zinc-300 w-28 shrink-0">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 w-28 shrink-0">
                     Active Source
                   </span>
-                  <div className="flex-1 h-2.5 rounded-full bg-zinc-800/80 overflow-hidden relative shadow-inner">
+                  <div className="flex-1 h-2.5 rounded-full bg-slate-200 dark:bg-zinc-800/80 overflow-hidden relative shadow-inner">
                     <div
                       className="h-full bg-[#38BDF8] rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(56,189,248,0.7)]"
                       style={{
@@ -397,17 +397,17 @@ export const IncomePillarPage: React.FC = () => {
                       }}
                     />
                   </div>
-                  <span className="text-xs font-bold text-white w-14 text-right shrink-0">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white w-14 text-right shrink-0">
                     {activePct.toFixed(1)}%
                   </span>
                 </div>
 
                 {/* Passive Source Bar */}
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <span className="text-xs font-semibold text-zinc-300 w-28 shrink-0">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 w-28 shrink-0">
                     Passive Source
                   </span>
-                  <div className="flex-1 h-2.5 rounded-full bg-zinc-800/80 overflow-hidden relative shadow-inner">
+                  <div className="flex-1 h-2.5 rounded-full bg-slate-200 dark:bg-zinc-800/80 overflow-hidden relative shadow-inner">
                     <div
                       className="h-full bg-[#A855F7] rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(168,85,247,0.7)]"
                       style={{
@@ -415,7 +415,7 @@ export const IncomePillarPage: React.FC = () => {
                       }}
                     />
                   </div>
-                  <span className="text-xs font-bold text-white w-14 text-right shrink-0">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white w-14 text-right shrink-0">
                     {passivePct.toFixed(1)}%
                   </span>
                 </div>
@@ -426,15 +426,15 @@ export const IncomePillarPage: React.FC = () => {
           {/* 5. DISTRIBUTION STATUS Card */}
           <div>
             <SectionHeader
-              icon={<Target className="w-4 h-4 text-purple-400" />}
+              icon={<Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
               label="DISTRIBUTION STATUS"
             />
-            <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+            <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/35 flex items-center justify-center text-purple-400 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-                  <Target className="w-5 h-5 text-purple-400" />
+                <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-600/20 border border-purple-200 dark:border-purple-500/35 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 shadow-sm dark:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                  <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-sm font-bold text-white">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                   Distribution Health
                 </h3>
               </div>
@@ -442,14 +442,14 @@ export const IncomePillarPage: React.FC = () => {
               {/* Multi-color continuous gradient meter bar */}
               <div className="relative h-3 w-full rounded-full bg-gradient-to-r from-[#EF4444] via-[#FACC15] to-[#10B981] my-2 shadow-inner">
                 <div
-                  className="absolute -top-1 w-5 h-5 rounded-full bg-white border-2 border-slate-900 shadow-[0_0_10px_rgba(255,255,255,0.9)] transition-all duration-500 pointer-events-none"
+                  className="absolute -top-1 w-5 h-5 rounded-full bg-white border-2 border-slate-700 dark:border-slate-900 shadow-md transition-all duration-500 pointer-events-none"
                   style={{
                     left: `calc(${clampedScore / 100} * (100% - 20px))`,
                   }}
                 />
               </div>
 
-              <p className="text-xs italic text-zinc-400 pl-0.5">
+              <p className="text-xs italic text-slate-500 dark:text-zinc-400 pl-0.5">
                 Strategy: Aim for passive income to reach at least 25% of your total earnings.
               </p>
             </div>

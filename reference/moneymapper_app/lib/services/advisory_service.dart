@@ -222,4 +222,88 @@ class AdvisoryService {
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // 52 DYNAMIC GLOBAL FITNESS SCORE ADVISORIES (4 SCORE BANDS)
+  // ---------------------------------------------------------------------------
+
+  static final List<String> _criticalAdvisories = [
+    "High financial stress detected. Pause all discretionary spending and focus strictly on essential rent, groceries, and EMIs.",
+    "Your liquid savings are critically low. Cut non-essential subscriptions and build a 1-month emergency buffer immediately.",
+    "High debt-to-income ratio flagged. Avoid taking new credit cards or loans until your primary cashflow stabilizes.",
+    "Your spending exceeds safe limits. Separate needs from wants and track every daily outflow without exception.",
+    "Critical liquidity shortfall! Avoid high-risk investments and prioritize liquid savings first.",
+    "Review all active EMIs today and prioritize clearing the highest-interest loans first.",
+    "Your fixed expenses absorb too much income. Negotiate lower costs or pause non-vital commitments.",
+    "No health cover detected. A single medical emergency can wipe out savings—get basic health insurance first.",
+    "High lifestyle spending risk. Stick to a strict cash-only or pre-budgeted UPI allowance for the next 30 days.",
+    "Your financial baseline needs urgent stabilization. Focus on clearing high-interest debt and building emergency cash.",
+    "Pause new SIPs temporarily if EMIs or basic bills are struggling to be paid on time.",
+    "Cancel all unused OTT, gym, or digital subscriptions today to plug immediate spending leaks.",
+    "Create a bare-minimum survival budget covering only essential food, shelter, and mandatory bills.",
+    "Avoid EMI-based purchases for gadgets or lifestyle items until your fitness score crosses 50.",
+    "Set a hard daily spending limit and log every expense to regain complete cashflow control.",
+  ];
+
+  static final List<String> _averageAdvisories = [
+    "You're on track! Focus on building a 3 to 6-month liquid emergency cushion before scaling investments.",
+    "Apply the 50/30/20 budget rule: 50% for Needs, 30% for Wants, and 20% dedicated to systematic savings.",
+    "Your fixed costs are moderate. Cap discretionary spending to boost your monthly investment surplus.",
+    "Good progress! Ensure your term life insurance covers at least 10x your annual take-home income.",
+    "Reduce high-interest credit card debt or personal loans to free up monthly cashflow for SIPs.",
+    "Automate your emergency fund savings on the 1st of every month before discretionary spending occurs.",
+    "Review your health insurance coverage—ensure a minimum ₹5 Lakhs individual or floater policy is active.",
+    "Your cashflow is stable but vulnerable. Avoid new long-term loan commitments for the next 6 months.",
+    "Increase your monthly SIPs by 5% every time you get a salary increment or bonus.",
+    "Track weekly variable expenses to prevent weekend spending from eating into your monthly savings target.",
+    "Keep your debt EMI payments under 30% of your total monthly take-home income.",
+    "Diversify short-term savings into Liquid Mutual Funds or High-Yield Savings Accounts for easy access.",
+    "Re-evaluate impulse buys: enforce a 48-hour cooling period before any non-essential purchase above ₹3,000.",
+    "Consolidate small multiple debt payments into one low-cost structured payback plan.",
+    "Maintain 3 months of fixed expenses in a liquid fund so unexpected hiccups don't disrupt your investments.",
+  ];
+
+  static final List<String> _goodAdvisories = [
+    "Strong financial discipline! Focus on optimizing asset allocation across Equity, Debt, and Gold.",
+    "Your emergency cushion is healthy. Step up equity SIPs to compound wealth over 5+ year horizons.",
+    "Ensure 100% of your family health and term life insurance gaps are fully covered with adequate sum assured.",
+    "Great job! Increase your annual SIP step-up rate by 10% to accelerate your long-term goal timeline.",
+    "Maintain a balanced portfolio: 60% Equity for growth, 30% Debt/Liquid for safety, and 10% Gold as a hedge.",
+    "Your expense-to-income ratio is healthy. Channel extra cashflow into low-cost Index or Flexi-Cap funds.",
+    "Review portfolio performance quarterly and rebalance if equity exposure drifts by more than 10%.",
+    "Maximize Section 80C and tax-saving avenues using ELSS funds with a 3-year compounding perspective.",
+    "Your cashflow is well-managed. Focus on creating passive income streams alongside your primary salary.",
+    "Keep term insurance pure: avoid mixing investment with insurance (avoid traditional LIC endowment policies).",
+    "Build dedicated goal-based buckets for short-term goals (car, travel) without touching core retirement SIPs.",
+    "Consolidate scattered mutual fund folios into a clean, trackable portfolio of 4-5 high-scoring funds.",
+  ];
+
+  static final List<String> _excellentAdvisories = [
+    "Stellar financial health! Your 5-pillar ecosystem is operating at peak compounding efficiency.",
+    "Optimal risk-reward balance achieved. Focus on tax-efficient harvest strategies and asset preservation.",
+    "Your emergency cushion and insurance coverage are fully fortified. Expand passive income avenues.",
+    "Exceptional expense control and high investment surplus! Explore strategic international or factor investing.",
+    "Maintain annual portfolio rebalancing to lock in gains and protect against sudden market downturns.",
+    "Your financial freedom runway is expanding rapidly. Focus on long-term capital preservation & estate planning.",
+    "Automate 100% of new passive cashflows back into high-compounding core wealth assets.",
+    "Your debt-to-asset ratio is near zero. Continue building multi-generational wealth with low-cost index assets.",
+    "Mastery level achieved! Mentor family members or review advanced tax-harvesting techniques with an advisor.",
+    "Top-tier score! Maintain quarterly health checks to ensure your financial fortress stays invincible.",
+  ];
+
+  static String getGlobalFitnessAdvisory(double score) {
+    List<String> list;
+    if (score < 40) {
+      list = _criticalAdvisories;
+    } else if (score < 60) {
+      list = _averageAdvisories;
+    } else if (score < 80) {
+      list = _goodAdvisories;
+    } else {
+      list = _excellentAdvisories;
+    }
+
+    final int seed = score.round() + DateTime.now().day;
+    return list[Random(seed).nextInt(list.length)];
+  }
 }

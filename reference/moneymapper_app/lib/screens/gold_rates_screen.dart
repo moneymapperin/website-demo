@@ -94,7 +94,7 @@ class _GoldRatesScreenState extends State<GoldRatesScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
-                        childAspectRatio: 1.3,
+                        childAspectRatio: 1.05,
                         children: [
                           _buildMetalCard("24K (999 Purity)", _goldData?['24K (999 Purity)'], true, isDark),
                           _buildMetalCard("22K (916 Purity)", _goldData?['22K (916 Purity)'], true, isDark),
@@ -240,24 +240,32 @@ class _GoldRatesScreenState extends State<GoldRatesScreen> {
             style: TextStyle(fontSize: 10, color: isDark ? Colors.white38 : Colors.black38, fontWeight: FontWeight.bold),
           ),
           const Spacer(),
-          Row(
-            children: [
-              Text("₹", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: accentColor)),
-              const SizedBox(width: 4),
-              Text(
-                priceVal.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},'),
-                style: TextStyle(
-                  fontSize: 22, // Increased from 18
-                  fontWeight: FontWeight.w900,
-                  color: isDark ? Colors.white : AppColors.textPrimaryLight,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                Text("₹", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: accentColor)),
+                const SizedBox(width: 4),
+                Text(
+                  priceVal.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},'),
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.white : AppColors.textPrimaryLight,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 2),
-          Text(
-            unit,
-            style: TextStyle(fontSize: 9, color: isDark ? Colors.white38 : Colors.black38, fontWeight: FontWeight.bold),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              unit,
+              style: TextStyle(fontSize: 9, color: isDark ? Colors.white38 : Colors.black38, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

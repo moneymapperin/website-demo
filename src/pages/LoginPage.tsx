@@ -320,7 +320,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Right Column: Active QR Login Panel */}
-        <QrLoginPanel />
+        <QrLoginPanel autoStart={false} />
       </div>
     </AuthPageLayout>
   );

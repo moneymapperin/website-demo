@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MoneyMapper Business - Full Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0b0a14;
+            --card: #131122;
+            --field: #0e0c1a;
+            --border: #26213d;
+            --text: #ffffff;
+            --muted: #a09cb3;
+            --grad: linear-gradient(90deg, #8b5cf6, #d946ef, #ec4899);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 64px 20px 80px;
+        }
+
+        .eyebrow {
+            text-align: center;
+            color: #b9a6f5;
+            font-size: 13px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: clamp(30px, 5vw, 44px);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 14px 0 12px;
+        }
+
+        .grad {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .sub {
+            text-align: center;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 36px;
+        }
+
+        form,
+        .success {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 32px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .row .field {
+            margin-bottom: 0;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #d9d4ee;
+        }
+
+        label .req {
+            color: #f472b6;
+        }
+
+        input,
+        select,
+        textarea {
+            background: var(--field);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 14px;
+            color: #fff;
+            font: inherit;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #6f6a88;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #8b5cf6;
+        }
+
+        select option {
+            background: #131122;
+            color: #fff;
+        }
+
+        textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        .radios {
+            display: flex;
+            gap: 12px;
+        }
+
+        .radio {
+            flex: 1;
+            position: relative;
+        }
+
+        .radio input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .radio span {
+            display: block;
+            text-align: center;
+            padding: 13px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--field);
+            color: var(--muted);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .radio input:checked+span {
+            border-color: #8b5cf6;
+            color: #fff;
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .radio input:focus-visible+span {
+            outline: 2px solid #8b5cf6;
+            outline-offset: 2px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .submit {
+            width: 100%;
+            margin-top: 8px;
+            padding: 16px;
+            border: 0;
+            border-radius: 14px;
+            background: var(--grad);
+            color: #fff;
+            font: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(217, 70, 239, 0.25);
+        }
+
+        .submit:hover {
+            opacity: 0.92;
+        }

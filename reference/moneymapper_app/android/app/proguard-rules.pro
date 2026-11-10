@@ -54,3 +54,12 @@
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
 -dontwarn java.lang.invoke.**
+-dontwarn com.google.android.play.core.**
+
+# OkHttp R8/ProGuard rules
+-dontwarn okhttp3.internal.platform.BouncyCastlePlatform
+-dontwarn okhttp3.internal.platform.ConscryptPlatform**
+-dontwarn okhttp3.internal.platform.OpenJSSEPlatform
+-dontwarn org.bouncycastle.jsse.**
+-dontwarn org.conscrypt.**
+-dontwarn org.openjsse.**

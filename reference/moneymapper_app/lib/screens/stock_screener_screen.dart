@@ -65,15 +65,28 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
     if (!mounted) return;
     setState(() => _loading = true);
     try {
-      final res = await _supabase
-          .schema('bse_data')
-          .from('stock_signals')
-          .select()
-          .order('score', ascending: false);
+      List<Map<String, dynamic>> allRows = [];
+      int offset = 0;
+      final int pageSize = 1000;
+      
+      while (true) {
+        final res = await _supabase
+            .schema('bse_data')
+            .from('stock_signals')
+            .select()
+            .order('score', ascending: false)
+            .range(offset, offset + pageSize - 1);
+            
+        final chunk = List<Map<String, dynamic>>.from(res);
+        allRows.addAll(chunk);
+        
+        if (chunk.length < pageSize) break;
+        offset += pageSize;
+      }
       
       if (mounted) {
         setState(() {
-          _allSignals = List<Map<String, dynamic>>.from(res);
+          _allSignals = allRows;
           _filteredSignals = _allSignals;
           _loading = false;
         });
@@ -151,7 +164,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
             Text("• Bollinger Bands: Volatility exhaustion", style: TextStyle(fontSize: 12)),
             Text("• Pivot Analysis: Trend-cycle detection", style: TextStyle(fontSize: 12)),
             SizedBox(height: 16),
-            Text("Scores above 70 indicate high-confidence signals. Always follow the Stop Loss range for risk management.", style: TextStyle(fontSize: 11, color: Colors.grey, fontStyle: FontStyle.italic)),
+            Text("Scores above 70 indicate high-confidence signals. Always follow the Risk Level range for risk management.", style: TextStyle(fontSize: 11, color: Colors.grey, fontStyle: FontStyle.italic)),
           ],
         ),
         actions: [
@@ -271,10 +284,10 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
     String subLabel = "STABLE MARKET";
     Color accentColor = Colors.orange;
 
-    if (_sentimentDirection == "BUY") {
+    if (_sentimentDirection == "BUY" || _sentimentDirection == "BULLISH") {
       subLabel = "BULLISH / GREED";
       accentColor = Colors.green;
-    } else if (_sentimentDirection == "SELL") {
+    } else if (_sentimentDirection == "SELL" || _sentimentDirection == "BEARISH") {
       subLabel = "BEARISH / FEAR";
       accentColor = Colors.red;
     }
@@ -427,9 +440,17 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
             // Force WAIT if score is 0
             if (score == 0) direction = 'WAIT';
 
-            final isBuy = direction == 'BUY';
+            final isBuy = direction == 'BUY' || direction == 'BULLISH';
+            final isSell = direction == 'SELL' || direction == 'BEARISH';
             final isWait = direction == 'WAIT';
             final isLocked = !_isPro && (_isTrialExpired || i > 0);
+
+            String displayDirection = direction;
+            if (isBuy) {
+              displayDirection = 'BULLISH';
+            } else if (isSell) {
+              displayDirection = 'BEARISH';
+            }
 
             return GestureDetector(
               onTap: isLocked ? () {
@@ -549,7 +570,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
-                                        direction,
+                                        displayDirection,
                                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
                                       ),
                                     ),
@@ -560,9 +581,9 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      _rangeBox("STOP LOSS", s['sl_range']?.toString() ?? 'N/A', AppColors.danger),
-                                      _rangeBox("ENTRY ZONE", s['entry_range']?.toString() ?? 'N/A', Colors.blue),
-                                      _rangeBox("TARGET", s['target_range']?.toString() ?? 'N/A', AppColors.success),
+                                      _rangeBox("RISK LEVEL", s['sl_range']?.toString() ?? 'N/A', AppColors.danger),
+                                      _rangeBox("ENTRY REFERENCE ZONE", s['entry_range']?.toString() ?? 'N/A', Colors.blue),
+                                      _rangeBox("PROJECTED LEVELS", s['target_range']?.toString() ?? 'N/A', AppColors.success),
                                     ],
                                   ),
                                 ],

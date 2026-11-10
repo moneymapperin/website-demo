@@ -496,7 +496,7 @@ class _IncomePillarDashboardState extends State<IncomePillarDashboard> {
                     ),
                   ),
                   Text(
-                    "₹${_formatCompact(forecastAnnual)} / year",
+                    "${_formatCompact(forecastAnnual)} / year",
                     style: const TextStyle(
                       fontSize: 10,
                       color: Colors.grey,

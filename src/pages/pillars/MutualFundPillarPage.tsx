@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 const SectionHeader: React.FC<{ icon: React.ReactNode; label: string }> = ({ icon, label }) => (
-  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 pl-1 mb-2.5">
+  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 pl-1 mb-2.5">
     {icon}
     <span>{label}</span>
   </div>
@@ -233,10 +233,10 @@ export const MutualFundPillarPage: React.FC = () => {
       {/* 1. SCORE HEADER CARD */}
       <div
         data-testid="investments-score-header"
-        className="relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-[#0A0B1A]/95 border border-indigo-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6"
+        className="relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200/80 dark:border-indigo-500/30 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         {/* Subtle Ambient Glow */}
-        <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-purple-900/20 via-indigo-900/10 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-purple-100/60 dark:from-purple-900/20 via-indigo-50/40 dark:via-indigo-900/10 to-transparent pointer-events-none" />
 
         {/* Left: Icon Box + Score Details */}
         <div className="flex items-center gap-4 relative z-10">
@@ -245,17 +245,17 @@ export const MutualFundPillarPage: React.FC = () => {
           </div>
 
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               GLOBAL PILLAR SCORE
             </div>
-            <div className="text-4xl sm:text-5xl font-black text-white mt-1 leading-none tracking-tight">
+            <div className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white mt-1 leading-none tracking-tight">
               {Math.round(p.investmentScore)}
             </div>
           </div>
         </div>
 
         {/* Glowing Background Wave Graphic spanning from center across to rings */}
-        <div className="absolute inset-y-0 left-[26%] right-0 hidden md:block pointer-events-none select-none overflow-hidden">
+        <div className="absolute inset-y-0 left-[26%] right-0 hidden md:block pointer-events-none select-none overflow-hidden opacity-35 dark:opacity-100">
           <svg
             className="w-full h-full"
             viewBox="0 0 700 130"
@@ -316,20 +316,20 @@ export const MutualFundPillarPage: React.FC = () => {
         <div className="flex items-center gap-6 relative z-10 self-end sm:self-center">
           {/* Asset Mix Ring */}
           <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#38BDF8] flex items-center justify-center text-base font-black text-white bg-[#071324] shadow-[0_0_18px_rgba(56,189,248,0.35)]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#38BDF8] flex items-center justify-center text-base font-black text-sky-700 dark:text-white bg-sky-50 dark:bg-[#071324] shadow-sm dark:shadow-[0_0_18px_rgba(56,189,248,0.35)]">
               {Math.round(p.assetBalanceScore)}
             </div>
-            <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 mt-1.5">
               Asset Mix
             </span>
           </div>
 
           {/* SIP Health Ring */}
           <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#10B981] flex items-center justify-center text-base font-black text-white bg-[#052018] shadow-[0_0_18px_rgba(16,185,129,0.35)]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#10B981] flex items-center justify-center text-base font-black text-emerald-700 dark:text-white bg-emerald-50 dark:bg-[#052018] shadow-sm dark:shadow-[0_0_18px_rgba(16,185,129,0.35)]">
               {Math.round(p.sipScore)}
             </div>
-            <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 mt-1.5">
               SIP Health
             </span>
           </div>
@@ -341,26 +341,26 @@ export const MutualFundPillarPage: React.FC = () => {
         {/* Column 1: PORTFOLIO BREAKDOWN */}
         <div>
           <SectionHeader
-            icon={<Briefcase className="w-4 h-4 text-purple-400" />}
+            icon={<Briefcase className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
             label="PORTFOLIO BREAKDOWN"
           />
-          <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+          <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
             {/* Total Wealth Assets Row */}
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-blue-600/20 border border-blue-500/35 flex items-center justify-center text-blue-400 shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.2)]">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-600/20 border border-blue-200 dark:border-blue-500/35 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-sm dark:shadow-[0_0_12px_rgba(59,130,246,0.2)]">
                   <Briefcase className="w-5 h-5" />
                 </div>
-                <div className="text-sm font-bold text-white">
+                <div className="text-sm font-bold text-slate-900 dark:text-white">
                   Total Wealth Assets
                 </div>
               </div>
-              <span className="text-xl sm:text-2xl font-black text-[#38BDF8] tracking-tight">
+              <span className="text-xl sm:text-2xl font-black text-sky-600 dark:text-[#38BDF8] tracking-tight">
                 {formatInr(p.totalInvested)}
               </span>
             </div>
 
-            <div className="border-t border-white/[0.06]" />
+            <div className="border-t border-slate-100 dark:border-white/[0.06]" />
 
             {/* 4 Asset Rows */}
             <div className="space-y-3">
@@ -369,22 +369,22 @@ export const MutualFundPillarPage: React.FC = () => {
                   <div className="flex items-center gap-2.5">
                     <div className={`w-2.5 h-2.5 rounded-full ${row.dotBg} shrink-0 ${row.glowClass}`} />
                     <div>
-                      <div className="text-sm font-bold text-white">
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">
                         {row.label}
                       </div>
-                      <div className="text-xs text-zinc-400">
+                      <div className="text-xs text-slate-500 dark:text-zinc-400">
                         {row.tag}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-white">
+                    <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                       {formatInr(row.amount)}
                     </span>
                     <button
                       type="button"
                       onClick={() => openQuickEdit(row.label, row.key, row.amount)}
-                      className="p-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                       title={`Edit ${row.label}`}
                       aria-label={`Edit ${row.label}`}
                     >
@@ -400,24 +400,24 @@ export const MutualFundPillarPage: React.FC = () => {
         {/* Column 2: ALLOCATION HEALTH */}
         <div>
           <SectionHeader
-            icon={<Layers className="w-4 h-4 text-purple-400" />}
+            icon={<Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
             label="ALLOCATION HEALTH"
           />
-          <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+          <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
             <span className="sr-only">Allocation Breakdown</span>
             {portfolioRows.map((row) => {
               const pct = p.totalInvested > 0 ? (row.amount / p.totalInvested) * 100 : 0;
               return (
                 <div key={`alloc-${row.key}`} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-white">
+                    <span className="font-semibold text-slate-900 dark:text-white">
                       {row.label}
                     </span>
                     <span className={`font-black ${row.colorText}`}>
                       {pct.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="h-2.5 w-full bg-zinc-800/80 rounded-full overflow-hidden shadow-inner">
+                  <div className="h-2.5 w-full bg-slate-200 dark:bg-zinc-800/80 rounded-full overflow-hidden shadow-inner">
                     <div
                       className={`h-full ${row.barBg} ${row.shadowClass} rounded-full transition-all duration-500`}
                       style={{ width: `${Math.min(100, Math.max(1, pct))}%` }}
@@ -433,23 +433,23 @@ export const MutualFundPillarPage: React.FC = () => {
       {/* 3. SIP ANALYSIS (Full Width) */}
       <div>
         <SectionHeader
-          icon={<Coins className="w-4 h-4 text-purple-400" />}
+          icon={<Coins className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
           label="SIP ANALYSIS"
         />
-        <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md">
+        <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
             {/* Left Column: Monthly SIP Contribution & Details */}
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/35 flex items-center justify-center text-blue-400 shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.2)]">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-600/20 border border-blue-200 dark:border-blue-500/35 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-sm dark:shadow-[0_0_12px_rgba(59,130,246,0.2)]">
                     <Link2 className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
                     Monthly SIP Contribution
                   </span>
                 </div>
-                <span className="text-xl sm:text-2xl font-black text-[#38BDF8] tracking-tight">
+                <span className="text-xl sm:text-2xl font-black text-sky-600 dark:text-[#38BDF8] tracking-tight">
                   {formatInr(p.monthlySipTotal)}
                 </span>
               </div>
@@ -459,18 +459,18 @@ export const MutualFundPillarPage: React.FC = () => {
                 <div className="flex items-center justify-between gap-4 pl-1">
                   <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-[#FB923C] shrink-0 shadow-[0_0_8px_rgba(251,146,60,0.6)]" />
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">
                       Mutual Fund SIP
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-orange-400">
+                    <span className="text-sm sm:text-base font-bold text-orange-600 dark:text-orange-400">
                       {formatInr(p.sipDebt)}
                     </span>
                     <button
                       type="button"
                       onClick={() => openManageSip('Mutual Fund SIP', 'mfSips', 'monthlySipDebt', p.mfSips)}
-                      className="p-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                       title="Manage Mutual Fund SIP"
                       aria-label="Manage Mutual Fund SIP"
                     >
@@ -483,18 +483,18 @@ export const MutualFundPillarPage: React.FC = () => {
                 <div className="flex items-center justify-between gap-4 pl-1">
                   <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-[#FBBF24] shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">
                       Gold SIP
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-amber-400">
+                    <span className="text-sm sm:text-base font-bold text-amber-600 dark:text-amber-400">
                       {formatInr(p.sipGold)}
                     </span>
                     <button
                       type="button"
                       onClick={() => openManageSip('Gold SIP', 'goldSips', 'monthlySipGold', p.goldSips)}
-                      className="p-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                       title="Manage Gold SIP"
                       aria-label="Manage Gold SIP"
                     >
@@ -506,18 +506,18 @@ export const MutualFundPillarPage: React.FC = () => {
             </div>
 
             {/* Right Column: Monthly Shortfall (Gap) */}
-            <div className="lg:border-l lg:border-white/[0.08] lg:pl-6 space-y-3.5">
+            <div className="lg:border-l lg:border-slate-200 dark:lg:border-white/[0.08] lg:pl-6 space-y-3.5">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-sm font-bold text-[#F43F5E]">
+                <span className="text-sm font-bold text-rose-600 dark:text-[#F43F5E]">
                   Monthly Shortfall (Gap)
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-[#F43F5E] tracking-tight">
+                <span className="text-xl sm:text-2xl font-black text-rose-600 dark:text-[#F43F5E] tracking-tight">
                   {formatInr(p.sipGap)}
                 </span>
               </div>
 
               {/* Shortfall Progress Bar */}
-              <div className="h-2.5 w-full bg-zinc-800/80 rounded-full overflow-hidden shadow-inner">
+              <div className="h-2.5 w-full bg-slate-200 dark:bg-zinc-800/80 rounded-full overflow-hidden shadow-inner">
                 <div
                   className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]"
                   style={{
@@ -527,7 +527,7 @@ export const MutualFundPillarPage: React.FC = () => {
               </div>
 
               {/* Footnote text */}
-              <div className="text-xs text-zinc-400 italic">
+              <div className="text-xs text-slate-500 dark:text-zinc-400 italic">
                 Increase your monthly SIP by {formatInr(p.sipGap)} to reach your financial potential.
               </div>
             </div>
@@ -549,22 +549,22 @@ export const MutualFundPillarPage: React.FC = () => {
       {/* Quick Edit Modal */}
       {editField && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-white">
+          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Update {editField.title}
             </h3>
             <form onSubmit={handleQuickEditSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300 block mb-1.5">
                   Amount (₹)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">₹</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 font-bold text-sm">₹</span>
                   <input
                     type="number"
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-white/10 bg-[#121528] text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-zinc-600"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-[#121528] text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-slate-400 dark:placeholder:text-zinc-600"
                     placeholder="Enter amount"
                     autoFocus
                   />
@@ -575,7 +575,7 @@ export const MutualFundPillarPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setEditField(null)}
-                  className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -595,9 +595,9 @@ export const MutualFundPillarPage: React.FC = () => {
       {/* Manage SIP Modal */}
       {activeSipModal && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between pb-1">
-              <h3 className="text-base sm:text-lg font-bold text-white">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                 Manage {activeSipModal.title}
               </h3>
               <button
@@ -609,7 +609,7 @@ export const MutualFundPillarPage: React.FC = () => {
                       : null
                   )
                 }
-                className="p-1 rounded-lg text-indigo-400 hover:bg-white/[0.05] transition-colors cursor-pointer"
+                className="p-1 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
                 title="Add SIP"
                 aria-label="Add SIP"
               >
@@ -619,14 +619,14 @@ export const MutualFundPillarPage: React.FC = () => {
 
             <div className="overflow-y-auto space-y-3 flex-1 pr-1">
               {activeSipModal.list.length === 0 ? (
-                <div className="text-center py-6 text-xs text-zinc-400">
+                <div className="text-center py-6 text-xs text-slate-500 dark:text-zinc-400">
                   No SIPs added. Click the + button above to add one.
                 </div>
               ) : (
                 activeSipModal.list.map((item, index) => (
                   <div
                     key={`sip-${index}`}
-                    className="p-3 rounded-xl border border-white/10 bg-[#121528] space-y-2 relative group"
+                    className="p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#121528] space-y-2 relative group"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <input
@@ -634,12 +634,12 @@ export const MutualFundPillarPage: React.FC = () => {
                         placeholder="Fund or Asset Name"
                         value={item.name}
                         onChange={(e) => updateSipItem(index, 'name', e.target.value)}
-                        className="bg-transparent border-b border-white/10 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 w-full pb-1"
+                        className="bg-transparent border-b border-slate-300 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 w-full pb-1"
                       />
                       <button
                         type="button"
                         onClick={() => removeSipItem(index)}
-                        className="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"
+                        className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-1 cursor-pointer"
                         title="Remove SIP"
                         aria-label="Remove SIP"
                       >
@@ -649,17 +649,17 @@ export const MutualFundPillarPage: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <div>
-                        <label className="text-[10px] text-zinc-400 block mb-0.5">Amount (₹)</label>
+                        <label className="text-[10px] text-slate-500 dark:text-zinc-400 block mb-0.5">Amount (₹)</label>
                         <input
                           type="number"
                           placeholder="Amount"
                           value={item.amount}
                           onChange={(e) => updateSipItem(index, 'amount', e.target.value)}
-                          className="w-full px-2 py-1 rounded bg-[#0A0B1A] border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"
+                          className="w-full px-2 py-1 rounded bg-white dark:bg-[#0A0B1A] border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] text-zinc-400 block mb-0.5">SIP Date (1-31)</label>
+                        <label className="text-[10px] text-slate-500 dark:text-zinc-400 block mb-0.5">SIP Date (1-31)</label>
                         <input
                           type="number"
                           min={1}
@@ -667,7 +667,7 @@ export const MutualFundPillarPage: React.FC = () => {
                           placeholder="Date"
                           value={item.date}
                           onChange={(e) => updateSipItem(index, 'date', e.target.value)}
-                          className="w-full px-2 py-1 rounded bg-[#0A0B1A] border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"
+                          className="w-full px-2 py-1 rounded bg-white dark:bg-[#0A0B1A] border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                         />
                       </div>
                     </div>
@@ -676,11 +676,11 @@ export const MutualFundPillarPage: React.FC = () => {
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+            <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setActiveSipModal(null)}
-                className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
               >
                 Cancel
               </button>

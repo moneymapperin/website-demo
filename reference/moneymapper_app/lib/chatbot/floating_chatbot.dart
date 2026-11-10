@@ -398,20 +398,25 @@ class _FloatingChatbotState extends State<FloatingChatbot>
               radius: 16,
               backgroundColor: isDark ? const Color(0xFF312E81) : const Color(0xFFE0E7FF),
               child: ClipOval(
-                child: Image.asset(
-                  'assets/mascot no background -s.png',
-                  width: 28,
-                  height: 28,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Icon(
-                    Icons.smart_toy,
-                    size: 18,
-                    color: isDark ? Colors.white : const Color(0xFF4F46E5),
+                child: ClipRect(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    heightFactor: 0.9,
+                    child: Image.asset(
+                      'assets/mascot no background -s.png',
+                      width: 28,
+                      height: 28,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.smart_toy,
+                        size: 18,
+                        color: isDark ? Colors.white : const Color(0xFF4F46E5),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

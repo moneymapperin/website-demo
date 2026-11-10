@@ -128,7 +128,7 @@ class AuthService {
     try {
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'moneymapper://login-callback/',
+        redirectTo: 'io.supabase.moneymapper://login-callback/',
       );
     } catch (e) {
       throw ResilienceUtils.sanitizeErrorMessage(e);

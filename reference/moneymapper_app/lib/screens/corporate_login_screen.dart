@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../widgets/auth_page_layout.dart';
@@ -56,6 +57,10 @@ class _CorporateLoginScreenState extends State<CorporateLoginScreen> {
       if (!mounted) return;
 
       if (adminCheck.containsKey('company_name')) {
+        // Mark session as corporate
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('is_corporate_admin', true);
+
         // Success: Redirect to Native Corporate Dashboard
         Navigator.pushReplacement(
           context,
@@ -72,7 +77,7 @@ class _CorporateLoginScreenState extends State<CorporateLoginScreen> {
         setState(() => _loading = false);
         
         // Check for specific error message that indicates role mismatch
-        if (e.toString().contains("not in the Corporate Admins table")) {
+        if (e.toString().toLowerCase().contains("not an admin") || e.toString().toLowerCase().contains("not in the corporate admins table")) {
           await _auth.logout(); // Security logout
           _showStandardUserDialog();
         } else {

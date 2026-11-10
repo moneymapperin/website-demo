@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 const SectionHeader: React.FC<{ icon: React.ReactNode; label: string }> = ({ icon, label }) => (
-  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 pl-1 mb-2.5">
+  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 pl-1 mb-2.5">
     {icon}
     <span>{label}</span>
   </div>
@@ -175,10 +175,10 @@ export const EmergencyFundPage: React.FC = () => {
       {/* 1. HERO EMERGENCY SAVINGS SCORE Card */}
       <div
         data-testid="emergency-score-header"
-        className="relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-[#0A0B1A]/95 border border-indigo-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6"
+        className="relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200/80 dark:border-indigo-500/30 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         {/* Subtle Ambient Glow */}
-        <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-purple-900/20 via-indigo-900/10 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-purple-100/60 dark:from-purple-900/20 via-indigo-50/40 dark:via-indigo-900/10 to-transparent pointer-events-none" />
 
         {/* Left: Landmark Icon Box + Score Details */}
         <div className="flex items-center gap-4 relative z-10">
@@ -187,17 +187,17 @@ export const EmergencyFundPage: React.FC = () => {
           </div>
 
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               EMERGENCY SAVINGS SCORE
             </div>
-            <div className="text-4xl sm:text-5xl font-black text-white mt-1 leading-none tracking-tight">
+            <div className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white mt-1 leading-none tracking-tight">
               {Math.round(p.savingsScore)}
             </div>
           </div>
         </div>
 
         {/* Glowing Background Wave Graphic spanning from center across to rings */}
-        <div className="absolute inset-y-0 left-[26%] right-0 hidden md:block pointer-events-none select-none overflow-hidden">
+        <div className="absolute inset-y-0 left-[26%] right-0 hidden md:block pointer-events-none select-none overflow-hidden opacity-35 dark:opacity-100">
           <svg
             className="w-full h-full"
             viewBox="0 0 700 130"
@@ -257,10 +257,10 @@ export const EmergencyFundPage: React.FC = () => {
         {/* Right: Readiness Score Ring */}
         <div className="flex items-center gap-6 relative z-10 self-end sm:self-center">
           <div className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-[#10B981] flex items-center justify-center text-base font-black text-white bg-[#052018] shadow-[0_0_18px_rgba(16,185,129,0.35)]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#10B981] flex items-center justify-center text-base font-black text-emerald-700 dark:text-white bg-emerald-50 dark:bg-[#052018] shadow-sm dark:shadow-[0_0_18px_rgba(16,185,129,0.35)]">
               {Math.round(p.readinessScore)}
             </div>
-            <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 mt-1.5">
               Readiness
             </span>
           </div>
@@ -272,24 +272,24 @@ export const EmergencyFundPage: React.FC = () => {
         {/* Column 1: EMERGENCY RESERVES */}
         <div>
           <SectionHeader
-            icon={<Landmark className="w-4 h-4 text-purple-400" />}
+            icon={<Landmark className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
             label="EMERGENCY RESERVES"
           />
-          <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+          <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
             {/* Current Estimated Fund Row */}
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-emerald-600/20 border border-emerald-500/35 flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+                <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-600/20 border border-emerald-200 dark:border-emerald-500/35 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-sm dark:shadow-[0_0_12px_rgba(16,185,129,0.2)]">
                   <Wallet className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">Current Estimated Fund</div>
-                  <div className="text-xs text-zinc-400 mt-0.5">Total liquid cushion readily accessible</div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">Current Estimated Fund</div>
+                  <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Total liquid cushion readily accessible</div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2.5">
-                <span className="text-xl sm:text-2xl font-black text-[#10B981] tracking-tight">
+                <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-[#10B981] tracking-tight">
                   {formatEmergencyCompact(p.efCurrent)}
                 </span>
                 <button
@@ -299,7 +299,7 @@ export const EmergencyFundPage: React.FC = () => {
                     setQuickEditVal(p.efCurrent.toString());
                     setIsQuickEditOpen(true);
                   }}
-                  className="p-1.5 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/10 text-emerald-400 hover:text-white transition-all cursor-pointer"
+                  className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-white transition-all cursor-pointer"
                   title="Edit Current Fund"
                   aria-label="Edit Current Fund"
                 >
@@ -308,39 +308,39 @@ export const EmergencyFundPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="border-t border-white/[0.06]" />
+            <div className="border-t border-slate-100 dark:border-white/[0.06]" />
 
             {/* Target Goal Row */}
             <div className="flex items-center justify-between gap-4 pl-1">
               <div className="flex items-center gap-2.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#A855F7] shrink-0 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
                 <div>
-                  <div className="text-sm font-bold text-white">Target Goal</div>
-                  <div className="text-xs text-zinc-400 mt-0.5">Safe Cushion</div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">Target Goal</div>
+                  <div className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Safe Cushion</div>
                 </div>
               </div>
-              <span className="text-sm sm:text-base font-bold text-white">
+              <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                 {formatEmergencyCompact(p.efTarget)}
               </span>
             </div>
 
-            <div className="border-t border-white/[0.06]" />
+            <div className="border-t border-slate-100 dark:border-white/[0.06]" />
 
             {/* Parked In Row */}
             <div className="flex items-center justify-between gap-4 pl-1">
               <div className="flex items-center gap-2.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#38BDF8] shrink-0 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
                 <div>
-                  <div className="text-sm font-bold text-white">Parked In</div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">Parked In</div>
                   <div
                     data-testid="yield-tag"
-                    className="inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[11px] font-bold"
+                    className="inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 text-[11px] font-bold"
                   >
                     ⚡ {p.yieldTag}
                   </div>
                 </div>
               </div>
-              <span className="text-sm sm:text-base font-bold text-white">
+              <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                 {p.parkedLocation}
               </span>
             </div>
@@ -350,24 +350,24 @@ export const EmergencyFundPage: React.FC = () => {
         {/* Column 2: READINESS HEALTH */}
         <div>
           <SectionHeader
-            icon={<BarChart3 className="w-4 h-4 text-purple-400" />}
+            icon={<BarChart3 className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
             label="READINESS HEALTH"
           />
-          <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+          <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-white">Fund Completion</h2>
-              <span className="text-sm sm:text-base font-black text-[#10B981]">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">Fund Completion</h2>
+              <span className="text-sm sm:text-base font-black text-emerald-600 dark:text-[#10B981]">
                 {progressPct.toFixed(1)}%
               </span>
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs text-zinc-400">
+              <div className="text-xs text-slate-500 dark:text-zinc-400">
                 Target Fulfilment
                 <span className="sr-only">Target Fulfillment</span>
               </div>
 
-              <div className="h-3 w-full bg-zinc-800/80 rounded-full overflow-hidden shadow-inner">
+              <div className="h-3 w-full bg-slate-200 dark:bg-zinc-800/80 rounded-full overflow-hidden shadow-inner">
                 <div
                   className="h-full bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(168,85,247,0.6)]"
                   style={{ width: `${Math.min(100, Math.max(1, progressPct))}%` }}
@@ -383,24 +383,24 @@ export const EmergencyFundPage: React.FC = () => {
         {/* Column 1: STRATEGY & TIPS */}
         <div>
           <SectionHeader
-            icon={<Lightbulb className="w-4 h-4 text-purple-400" />}
+            icon={<Lightbulb className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
             label="STRATEGY & TIPS"
           />
           <div
             data-testid="shortfall-card"
-            className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md flex flex-col justify-between space-y-5"
+            className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md flex flex-col justify-between space-y-5"
           >
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-[#F43F5E]">
+                <span className="text-sm font-bold text-rose-600 dark:text-[#F43F5E]">
                   Shortfall to Target
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-[#F43F5E] tracking-tight">
+                <span className="text-xl sm:text-2xl font-black text-rose-600 dark:text-[#F43F5E] tracking-tight">
                   {formatEmergencyCompact(shortfallGap)}
                 </span>
               </div>
 
-              <p className="text-xs text-zinc-400 leading-relaxed font-medium">
+              <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
                 {shortfallGap > 0
                   ? 'Your emergency fund is below target. Move your surplus to a Liquid Fund for safety.'
                   : 'Excellent! Your emergency fund is fully funded.'}
@@ -423,24 +423,24 @@ export const EmergencyFundPage: React.FC = () => {
         {/* Column 2: UPDATE SAVINGS BALANCE */}
         <div>
           <SectionHeader
-            icon={<Coins className="w-4 h-4 text-purple-400" />}
+            icon={<Coins className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
             label="UPDATE SAVINGS BALANCE"
           />
-          <div className="p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4">
+          <div className="p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4">
             <div>
-              <h2 className="text-sm font-bold text-white">Add to Emergency Fund</h2>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">Add to Emergency Fund</h2>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
                 Enter the amount you saved up this month.
               </p>
             </div>
 
             <form onSubmit={handleAddSavingsSubmit} className="space-y-3.5">
               <div>
-                <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300 block mb-1.5">
                   Savings Amount
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 font-bold text-sm">
                     ₹
                   </span>
                   <input
@@ -448,7 +448,7 @@ export const EmergencyFundPage: React.FC = () => {
                     data-testid="savings-amount-input"
                     value={savingsInput}
                     onChange={(e) => setSavingsInput(e.target.value)}
-                    className="w-full pl-8 pr-4 py-3 rounded-xl border border-white/10 bg-[#121528] text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-zinc-600"
+                    className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-[#121528] text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-400 dark:placeholder:text-zinc-600"
                     placeholder="Savings Amount"
                   />
                 </div>
@@ -470,22 +470,22 @@ export const EmergencyFundPage: React.FC = () => {
       {/* Quick Edit Modal */}
       {isQuickEditOpen && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-white">
+          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Update Estimated Fund
             </h3>
             <form onSubmit={handleQuickEditSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300 block mb-1.5">
                   New Amount (₹)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">₹</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 font-bold text-sm">₹</span>
                   <input
                     type="number"
                     value={quickEditVal}
                     onChange={(e) => setQuickEditVal(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-white/10 bg-[#121528] text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-zinc-600"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-[#121528] text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-slate-400 dark:placeholder:text-zinc-600"
                     placeholder="Enter amount"
                     autoFocus
                   />
@@ -496,7 +496,7 @@ export const EmergencyFundPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsQuickEditOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -516,16 +516,16 @@ export const EmergencyFundPage: React.FC = () => {
       {/* Add Savings Confirmation Modal */}
       {confirmAmount && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-white">Confirm Update</h3>
-            <p className="text-xs text-zinc-300 leading-relaxed">
+          <div className="bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Confirm Update</h3>
+            <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">
               Add ₹{confirmAmount} to your emergency fund?
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setConfirmAmount(null)}
-                className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
               >
                 Cancel
               </button>

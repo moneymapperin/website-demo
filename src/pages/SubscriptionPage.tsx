@@ -6,6 +6,7 @@ import { usePlan } from '../hooks/usePlan';
 import { useToast } from '../context/ToastContext';
 import { premiumService, PremiumService, isProPlan } from '../services/premiumService';
 import { paymentService } from '../services/paymentService';
+import { supabase } from '../lib/supabase';
 import { APP_COLORS } from '../theme/tokens';
 import quarterlyImg from '../assets/app/quarterly_plan.png';
 import halfYearlyImg from '../assets/app/half_yearly_2.png';
@@ -13,8 +14,10 @@ import yearlyImg from '../assets/app/yearly_plan_1.png';
 
 export interface SubPlan {
   id: string;
+  planCode?: string;
   title: string;
   months: number;
+  rawPrice?: number;
   storePrice: string;
   totalBilledPrice: string;
   originalPrice: string;
@@ -71,11 +74,14 @@ export const SubscriptionPage: React.FC = () => {
   } catch {
     // Graceful fallback for environments without ToastProvider
   }
+  const [plans, setPlans] = useState<SubPlan[]>(SUBSCRIPTION_PLANS);
+  const [plansAvailable, setPlansAvailable] = useState<boolean>(true);
   const [selectedPlan, setSelectedPlan] = useState<SubPlan>(SUBSCRIPTION_PLANS[2]); // Default Yearly
   const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   const processSubscriptionDetails = useCallback(async (details: any, updateServicePlan: boolean = true) => {
     if (details?.current_period_end) {
@@ -133,6 +139,90 @@ export const SubscriptionPage: React.FC = () => {
     };
   }, [processSubscriptionDetails]);
 
+  // Load real plans dynamically from payments.plans in Supabase
+  useEffect(() => {
+    let isMounted = true;
+    async function loadDynamicPlans() {
+      try {
+        const { data, error } = await supabase
+          .schema('payments')
+          .from('plans')
+          .select('*')
+          .order('months_duration', { ascending: true });
+
+        if (error || !data || data.length === 0) {
+          if (error) {
+            console.error('Could not load plans from payments.plans:', error);
+          }
+          if (isMounted) {
+            setPlansAvailable(false);
+            showToast('Plans are unavailable right now. Please try again later.');
+          }
+          return;
+        }
+
+        const loadedPlans: SubPlan[] = data.map((row: any) => {
+          const rawPrice = Number(row.discounted_price);
+          const originalPrice = Number(row.original_price);
+          const months = Number(row.months_duration);
+
+          const monthlyPrice = Math.round(rawPrice / months);
+          const totalOriginal = originalPrice * months;
+          const savingsAmt = totalOriginal - rawPrice;
+          const discountPct = totalOriginal > 0 ? Math.round((savingsAmt / totalOriginal) * 100) : 0;
+
+          let mappedImage = quarterlyImg;
+          if (months === 6) {
+            mappedImage = halfYearlyImg;
+          } else if (months === 12) {
+            mappedImage = yearlyImg;
+          }
+
+          return {
+            id: String(row.id),
+            planCode: String(row.plan_code),
+            title: row.title,
+            months,
+            rawPrice,
+            storePrice: `₹${monthlyPrice.toLocaleString('en-IN')}`,
+            totalBilledPrice: `₹${Math.round(rawPrice).toLocaleString('en-IN')}`,
+            originalPrice: `₹${Math.round(originalPrice).toLocaleString('en-IN')}`,
+            discount: `${discountPct}% OFF`,
+            savings: `SAVE ₹${Math.round(savingsAmt).toLocaleString('en-IN')}`,
+            image: mappedImage,
+            isRecommended: row.is_recommended === true,
+          };
+        });
+
+        if (!isMounted) return;
+
+        setPlans(loadedPlans);
+        setPlansAvailable(true);
+
+        const defaultPlan =
+          loadedPlans.find((p) => p.isRecommended) ||
+          loadedPlans.find((p) => p.months === 12) ||
+          loadedPlans[0];
+
+        setSelectedPlan((prev) => {
+          const matching = loadedPlans.find((p) => p.months === prev.months);
+          return matching || defaultPlan;
+        });
+      } catch (err) {
+        console.error('Exception loading dynamic plans:', err);
+        if (isMounted) {
+          setPlansAvailable(false);
+          showToast('Plans are unavailable right now. Please try again later.');
+        }
+      }
+    }
+
+    loadDynamicPlans();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Re-read details and update expiry banner whenever the plan changes (two-way sync)
   useEffect(() => {
     const unsubscribe = premiumService.subscribe(async () => {
@@ -162,17 +252,21 @@ export const SubscriptionPage: React.FC = () => {
   };
 
   const handleBuyPlan = async () => {
-    if (paymentLoading) return;
+    if (paymentLoading || isFinalizing) return;
 
-    const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
-    if (!keyId || typeof keyId !== 'string' || keyId.trim() === '') {
-      showToast('Online payments are not available right now.');
+    if (!plansAvailable || !selectedPlan.planCode) {
+      showToast('Plans are unavailable right now. Please try again later.');
       return;
     }
 
     try {
       setPaymentLoading(true);
-      await paymentService.startPurchase(selectedPlan);
+      await paymentService.startCheckout(selectedPlan, {
+        navigate,
+        showToast,
+        refreshPlan,
+        onFinalizingChange: setIsFinalizing,
+      });
 
       await refreshPlan(true);
       const details = await apiService.getSubscriptionDetails();
@@ -186,16 +280,26 @@ export const SubscriptionPage: React.FC = () => {
       if (err?.isCancelled || err?.message === 'Payment cancelled.') {
         showToast('Payment cancelled.');
       } else if (
-        err?.message === 'VITE_RAZORPAY_KEY_ID_MISSING' ||
-        err?.message === 'UNAVAILABLE' ||
-        err?.message?.includes('Failed to fetch') ||
-        err?.message?.includes('network') ||
-        err?.message?.includes('unreachable')
+        err?.code === 'GATEWAYS_UNAVAILABLE' ||
+        err?.message?.includes('temporarily down for maintenance')
+      ) {
+        showToast({
+          message: 'Payments are temporarily down for maintenance. Please try again later.',
+          backgroundColor: APP_COLORS.danger,
+        });
+      } else if (
+        err?.message === 'Plan is not available for purchase right now.'
+      ) {
+        showToast('Plans are unavailable right now. Please try again later.');
+      } else if (
+        err?.message?.toLowerCase().includes('failed to fetch') ||
+        err?.message?.toLowerCase().includes('network') ||
+        err?.message?.toLowerCase().includes('unreachable')
       ) {
         showToast('Online payments are not available right now.');
       } else {
         showToast({
-          message: `Purchase Failed: ${err?.message || 'Unknown error'}`,
+          message: err?.message || 'Payment initiation failed',
           backgroundColor: APP_COLORS.danger,
         });
       }
@@ -278,7 +382,7 @@ export const SubscriptionPage: React.FC = () => {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          {SUBSCRIPTION_PLANS.map((plan) => {
+          {plans.map((plan) => {
             const isSelected = selectedPlan.id === plan.id;
             return (
               <div
@@ -349,7 +453,8 @@ export const SubscriptionPage: React.FC = () => {
       <div className="space-y-3 pt-4">
         <button
           type="button"
-          disabled={paymentLoading}
+          disabled={paymentLoading || isFinalizing || !plansAvailable || !selectedPlan.planCode}
+          title={!plansAvailable || !selectedPlan.planCode ? 'Plans are unavailable right now. Please try again later.' : undefined}
           data-testid="buy-plan-btn"
           onClick={handleBuyPlan}
           className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:via-purple-500 hover:to-indigo-600 text-white font-bold text-sm text-center shadow-lg hover:shadow-indigo-500/25 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
@@ -377,11 +482,25 @@ export const SubscriptionPage: React.FC = () => {
         </div>
       </div>
 
-      {paymentLoading && (
+      {paymentLoading && !isFinalizing && (
         <div data-testid="payment-loading-overlay" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/30 shadow-2xl">
             <RotateCw className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
             <p className="text-xs font-bold text-slate-800 dark:text-white">Processing payment...</p>
+          </div>
+        </div>
+      )}
+
+      {isFinalizing && (
+        <div
+          data-testid="finalize-loading-overlay"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm"
+        >
+          <div className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-white dark:bg-[#0E0B1F] border border-slate-200 dark:border-indigo-500/30 shadow-2xl text-center max-w-sm mx-4">
+            <RotateCw className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
+            <p className="text-xs font-bold text-slate-800 dark:text-white">
+              Confirming your payment, please do not close or refresh this page.
+            </p>
           </div>
         </div>
       )}

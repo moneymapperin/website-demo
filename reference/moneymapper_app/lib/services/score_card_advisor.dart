@@ -16,7 +16,7 @@ class ScoreCardAdvisor {
 
     final bool isGood = score >= 60;
     final String decisionEmoji = isGood ? '✅' : '⚠️';
-    final String decisionLabel = isGood ? 'GOOD TO BUY / POSITIVE' : 'AVOID / EXERCISE CAUTION';
+    final String decisionLabel = isGood ? 'BULLISH / POSITIVE' : 'AVOID / EXERCISE CAUTION';
 
     final StringBuffer sb = StringBuffer();
     sb.writeln('### 📊 **Stock Score Card: $name${symbol.isNotEmpty ? " ($symbol)" : ""}**');
@@ -24,7 +24,10 @@ class ScoreCardAdvisor {
     sb.writeln('• **MoneyMapper Score:** **${score.round()}/100**');
     sb.writeln('• **Verdict:** $decisionEmoji **$decisionLabel**');
     if (signal.isNotEmpty) {
-      sb.writeln('• **Signal:** `$signal`');
+      String displaySignal = signal.toUpperCase();
+      if (displaySignal == 'BUY') displaySignal = 'BULLISH';
+      if (displaySignal == 'SELL') displaySignal = 'BEARISH';
+      sb.writeln('• **Signal:** `$displaySignal`');
     }
     sb.writeln();
 
@@ -277,6 +280,107 @@ class ScoreCardAdvisor {
     sb.writeln();
 
     sb.writeln('ℹ️ *Note: IPO score card metrics update live as bidding and subscription data open.*');
+    return sb.toString();
+  }
+
+  // ---------------------------------------------------------------------------
+  // 5. MULTI-MATCH RESULT FORMATTERS
+  // ---------------------------------------------------------------------------
+
+  static String generateMultiStockDetails(List<Map<String, dynamic>> stocks, String query) {
+    final StringBuffer sb = StringBuffer();
+    sb.writeln('🔍 **Found ${stocks.length} Matching Stocks:**');
+    sb.writeln();
+
+    for (int i = 0; i < stocks.length; i++) {
+      final s = stocks[i];
+      final String name = s['company_name']?.toString() ?? s['symbol']?.toString() ?? 'Stock';
+      final String symbol = s['symbol']?.toString() ?? '';
+      final double score = _toDouble(s['score'] ?? s['final_score']);
+      final String sector = s['sector']?.toString() ?? 'General';
+      final String signal = s['signal']?.toString() ?? s['recommendation']?.toString() ?? '';
+
+      sb.writeln('${i + 1}️⃣ **$name**${symbol.isNotEmpty ? " (`$symbol`)" : ""}');
+      sb.writeln('   • **Score:** **${score.round()}/100** ⭐');
+      sb.writeln('   • **Sector:** $sector');
+      if (signal.isNotEmpty) {
+        sb.writeln('   • **Signal:** `$signal`');
+      }
+      sb.writeln();
+    }
+
+    sb.writeln('💡 *Ask for a specific stock name (e.g. "Reliance") to see its full Score Card analysis!*');
+    return sb.toString();
+  }
+
+  static String generateMultiMfDetails(List<Map<String, dynamic>> funds, String query) {
+    final StringBuffer sb = StringBuffer();
+    sb.writeln('🔍 **Found ${funds.length} Matching Mutual Funds:**');
+    sb.writeln();
+
+    for (int i = 0; i < funds.length; i++) {
+      final f = funds[i];
+      final String name = f['scheme_name']?.toString() ?? f['fund_name']?.toString() ?? 'Mutual Fund';
+      final double score = _toDouble(f['final_score'] ?? f['score']);
+      final String category = f['category']?.toString() ?? f['cluster']?.toString() ?? 'Equity';
+
+      sb.writeln('${i + 1}️⃣ **$name**');
+      sb.writeln('   • **Score:** **${score.round()}/100** ⭐');
+      sb.writeln('   • **Category:** $category');
+      sb.writeln();
+    }
+
+    sb.writeln('💡 *Ask for a specific scheme name (e.g. "SBI Small Cap") to view full details!*');
+    return sb.toString();
+  }
+
+  static String generateMultiInsuranceDetails(List<Map<String, dynamic>> plans, String query) {
+    final StringBuffer sb = StringBuffer();
+    sb.writeln('🔍 **Found ${plans.length} Matching Insurance Plans:**');
+    sb.writeln();
+
+    for (int i = 0; i < plans.length; i++) {
+      final p = plans[i];
+      final String company = p['company_name']?.toString() ?? p['provider_name']?.toString() ?? 'Provider';
+      final String planName = p['plan_name']?.toString() ?? p['name']?.toString() ?? 'Policy';
+      final double score = _toDouble(p['score'] ?? p['final_score']);
+      final String planType = p['plan_type']?.toString() ?? p['category']?.toString() ?? 'Health/Term';
+      final dynamic csrVal = p['claim_settlement_ratio'] ?? p['csr'];
+
+      sb.writeln('${i + 1}️⃣ **$planName**');
+      sb.writeln('   • **Provider:** $company');
+      sb.writeln('   • **Score:** **${score.round()}/100**');
+      sb.writeln('   • **Type:** $planType');
+      if (csrVal != null && csrVal.toString().isNotEmpty && csrVal.toString() != 'null') {
+        final double csr = _toDouble(csrVal);
+        sb.writeln('   • **CSR:** ${csr.toStringAsFixed(1)}%');
+      }
+      sb.writeln();
+    }
+
+    sb.writeln('💡 *Ask for a specific plan name (e.g. "HDFC Ergo Optima") to view its full Score Card!*');
+    return sb.toString();
+  }
+
+  static String generateMultiIpoDetails(List<Map<String, dynamic>> ipos, String query) {
+    final StringBuffer sb = StringBuffer();
+    sb.writeln('🔍 **Found ${ipos.length} Matching Upcoming IPOs:**');
+    sb.writeln();
+
+    for (int i = 0; i < ipos.length; i++) {
+      final ipo = ipos[i];
+      final String company = ipo['company_name']?.toString() ?? ipo['name']?.toString() ?? 'IPO';
+      final double score = _toDouble(ipo['score'] ?? ipo['final_score']);
+      final String priceBand = ipo['price_band']?.toString() ?? 'TBA';
+      final String dates = ipo['bidding_dates'] ?? ipo['dates'] ?? 'Upcoming';
+
+      sb.writeln('${i + 1}️⃣ **$company**');
+      sb.writeln('   • **Score:** **${score.round()}/100**');
+      sb.writeln('   • **Price Band:** $priceBand');
+      sb.writeln('   • **Bidding Dates:** $dates');
+      sb.writeln();
+    }
+
     return sb.toString();
   }
 

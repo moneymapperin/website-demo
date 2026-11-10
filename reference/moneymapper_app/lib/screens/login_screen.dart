@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
@@ -20,37 +21,77 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _auth = AuthService();
   final _api = ApiService();
   bool _loading = false;
   bool _obscurePassword = true; // State for password visibility
+  bool _pendingGoogleLogin = false;
+  Timer? _googleLoginTimer;
 
   late final StreamSubscription<AuthState> _authSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
+        _googleLoginTimer?.cancel();
         if (!mounted) return;
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const MainScreen()),
-          (_) => false,
-        );
+
+        // Prevent hijacking login flow if another screen (like CorporateLoginScreen) is active
+        final isCurrentScreen = ModalRoute.of(context)?.isCurrent ?? false;
+        
+        if (isCurrentScreen || _pendingGoogleLogin) {
+          _pendingGoogleLogin = false;
+          
+          // Since this listener routes to MainScreen, ensure corporate flag is cleared
+          SharedPreferences.getInstance().then((prefs) => prefs.remove('is_corporate_admin'));
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const MainScreen()),
+            (_) => false,
+          );
+        }
       }
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _googleLoginTimer?.cancel();
     _authSubscription.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _pendingGoogleLogin) {
+      // User returned from browser. Give the deep link 5 seconds to process auth.
+      _googleLoginTimer?.cancel();
+      _googleLoginTimer = Timer(const Duration(seconds: 5), () {
+        if (mounted && _pendingGoogleLogin) {
+          setState(() {
+            _loading = false;
+            _pendingGoogleLogin = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Google sign-in was abandoned or unsuccessful.'),
+              backgroundColor: Colors.red.shade700,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      });
+    }
   }
 
   Future<void> _login() async {
@@ -70,6 +111,10 @@ class _LoginScreenState extends State<LoginScreen> {
       await _auth.signIn(email: email, password: password);
       
       if (!mounted) return;
+
+      // Ensure we clear corporate flag on standard login
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('is_corporate_admin');
 
       // If login is successful, proceed to main screen regardless of role
       Navigator.pushAndRemoveUntil(
@@ -125,7 +170,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginWithGoogle() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _pendingGoogleLogin = true;
+    });
     try {
       await _auth.signInWithGoogle();
       // Note: For OAuth flow, the app will handle deep link redirection automatically.
@@ -139,7 +187,10 @@ class _LoginScreenState extends State<LoginScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      setState(() => _loading = false);
+      setState(() {
+        _loading = false;
+        _pendingGoogleLogin = false;
+      });
     }
   }
 
@@ -194,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.black45,
+                      color: Colors.white54,
                     ),
                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
@@ -215,15 +266,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: const Text('Login'),
                 ),
               ),
-              const SizedBox(height: 16),
+
+              // ── OR ── Divider
+              _buildOrDivider(),
+
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: _loading ? null : _loginWithGoogle,
-                  icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                  icon: _buildGoogleLogo(),
                   label: const Text('Sign in with Google'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white24),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
               ),
@@ -257,6 +314,49 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Center(child: CircularProgressIndicator()),
           ),
       ],
+    );
+  }
+
+  Widget _buildOrDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 1,
+              color: Colors.white24,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Text(
+              'OR',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: Colors.white24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGoogleLogo() {
+    return Image.asset(
+      'assets/google_logo.png',
+      width: 22,
+      height: 22,
+      fit: BoxFit.contain,
     );
   }
 }

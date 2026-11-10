@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MoneyMapper FAQ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0b0a14;
+            --card: #131122;
+            --border: #26213d;
+            --text: #ffffff;
+            --muted: #a09cb3;
+            --grad: linear-gradient(90deg, #8b5cf6, #d946ef, #ec4899);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 64px 20px 80px;
+        }
+
+        .eyebrow {
+            text-align: center;
+            color: #b9a6f5;
+            font-size: 13px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 14px 0 40px;
+        }
+
+        .grad {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        summary {
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 22px 24px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .chev {
+            width: 11px;
+            height: 11px;
+            border-right: 2px solid #c4b5fd;
+            border-bottom: 2px solid #c4b5fd;
+            transform: rotate(45deg);
+            margin-top: -5px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .item[open] .chev {
+            transform: rotate(-135deg);
+            margin-top: 5px;
+        }
+
+        .answer {
+            padding: 0 24px 24px;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 32px;
+            color: #c4b5fd;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            summary {
+                font-size: 16px;
+                padding: 18px;
+            }
+
+            .answer {
+                padding: 0 18px 18px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <p class="eyebrow">FAQ</p>
+        <h1>Questions, <span class="grad">answered</span></h1>
+
+        <details class="item" open>
+            <summary>Is MoneyMapper a SEBI-registered investment adviser?<span class="chev"></span></summary>
+            <div class="answer">MoneyMapper is a financial wellness platform. The Investment pillar and any investment
+                recommendations will be offered only after the required SEBI registration is in place. Market scores in
+                the app are informational and not investment advice.</div>
+        </details>
+
+        <details class="item">
+            <summary>Do I need to share my bank login?<span class="chev"></span></summary>
+            <div class="answer">No. You enter your own numbers in a guided profile. MoneyMapper does not ask for net
+                banking credentials.</div>
+        </details>
+
+        <details class="item">
+            <summary>How is the Financial Fitness Score calculated?<span class="chev"></span></summary>
+            <div class="answer">Each of the five pillars (Income, Expenses, Savings, Protection, Investment) is scored
+                from 0 to 100 from your profile, and the Financial Fitness Score is the average of the five. The method
+                is grounded in the RBI Household Finance Committee Report (2017).</div>
+        </details>
+
+        <details class="item">
+            <summary>Does the AI Assistant use ChatGPT or another external AI?<span class="chev"></span></summary>
+            <div class="answer">No. It is a transparent, rule-based assistant that reads your own dashboard data. Your
+                questions are not sent to an external language-model service.</div>
+        </details>
+
+        <details class="item">
+            <summary>Is there a mobile app?<span class="chev"></span></summary>
+            <div class="answer">The web app works on any phone and you can sign in by scanning a QR code. The Android
+                app is in testing and is being prepared for Google Play.</div>
+        </details>
+
+        <details class="item">
+            <summary>How much does it cost?<span class="chev"></span></summary>
+            <div class="answer">Plans are ₹499 per month (quarterly), ₹399 per month (half-yearly) and ₹299 per month
+                (yearly). Business pricing is ₹199 per employee per month. Final checkout in app stores may include
+                platform fees.</div>
+        </details>
+
+        <details class="item">
+            <summary>Can my employer see my personal data?<span class="chev"></span></summary>
+            <div class="answer">No. Corporate dashboards show aggregate analytics for the workforce, not individual
+                employee details.</div>
+        </details>
+
+        <details class="item">
+            <summary>How do I delete my data?<span class="chev"></span></summary>
+            <div class="answer">Use the Data Deletion Request page linked in the footer and your data deletion request
+                will be processed.</div>
+        </details>
+
+        <div class="center">
+            <a class="back" href="/">← Back to MoneyMapper</a>
+        </div>
+    </div>
+
+    <script>
+        // Open only one question at a time
+        const items = document.querySelectorAll('details');
+        items.forEach(d => {
+            d.addEventListener('toggle', () => {
+                if (d.open) items.forEach(o => { if (o !== d) o.open = false; });
+            });
+        });
+    </script>
+</body>
+
+</html>

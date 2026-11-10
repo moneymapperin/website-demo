@@ -116,6 +116,39 @@ class ApiService {
     }
   }
 
+  // --- Data Deletion Methods ---
+  Future<Map<String, dynamic>?> getActiveDeletionRequest() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null || user.email == null) return null;
+      return await _supabase
+          .from('deletion_requests')
+          .select()
+          .eq('email', user.email!)
+          .maybeSingle();
+    } catch (e) {
+      _logErrorResilient(e, "getActiveDeletionRequest");
+      return null;
+    }
+  }
+
+  Future<void> submitDeletionRequest(Map<String, dynamic> data) async {
+    final userId = _auth.currentUserId;
+    if (userId == null) throw Exception('Not logged in');
+    data['user_id'] = userId;
+    await _supabase.from('deletion_requests').insert(data);
+  }
+
+  Future<void> withdrawDeletionRequest() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null || user.email == null) throw Exception('Not logged in');
+    
+    // Per user request, actually delete the row from the table when they withdraw
+    await _supabase.from('deletion_requests')
+        .delete()
+        .eq('email', user.email!);
+  }
+
   // --- Subscription Methods ---
   Future<Map<String, dynamic>?> getSubscriptionDetails() async {
     try {

@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/announcement_popup.dart';
 
 class CorporateDashboardScreen extends StatefulWidget {
   const CorporateDashboardScreen({super.key});
@@ -36,6 +37,14 @@ class _CorporateDashboardScreenState extends State<CorporateDashboardScreen> wit
   @override
   void initState() {
     super.initState();
+    
+    // Check for announcements globally when the dashboard opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        AnnouncementPopup.checkAndShow(context);
+      }
+    });
+
     _startIntroSequence();
     _loadStats();
   }

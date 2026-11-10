@@ -1,344 +1,115 @@
 # 🎯 MoneyMapper — Production Technical Specification & System Architecture
 
-MoneyMapper is an enterprise-grade, cross-platform financial health scoring, intelligence, and wealth advisory platform built for the Indian market using **Flutter (Dart 3.x)**, **Supabase (PostgreSQL 15+)**, and **Bank-Grade Mobile Security**.
+MoneyMapper is an enterprise-grade, cross-platform financial health scoring, intelligence, and wealth advisory platform built for the Indian market. It is engineered using modern frameworks including Flutter for fluid UI rendering, Supabase for realtime database management, Deno Edge Functions for serverless compute, and bank-grade mobile security standards.
 
 ---
 
 ## 📌 Executive Summary
 
-MoneyMapper evaluates a user's complete financial profile across **5 Financial Pillars** (Income, Expenses, Emergency Readiness, Insurance Coverage, and Asset Allocation) to compute a dynamic **Financial Fitness Score (0–100)**. It delivers live market intelligence (IBJA 24K Gold rates, Nifty 500 stock signals, Mutual Fund screeners), an interactive AI advisory assistant, WhatsApp Web-style QR session handoff, and an automated **Wealth Select Pro** subscription stacking engine.
+MoneyMapper takes a holistic approach to personal finance by evaluating a user's complete financial profile across **5 Financial Pillars**: Income, Expenses, Emergency Readiness, Insurance Coverage, and Asset Allocation. It synthesizes these inputs to compute a dynamic **Financial Fitness Score (0–100)**. 
+
+Beyond scoring, the platform delivers live market intelligence (such as IBJA 24K Gold rates, Nifty 500 stock signals, and Mutual Fund screeners), an interactive AI advisory assistant, WhatsApp Web-style QR session handoffs for desktop access, and a highly resilient Serverless Payment Engine capable of dynamic failover routing.
 
 ---
 
-## 🏗️ 1. High-Level System Architecture
+## 🏗️ 1. Technical System Architecture
 
-MoneyMapper follows a **Decoupled Service-Oriented Architecture** with strict layer separation:
+MoneyMapper follows a **Decoupled Service-Oriented Architecture (SOA)**, ensuring strict separation of concerns across the platform while enabling real-time edge processing.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          PRESENTATION LAYER (UI)                            │
-│  Jetpack-like M3 Compose Styling │ Glassmorphism Theme │ ResponsiveUtils    │
+│  Responsive Viewports │ Liquid Glassmorphism (iOS) │ Material 3 (Android)   │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
 │                            APPLICATION & DOMAIN                             │
-│     Stateful Controllers │ ValueNotifiers │ StreamSubscriptions (Realtime)  │
+│       Value-First Onboarding │ Stateful Controllers │ Realtime Syncer       │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
 │                         SECURITY & SERVICE LAYER                            │
-│  SecureNetworkClient (Dio) │ SecureSupabaseStorage │ SecurityService (Keystore) │
-└──────────────────────────┬─────────────────────────┬────────────────────────┘
-                           │                         │
-┌──────────────────────────▼──────────┐   ┌──────────▼────────────────────────┐
-│     EXTERNAL BACKEND (SUPABASE)     │   │      LOCAL SECURE VAULT           │
-│ PostgreSQL 15+ │ RLS │ Realtime │ RPC│   │ Android Keystore / iOS Keychain   │
-└─────────────────────────────────────┘   └───────────────────────────────────┘
+│  Secure Network Pipeline │ Hardware-Encrypted Storage │ Identity Verification│
+└──────────────────────────┬─────────────────────────┬──────────────┬─────────┘
+                           │                         │              │
+┌──────────────────────────▼──────────┐   ┌──────────▼─────┐   ┌────▼─────────┐
+│     EXTERNAL BACKEND (SUPABASE)     │   │ SECURE VAULT   │   │ DENO EDGE    │
+│  PostgreSQL 15+  │  Row Level Sec.  │   │ Android/iOS Env│   │ API Routing  │
+└─────────────────────────────────────┘   └────────────────┘   └──────────────┘
 ```
 
-### Layer Breakdown
-* **Presentation Layer**: Material 3 UI with adaptive glassmorphism (`LiquidGlassTheme`) for macOS/iOS and solid card layouts for Android.
-* **Domain & Logic Layer**: Financial scoring algorithms (`ScoreCardAdvisor`, `AdvisoryService`), Xp/Milestone gamification (`XpService`), and streak tracking (`StreakService`).
-* **Security & Network Layer**: Dio-powered `SecureNetworkClient` with SSL Pinning, automatic JWT token interception, and hardware-encrypted storage (`SecureSupabaseStorage`).
-* **Database & Auth Layer**: Supabase Auth (Email/Metadata), PostgreSQL tables protected by Row Level Security (RLS), and custom PL/pgSQL Remote Procedure Calls (RPCs).
+### Architectural Sub-Systems
+*   **Presentation Layer**: Implements a truly adaptive UI that responds natively to the host operating system. It utilizes rich native iOS Glassmorphism (respecting system-level accessibility constraints like "Reduce Transparency") and smooth Material 3 animations on Android. Foldable and Tablet devices automatically transition from a standard bottom navigation bar to a responsive "Floating Nav Island."
+*   **Data Synchronization Engine**: Leverages Supabase Realtime (WebSockets) to instantly push database mutations to the client, coupled with a dual-tiered local cache (10-minute short TTL for profile data, 4-hour long TTL for market intelligence) to guarantee zero-latency rendering.
+*   **Security & Network Pipeline**: Powered by a robust HTTP client featuring automatic JWT token interception, hardware-encrypted local storage, and explicit Row Level Security (RLS) enforcement on all database queries.
+*   **Identity & Auth Fabric**: Manages user identity via Supabase Authentication (Email/Metadata/Google OAuth via ASWebAuthenticationSession), alongside a PostgreSQL relational database protected by granular security policies and server-side Remote Procedure Calls (RPCs).
 
 ---
 
-## 🔐 2. Authentication & Identity System
+## 🚀 2. Core Platform Features & Engineering
 
-### A. Core Auth Flow
-MoneyMapper uses Supabase Authentication backed by Hardware-Encrypted Token Persistence:
-1. **User Sign Up / Sign In**: Authenticates via `_supabase.auth.signInWithPassword()`.
-2. **Metadata Sync**: User metadata (Full Name, Mobile, Plan Status) is saved and synchronized with local cache via `AuthService`.
-3. **Session Persistence**: JWT access tokens and refresh tokens are stored in hardware-encrypted storage (`SecureSupabaseStorage`), bypassing insecure plain text files.
+### A. WhatsApp Web-Style Session Handoff (QR Code Login)
+MoneyMapper implements a zero-password, real-time web session handoff, allowing users to securely port their mobile session to a desktop monitor for deeper financial analysis.
+*   **The Protocol:** The web client generates a unique UUID `session_token` and subscribes to it via Supabase Realtime. The user scans the QR code using the mobile app's built-in `mobile_scanner`.
+*   **Secure Hydration:** The mobile device executes a secure backend RPC, injecting its encrypted JWT Access and Refresh tokens into the matching database row. The WebSocket instantly wakes up the web client, hydrates the browser's local storage with the tokens, deletes the temporary row, and authorizes the user in under 400 milliseconds.
 
-### B. WhatsApp Web-Style Session Handoff (QR Code Login)
-MoneyMapper implements a zero-password, real-time web session handoff similar to WhatsApp Web:
+### B. Live Market Intelligence Screeners
+The platform acts as a comprehensive wealth terminal, featuring specialized engines that parse raw market data into actionable insights:
+*   **Nifty 500 Stock Signals**: A real-time signal engine classifying algorithmic indicators into `BUY`, `BEARISH/SELL`, or `WAIT` statuses for major Indian equities.
+*   **Mutual Fund Screener**: Evaluates thousands of funds based on critical metrics including Compound Annual Growth Rate (CAGR), Sharpe Ratio, Expense Ratio, and Alpha generation.
+*   **Insurance Screener**: Compares life and health insurance policies using dynamic Claim Settlement Ratios (CSR) and age-adjusted premium modeling to locate coverage gaps.
+*   **Screen-Aware Sentiment Gauge**: Uses viewport tracking to run heavy physics-based needle oscillation (rendering market sentiment indices) **only when physically visible on the screen**, pausing background rendering to maintain a strict 60 FPS across the app.
 
-```
-  ┌──────────────┐         1. Generates QR (UUID Token)         ┌──────────────┐
-  │  React Web   ├─────────────────────────────────────────────►│  Supabase    │
-  │   Frontend   │◄─────────────────────────────────────────────┤ Realtime DB  │
-  └──────┬───────┘   4. Web receives JWTs & hydrates session    └──────▲───────┘
-         │                                                             │
-         │ 2. Scans QR Code                                            │ 3. Pushes JWTs
-         ▼                                                             │    & Auth Status
-  ┌──────────────┐                                                     │
-  │ Mobile App   ├─────────────────────────────────────────────────────┘
-  │ (Flutter)    │
-  └──────────────┘
-```
-
-#### Protocol Sequence:
-1. **Web App**: Generates a unique UUID `session_token`, inserts a `PENDING` record in `public.web_sessions`, and subscribes to Supabase Realtime updates on `session_token`.
-2. **Mobile App**: User opens the built-in scanner (`QrScannerScreen`) from either **Personal Profile** or **Corporate Dashboard**.
-3. **Scan Execution**: `ApiService.loginWithQr(token)` fetches the current session's `access_token` and `refresh_token` and updates `public.web_sessions`:
-   ```json
-   {
-     "session_token": "<scanned_token>",
-     "user_id": "<mobile_user_id>",
-     "access_token": "<jwt_access_token>",
-     "refresh_token": "<jwt_refresh_token>",
-     "status": "AUTHENTICATED",
-     "authenticated_at": "2026-09-06T23:00:00Z"
-   }
-   ```
-4. **Web Hydration**: The Web app receives the Realtime `UPDATE` event, executes `supabase.auth.setSession({ access_token, refresh_token })`, deletes the temporary `web_sessions` row, and redirects to the web dashboard automatically.
+### C. Jitter Elimination & Intelligent State Preservation
+All primary navigation tabs (Dashboard, Insights, AI Assistant, Profile) are bound to the framework's KeepAlive engine. The UI state is preserved indefinitely in the device's memory when a user navigates between tabs, ensuring 0-millisecond layout recreation and perfectly smooth screen transitions.
 
 ---
 
-## 🛡️ 3. Mobile Security & Anti-Fraud Hardening
+## 💳 3. Payment Processing & Dynamic Gateway Fallback
 
-MoneyMapper implements **Bank-Grade Mobile Hardening** across five key domains:
+MoneyMapper features a highly resilient **Serverless Checkout Engine** designed to eliminate single points of failure during the critical payment checkout process.
 
-### A. Hardware-Encrypted Storage (`SecureSupabaseStorage`)
-* Inherits from Supabase `LocalStorage`.
-* Uses `FlutterSecureStorage` with `aOptions: AndroidOptions(encryptedSharedPreferences: true)` on Android and `KeychainAccessibility.first_unlock` on iOS.
-* Encryption keys are managed directly by the **Android Keystore** and **Apple Keychain**.
+### A. Dynamic Priority Routing (Strategy Pattern)
+The payment edge function dynamically evaluates the operational status of configured gateways (such as Cashfree or Federal Bank/Easebuzz) at runtime:
+*   **Primary Gateway:** The system attempts to route the transaction through the highest-priority provider.
+*   **Silent Fallback:** If the primary SDK crashes, returns a 500 server error, or is unauthorized due to merchant account issues, the serverless `try/catch` block **instantly and silently switches to the secondary backup gateway**. It generates a new cryptographic payload and hands the fallback token back to the mobile app. The user experiences a seamless checkout without ever seeing a crash or error screen.
 
-### B. Network Security & SSL Certificate Pinning (`SecureNetworkClient`)
-* Intercepts every outgoing HTTP request to inject `Authorization: Bearer <Supabase.instance.client.auth.currentSession.accessToken>`.
-* If a request returns `401 Unauthorized`, a queued interceptor attempts an automatic session refresh via Supabase Auth and retries the failed request seamlessly.
-* Enforces **SSL Certificate Pinning** on native platforms via `IOHttpClientAdapter` and `SecurityContext`, preventing Man-in-the-Middle (MitM) proxy attacks on public Wi-Fi.
-
-### C. Screen Privacy & Anti-Spying (`FLAG_SECURE`)
-* On Android, `MainActivity.kt` enforces `WindowManager.LayoutParams.FLAG_SECURE`.
-* Screen recordings, screenshots, and task switcher previews are completely blocked/obscured.
-* **Corporate Admin Bypass**: Admins defined in `public.corporate_admins` with `secure_flag = false` can toggle this off for live presentation demos.
-
-### D. Code Obfuscation & R8 Scrambling (`proguard-rules.pro`)
-* Release builds enforce `isMinifyEnabled = true` and `isShrinkResources = true` in `android/app/build.gradle.kts`.
-* `proguard-rules.pro` scrambles classes, strips debugging metadata/line numbers, and repacks classes into `com.moneymapper.obscured`.
-* Preserves critical reflection rules for Flutter Embeddings, Supabase, PostgREST, Dio, LocalAuth, and MobileScanner.
-
-### E. Android 15 (API 35) 16 KB Page-Size Compatibility
-* Compiled with `compileSdk = 35` and updated C++ native shared libraries (`mobile_scanner 6.0.11` / MLKit).
-* Configured `useLegacyPackaging = true` in Gradle `packaging.jniLibs` and `android.bundle.enableUncompressedNativeLibs=false` in `gradle.properties` to ensure all native `.so` files are 16 KB page-size aligned (`0x4000` bytes).
+### B. Secure Server-to-Server Verification
+*   Payment payloads are cryptographically signed using `SHA-512` hashing directly on the secure Edge node. The merchant secret salts *never* touch the user's mobile device.
+*   **Transaction Finalization:** The mobile application NEVER updates payment success statuses directly. Instead, it triggers a highly restricted Remote Procedure Call (RPC) on the backend. This RPC executes with elevated `SECURITY DEFINER` privileges to securely verify the transaction with the bank before granting the user premium access, effectively blocking any client-side spoofing or referral code abuse.
 
 ---
 
 ## 📊 4. The 5 Core Financial Pillars & Scoring Engine
 
-The Financial Fitness Score is calculated out of 100 based on weighted metrics across 5 pillars:
+The platform's proprietary Financial Fitness Score is calculated out of 100, based on weighted metrics across 5 distinct pillars:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    FINANCIAL FITNESS SCORE (0 - 100)                        │
-└─────┬──────────────┬───────────────┬────────────────┬──────────────┬────────┘
-      │              │               │                │              │
-┌─────▼─────┐  ┌─────▼─────┐   ┌─────▼─────┐    ┌─────▼─────┐  ┌─────▼─────┐
-│  INCOME   │  │ EXPENSES  │   │ EMERGENCY │    │ INSURANCE │  │INVESTMENTS│
-│ (20 Pts)  │  │ (20 Pts)  │   │ (20 Pts)  │    │ (20 Pts)  │  │ (20 Pts)  │
-└───────────┘  └───────────┘   └───────────┘    └───────────┘  └───────────┘
-```
-
-### Pillar Definitions:
-1. **Income Pillar Matrix (20 Pts)**: Evaluates multi-source income diversity, passive income ratio vs. active salary, and income stability index.
-2. **Weekly Expense Predictor (20 Pts)**: Enforces the **50/30/20 Rule** (Needs, Wants, Savings). Evaluates weekly spending adherence, impulse control, and category targets.
-3. **Emergency Readiness (20 Pts)**: Measures liquid cash availability against monthly fixed expenses. Ideal target is **6 months of expense runway**.
-4. **Insurance Coverage Matrix (20 Pts)**: Evaluates Life Insurance (10x annual income target) and Health Insurance coverage gap based on Claim Settlement Ratio (CSR > 95%).
-5. **Investment Asset Allocation (20 Pts)**: Analyzes portfolio risk appetite (Conservative, Moderate, Aggressive) across Equity, Debt, and Gold.
+1.  **Income Pillar Matrix (20 Pts)**: Evaluates multi-source income diversity, passive income ratio versus active salary, and a localized income stability index based on the user's city tier.
+2.  **Weekly Expense Predictor (20 Pts)**: Enforces the industry-standard **50/30/20 Rule**. It evaluates weekly spending adherence, impulse control metrics, and category targets.
+3.  **Emergency Readiness (20 Pts)**: Measures liquid cash availability against monthly fixed expenses, targeting an ideal **6 months of expense runway**.
+4.  **Insurance Coverage Matrix (20 Pts)**: Evaluates Life Insurance coverage (targeting 10x annual income) and Health Insurance gaps based on Claim Settlement Ratios (CSR > 95%).
+5.  **Investment Asset Allocation (20 Pts)**: Analyzes the user's portfolio risk appetite across Equity, Debt, and Gold assets.
 
 ---
 
-## 💳 5. Wealth Select Monetization & Subscription Stacking
+## 🔐 5. Security Posture & Data Privacy Compliance
 
-MoneyMapper offers a premium tier (**Wealth Select Pro**) to unlock advanced screeners, full stock signals, and 24/7 AI advisory.
+MoneyMapper is engineered to comply with the most stringent global privacy laws, including the **GDPR** and India's **Digital Personal Data Protection (DPDP) Act**. 
 
-### A. Pricing Structure & Store Fee Offset
-Google Play charges a ~15% platform fee. Pricing is adjusted to ensure net developer revenue while delivering consumer savings:
+### A. Value-First Onboarding (Progressive Profiling)
+MoneyMapper flips the traditional, friction-heavy registration flow to maximize trust and conversion:
+*   **Anonymous Lead Engine**: New users input their financial data (Income, EMI, etc.) into an interactive wizard *before* ever providing a password. This data is securely stored in a restricted holding area.
+*   **Instant Value**: The backend instantly calculates their Financial Fitness Score and Stability Status (e.g., Red/Yellow/Green debt-to-income ratios) and presents a personalized "Teaser Dashboard."
+*   **Frictionless Conversion**: Only after seeing the value of the platform is the user prompted to secure their account with a password. The system then seamlessly merges their anonymous session into a fully authenticated cryptographic identity without requiring them to re-type any information.
 
-| Plan | Duration | Base Rate | Store Billed Upfront | Discount | Total Savings |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Quarterly** | 3 Months | ₹499/mo | **₹1,767** | 38% OFF | SAVE ₹897 |
-| **Half-Yearly** | 6 Months | ₹399/mo | **₹2,814** | 50% OFF | SAVE ₹2,400 |
-| **Yearly (Best Value)** | 12 Months | ₹299/mo | **₹4,188** | 63% OFF | SAVE ₹6,000 |
+### B. The "Right to be Forgotten" (Data Deletion Architecture)
+MoneyMapper provides a legally compliant, user-driven data deletion pipeline:
+*   Users can initiate a formal data deletion request directly from their Profile screen.
+*   **Delay & Verification Mechanism:** To prevent accidental data loss or malicious account hijacking, deletions are scheduled for **7 days** in the future. 
+*   **Secure Withdrawal Window:** During this 7-day window, the user can withdraw their request. This withdrawal triggers a hard-delete (`delete()`) command against their request ticket in the database.
+*   **Row Level Security (RLS):** Every step of the deletion and withdrawal process is cryptographically verified by Supabase RLS policies. A user can only view, initiate, or cancel a deletion request if their secure JWT token (`auth.uid()`) perfectly matches the database record. Once the 7-day window expires, the backend automatically cascades the deletion, permanently and irreversibly purging all PII (Personally Identifiable Information) and financial records from the platform.
 
-### B. Duration Stacking Algorithm (`stack_subscription`)
-Users can purchase or extend subscriptions at any time without losing active days. The PostgreSQL RPC function calculates new expiration as follows:
-
-$$\text{New Expiry} = \begin{cases} \text{NOW}() + \text{Duration}, & \text{if } \text{current\_expiry} \le \text{NOW}() \text{ or NULL} \\ \text{current\_expiry} + \text{Duration}, & \text{if } \text{current\_expiry} > \text{NOW}() \end{cases}$$
-
-```sql
-CREATE OR REPLACE FUNCTION public.stack_subscription(
-    p_user_id UUID,
-    p_months_to_add INT
-) RETURNS void AS $$
-DECLARE
-    v_current_end TIMESTAMPTZ;
-    v_new_end TIMESTAMPTZ;
-BEGIN
-    SELECT current_period_end INTO v_current_end
-    FROM bse_data.user_subscriptions
-    WHERE user_id = p_user_id;
-
-    IF v_current_end IS NULL OR v_current_end <= NOW() THEN
-        v_new_end := NOW() + (p_months_to_add || ' months')::INTERVAL;
-    ELSE
-        v_new_end := v_current_end + (p_months_to_add || ' months')::INTERVAL;
-    END IF;
-
-    INSERT INTO bse_data.user_subscriptions (user_id, tier, status, current_period_end, updated_at)
-    VALUES (p_user_id, 'pro', 'active', v_new_end, NOW())
-    ON CONFLICT (user_id)
-    DO UPDATE SET
-        tier = EXCLUDED.tier,
-        status = EXCLUDED.status,
-        current_period_end = EXCLUDED.current_period_end,
-        updated_at = NOW();
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-```
-
-### C. Live Status Validation Protocol
-* `PremiumService.syncSubscriptionStatus()` queries Supabase on app startup, auth state change, and pull-to-refresh.
-* If a user is not present in `user_subscriptions` or `current_period_end < NOW()`, access instantly reverts to the **`BASIC`** free tier.
-
----
-
-## 📈 6. Live Market Intelligence Engines
-
-1. **24K Gold Rates (IBJA Scraper)**: Fetches live Indian Bullion and Jewellers Association rates from `bse_data.gold_rates` with local TTL caching.
-2. **Nifty 500 Stock Signals**: Real-time signal engine (`bse_data.stock_signals`) classifying signals into `BUY`, `BEARISH/SELL`, or `WAIT`.
-3. **Mutual Fund Screener**: Evaluates funds based on CAGR, Sharpe Ratio, Expense Ratio, and Alpha scores from `bse_data.mf_signals`.
-4. **Screen-Aware Sentiment Gauge (`SentimentGauge`)**: Uses `ModalRoute.of(context).isCurrent` and `TickerMode` to run needle oscillation **only when visible**, pausing background rendering to maintain 60 FPS.
-
----
-
-## 🏢 7. Corporate Workforce Health Index
-
-MoneyMapper includes a specialized **B2B Corporate Wellness Module**:
-* **Corporate Admin Access**: Controlled via `public.corporate_admins`.
-* **Workforce Stability Index**: Aggregates anonymized employee emergency readiness, debt-to-income ratios, and financial stress scores.
-* **Web QR Access**: Corporate admins can scan the Web QR code directly from `CorporateDashboardScreen` to view company analytics on a desktop monitor.
-
----
-
-## 🗄️ 8. Complete Database Schema Reference
-
-### Table: `bse_data.user_subscriptions`
-```sql
-CREATE TABLE bse_data.user_subscriptions (
-    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    tier VARCHAR(50) DEFAULT 'free',
-    status VARCHAR(20) DEFAULT 'expired',
-    current_period_end TIMESTAMPTZ,
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Table: `public.web_sessions`
-```sql
-CREATE TABLE public.web_sessions (
-    session_token VARCHAR(255) PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    access_token TEXT,
-    refresh_token TEXT,
-    status VARCHAR(50) DEFAULT 'PENDING',
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    authenticated_at TIMESTAMPTZ
-);
-```
-
-### Table: `public.corporate_admins`
-```sql
-CREATE TABLE public.corporate_admins (
-    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    company_name VARCHAR(255) NOT NULL,
-    secure_flag BOOLEAN DEFAULT true,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
----
-
-## 📂 9. Project Directory Structure
-
-```
-moneymapper_app/
-├── android/                        # Android Native Project Configuration
-│   ├── app/
-│   │   ├── build.gradle.kts        # AGP 8.9.1, R8 Obfuscation & Legacy JNI Packaging
-│   │   ├── proguard-rules.pro      # Production R8 Rules for Flutter & Supabase
-│   │   └── src/main/kotlin/com/moneymapper/MainActivity.kt  # FLAG_SECURE & Play Integrity Channel
-│   ├── gradle/wrapper/
-│   │   └── gradle-wrapper.properties # Gradle 8.11.1
-│   ├── gradle.properties           # JDK 21 Path & 16KB Page Alignment
-│   └── settings.gradle.kts         # AGP & KGP Configuration
-├── lib/
-│   ├── chatbot/                    # AI Assistant Engine & Floating Mascot
-│   │   ├── chat_intent_service.dart
-│   │   ├── chat_message.dart
-│   │   └── floating_chatbot.dart
-│   ├── models/                     # Data Models
-│   │   └── dashboard_model.dart
-│   ├── screens/                    # Application Screens
-│   │   ├── ai_assistant_screen.dart
-│   │   ├── corporate_dashboard_screen.dart
-│   │   ├── corporate_login_screen.dart
-│   │   ├── dashboard_screen.dart
-│   │   ├── insurance_screener_screen.dart
-│   │   ├── main_screen.dart        # 4-Tab Navigation & Draggable Mascot
-│   │   ├── master_data_screen.dart
-│   │   ├── mf_screener_screen.dart
-│   │   ├── profile_screen.dart
-│   │   ├── qr_scanner_screen.dart  # Mobile QR Scanner Component
-│   │   ├── recommendations_screen.dart
-│   │   ├── stock_screener_screen.dart
-│   │   └── subscription_screen.dart# Wealth Select Paywall Screen
-│   ├── services/                   # Business Logic & Infrastructure Services
-│   │   ├── api_service.dart        # Supabase API & Cache Interceptor
-│   │   ├── auth_service.dart       # Supabase Auth & Local Profile Storage
-│   │   ├── integrity_service.dart  # Play Integrity Attestation Service
-│   │   ├── premium_service.dart    # Subscription Validation & Trial Sync
-│   │   ├── secure_network_client.dart # Dio Client with SSL Pinning & JWT Interceptor
-│   │   ├── secure_supabase_storage.dart # Keystore-backed LocalStorage
-│   │   └── security_service.dart  # App Lock & Biometrics
-│   ├── theme/                      # Theming & Design System
-│   │   ├── app_theme.dart
-│   │   ├── liquid_glass_theme.dart # macOS/iOS Glassmorphism System
-│   │   └── responsive_utils.dart
-│   ├── widgets/                    # Custom UI Components
-│   │   ├── brand_logo.dart
-│   │   ├── pillar_card.dart
-│   │   ├── score_gauge.dart
-│   │   └── sentiment_gauge.dart   # Screen-Aware Optimized Market Gauge
-│   └── main.dart                   # Application Entry Point & Security Listeners
-└── pubspec.yaml                    # Flutter Dependencies
-```
-
----
-
-## ⚡ 10. Local Development & Launch Instructions
-
-### Prerequisites:
-* Flutter SDK `3.24.x` or higher
-* Java Development Kit (JDK) `17` or `21`
-* Android Studio `2024.1+` / Xcode `15+`
-
-### Execution Commands:
-
-1. **Install Dependencies**:
-   ```bash
-   flutter pub get
-   ```
-
-2. **Run Static Analysis**:
-   ```bash
-   flutter analyze
-   ```
-
-3. **Launch Application on Connected Device / Emulator**:
-   ```bash
-   unset ANDROID_PREFS_ROOT && flutter run
-   ```
-
-4. **Build Release APK with R8 Scrambling**:
-   ```bash
-   unset ANDROID_PREFS_ROOT && flutter build apk --release
-   ```
-
----
-
-### 📄 License
-Copyright © 2026 MoneyMapper Technologies. All rights reserved.
+### C. Hardened Mobile Security
+*   **SSL Certificate Pinning:** The application enforces strict SSL pinning, ensuring that the mobile app will only communicate with the genuine backend servers, completely neutralizing Man-in-the-Middle (MitM) interception attempts on public Wi-Fi networks.
+*   **Hardware-Backed Storage:** All sensitive session tokens are vaulted using Android's `EncryptedSharedPreferences` and the iOS `Keychain`, relying on the physical security chips inside the user's device rather than software-level plain text files.
+*   **Screen Privacy:** On supported Android devices, the app utilizes `FLAG_SECURE` to block screenshots, screen recording, and obscure the app's content in the OS multitasking view, ensuring financial data cannot be inadvertently leaked or spied upon.

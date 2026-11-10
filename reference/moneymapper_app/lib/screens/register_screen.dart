@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../widgets/auth_page_layout.dart';
 import 'main_screen.dart';
@@ -14,25 +15,31 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObserver {
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _referralCodeController = TextEditingController();
 
   final _auth = AuthService();
   bool _loading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _pendingGoogleLogin = false;
+  Timer? _googleLoginTimer;
 
   late final StreamSubscription<AuthState> _authSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
+        _googleLoginTimer?.cancel();
+        _pendingGoogleLogin = false;
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
@@ -45,13 +52,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _googleLoginTimer?.cancel();
     _authSubscription.cancel();
     _fullNameController.dispose();
     _emailController.dispose();
     _mobileController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _referralCodeController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _pendingGoogleLogin) {
+      // User returned from browser. Give the deep link 5 seconds to process auth.
+      _googleLoginTimer?.cancel();
+      _googleLoginTimer = Timer(const Duration(seconds: 5), () {
+        if (mounted && _pendingGoogleLogin) {
+          setState(() {
+            _loading = false;
+            _pendingGoogleLogin = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Google sign-up was abandoned or unsuccessful.'),
+              backgroundColor: Colors.red.shade700,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      });
+    }
   }
 
   Future<void> _register() async {
@@ -89,6 +122,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: password,
         metadata: metadata,
       );
+      
+      final referralCode = _referralCodeController.text.trim();
+      if (referralCode.isNotEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('saved_referral_code', referralCode);
+      }
       
       if (!mounted) return;
       
@@ -152,7 +191,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _registerWithGoogle() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _pendingGoogleLogin = true;
+    });
     try {
       await _auth.signInWithGoogle(); // Maps to the same Supabase OAuth flow
     } catch (e) {
@@ -164,7 +206,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      setState(() => _loading = false);
+      setState(() {
+        _loading = false;
+        _pendingGoogleLogin = false;
+      });
     }
   }
 
@@ -177,7 +222,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
         AuthPageLayout(
           title: 'Create account',
           subtitle: 'Join MoneyMapper to track your financial health',
-          showBack: true,
+          showBack: false,
+          trailingAction: TextButton.icon(
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+            icon: const Icon(Icons.login_rounded, color: Colors.white, size: 18),
+            label: const Text(
+              "Log In",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.1),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -187,6 +251,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               _buildTextField('Mobile Number', _mobileController, Icons.phone_android_outlined, keyboardType: TextInputType.phone),
               const SizedBox(height: 16),
+              _buildTextField('Referral Code (Optional)', _referralCodeController, Icons.card_giftcard_outlined, textCapitalization: TextCapitalization.characters),
+              const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -194,7 +260,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   labelText: 'Password',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                    icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.white54),
                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
@@ -207,7 +273,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   labelText: 'Confirm Password',
                   prefixIcon: const Icon(Icons.lock_clock_outlined),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                    icon: Icon(_obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.white54),
                     onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                   ),
                 ),
@@ -220,15 +286,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: const Text('Register'),
                 ),
               ),
-              const SizedBox(height: 16),
+
+              // ── OR ── Divider
+              _buildOrDivider(),
+
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: _loading ? null : _registerWithGoogle,
-                  icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                  icon: _buildGoogleLogo(),
                   label: const Text('Sign up with Google'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white24),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
               ),
@@ -241,6 +313,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Center(child: CircularProgressIndicator()),
           ),
       ],
+    );
+  }
+
+  Widget _buildOrDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 1,
+              color: Colors.white24,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Text(
+              'OR',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: Colors.white24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGoogleLogo() {
+    return Image.asset(
+      'assets/google_logo.png',
+      width: 22,
+      height: 22,
+      fit: BoxFit.contain,
     );
   }
 

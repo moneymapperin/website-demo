@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:async';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/dashboard_model.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import '../services/advisory_service.dart';
 import '../services/streak_service.dart';
 import '../services/xp_service.dart';
 import '../services/notification_service.dart';
@@ -25,6 +27,8 @@ import 'mf_screener_screen.dart';
 import 'insurance_screener_screen.dart';
 import 'gold_rates_screen.dart';
 import '../services/premium_service.dart';
+import '../services/feature_flag_service.dart';
+import '../widgets/feature_flag_guard.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({
@@ -42,7 +46,10 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final _api = ApiService();
   final _auth = AuthService();
   final _streakService = StreakService();
@@ -210,6 +217,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       final coreData = await _api.getDashboard();
       var data = DashboardData.fromCoreSchema(coreData);
+
+      await _xpService.checkScoreImprovement(data.fitnessScore);
+      final stats = await _xpService.getImprovementStats(data.fitnessScore);
+      double diff = (stats['difference'] as num?)?.toDouble() ?? 0.0;
+      _scorePtsFromLastMonth = diff.round();
 
       final profileRes = await _api.getMasterProfile();
       final profile = profileRes['data'] ?? {};
@@ -503,7 +515,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Icon(Icons.trending_up_rounded, color: AppColors.success),
             SizedBox(width: 10),
-            Text('Score Improvement', style: TextStyle(fontWeight: FontWeight.w900)),
+            Expanded(
+              child: Text(
+                'Score Improvement',
+                style: TextStyle(fontWeight: FontWeight.w900),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: Column(
@@ -685,7 +704,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(height: 6),
                     // Actionable Advice / Summary text
                     Text(
-                      "You're on track. Focus on investing more and building your emergency fund.",
+                      AdvisoryService.getGlobalFitnessAdvisory(data.fitnessScore),
                       style: TextStyle(
                         fontSize: 11,
                         height: 1.35,
@@ -715,18 +734,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: [
                           Row(
                             children: [
-                              const Icon(
-                                Icons.arrow_upward_rounded,
+                              Icon(
+                                _scorePtsFromLastMonth < 0
+                                    ? Icons.arrow_downward_rounded
+                                    : Icons.arrow_upward_rounded,
                                 size: 14,
-                                color: AppColors.vibrantGreen,
+                                color: _scorePtsFromLastMonth < 0
+                                    ? AppColors.danger
+                                    : AppColors.vibrantGreen,
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '$_scorePtsFromLastMonth pts',
-                                style: const TextStyle(
+                                '${_scorePtsFromLastMonth >= 0 ? '+' : ''}$_scorePtsFromLastMonth pts',
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w900,
-                                  color: AppColors.vibrantGreen,
+                                  color: _scorePtsFromLastMonth < 0
+                                      ? AppColors.danger
+                                      : AppColors.vibrantGreen,
                                 ),
                               ),
                             ],
@@ -1251,6 +1276,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildGoldTicker(bool isDark) {
+    final bool isEnabled = FeatureFlagService().isEnabled('gold_rates');
+
     if (_goldData == null || (_goldData!['24K (999 Purity)'] ?? 0) <= 0) {
       // Show a placeholder loader if data isn't ready yet, instead of hiding completely
       return Container(
@@ -1275,12 +1302,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: GestureDetector(
-        onTap: () {
+        onTap: isEnabled ? () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const GoldRatesScreen()),
+            MaterialPageRoute(builder: (_) => FeatureFlagGuard(featureKey: 'gold_rates', child: GoldRatesScreen())),
           );
-        },
+        } : () {},
         child: Container(
           height: 110,
           decoration: BoxDecoration(
@@ -1344,6 +1371,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                 ),
+
+                // Overlay if feature is disabled
+                if (!isEnabled)
+                  Positioned.fill(
+                    child: ClipRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                        child: Container(
+                          color: Colors.black.withOpacity(0.4),
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 28),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Live Soon',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -1376,13 +1433,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 title: 'Stock Score',
                 scoreValue: '75',
                 category: 'NIFTY 500 COMPANIES',
-                description: 'Buy / Sell Recommendations',
+                description: 'Bullish / Bearish Recommendations',
                 color: const Color(0xFF10B981),
                 iconWidget: const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 16),
                 cardType: 'stock',
+                featureKey: 'stock_screener',
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const StockScreenerScreen()),
+                  MaterialPageRoute(builder: (_) => FeatureFlagGuard(featureKey: 'stock_screener', child: StockScreenerScreen())),
                 ),
                 isDark: isDark,
               ),
@@ -1397,9 +1455,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: const Color(0xFF3B82F6),
                 iconWidget: const Icon(Icons.pie_chart_outline_rounded, color: Color(0xFF3B82F6), size: 16),
                 cardType: 'mf',
+                featureKey: 'mutual_funds',
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const MutualFundScreenerScreen()),
+                  MaterialPageRoute(builder: (_) => FeatureFlagGuard(featureKey: 'mutual_funds', child: MutualFundScreenerScreen())),
                 ),
                 isDark: isDark,
               ),
@@ -1418,9 +1477,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: const Color(0xFFA855F7),
                 iconWidget: const Icon(Icons.shield_outlined, color: Color(0xFFA855F7), size: 16),
                 cardType: 'insurance',
+                featureKey: 'insurance',
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const InsuranceScreenerScreen()),
+                  MaterialPageRoute(builder: (_) => FeatureFlagGuard(featureKey: 'insurance', child: InsuranceScreenerScreen())),
                 ),
                 isDark: isDark,
               ),
@@ -1459,9 +1519,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String cardType,
     required VoidCallback onTap,
     required bool isDark,
+    String? featureKey,
   }) {
+    final bool isEnabled = featureKey == null || FeatureFlagService().isEnabled(featureKey);
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: isEnabled ? onTap : () {},
       child: Container(
         height: 185,
         decoration: BoxDecoration(
@@ -1597,6 +1660,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
               ),
+
+              // Overlay if feature is disabled
+              if (!isEnabled)
+                Positioned.fill(
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                      child: Container(
+                        color: Colors.black.withOpacity(0.4),
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 28),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Live Soon',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -2083,7 +2176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Your Financial Navigation System',
+            'Your Personal Money Manager',
             style: TextStyle(
               fontSize: 10,
               color: isDark ? Colors.white38 : AppColors.textSecondaryLight,
@@ -2239,6 +2332,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -2256,7 +2350,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         onRefresh: _load,
                         child: SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.fromLTRB(context.wp(4), 16, context.wp(4), 24),
+                          padding: EdgeInsets.fromLTRB(context.wp(4), 16, context.wp(4), 120), // ADDED EXTRA PADDING SO CONTENT CLEARS THE NAVBAR
                           child: _data == null
                               ? _buildEmptyState(isDark)
                               : _buildDashboardBody(_data!, isDark),

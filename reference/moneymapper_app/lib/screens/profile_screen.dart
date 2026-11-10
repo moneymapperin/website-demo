@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../services/security_service.dart';
 import '../services/streak_service.dart';
 import '../services/premium_service.dart';
 import '../services/xp_service.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'master_data_screen.dart';
 
@@ -16,7 +18,10 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final AuthService _auth = AuthService();
   final PremiumService _premiumService = PremiumService();
 
@@ -456,6 +461,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -708,9 +714,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 24),
                         _buildLogoutButton(),
+                        const SizedBox(height: 12),
+                        _buildManageDataButton(),
                         const SizedBox(height: 24),
                         _buildTrustBadges(isDark),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 120), // ADDED EXTRA PADDING SO CONTENT CLEARS THE NAVBAR
                       ],
                     ),
                   ),
@@ -743,30 +751,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: Column(
           children: [
-            Row(
-              children: [
-                Builder(
-                  builder: (ctx) => IconButton(
-                    icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
-                    onPressed: () => Scaffold.of(ctx).openDrawer(),
-                  ),
+            const Center(
+              child: Text(
+                "Profile",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
                 ),
-                const Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 48),
-                      child: Text(
-                        "Profile",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
             const SizedBox(height: 12),
             CircleAvatar(
@@ -988,6 +981,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _buildManageDataButton() {
+    return Center(
+      child: TextButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (ctx) => const _ManageDataBottomSheet(),
+          );
+        },
+        child: const Text('Manage My Data', style: TextStyle(color: Colors.grey, fontSize: 13, decoration: TextDecoration.underline)),
+      ),
+    );
+  }
+
   Widget _buildTrustBadges(bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -995,8 +1004,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Icon(Icons.shield_rounded, size: 16, color: AppColors.success),
         const SizedBox(width: 10),
         _buildTrustBadge('SSL SECURED'),
-        const SizedBox(width: 8),
-        _buildTrustBadge('SEBI CERTIFIED'),
       ],
     );
   }
@@ -1017,6 +1024,296 @@ class _ProfileScreenState extends State<ProfileScreen> {
           color: AppColors.success,
           letterSpacing: 0.5,
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------
+// Bottom Sheet for Manage My Data
+// ---------------------------------------------------------
+class _ManageDataBottomSheet extends StatefulWidget {
+  const _ManageDataBottomSheet();
+  @override
+  State<_ManageDataBottomSheet> createState() => _ManageDataBottomSheetState();
+}
+
+class _ManageDataBottomSheetState extends State<_ManageDataBottomSheet> {
+  final ApiService _api = ApiService();
+  bool _isLoading = true;
+  bool _isSubmitting = false;
+  Map<String, dynamic>? _activeRequest;
+
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _reasonController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRequest();
+  }
+
+  Future<void> _fetchRequest() async {
+    setState(() => _isLoading = true);
+    
+    // Auto-populate the email field right away since it should not be editable
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser != null && currentUser.email != null) {
+      _emailController.text = currentUser.email!;
+    }
+    
+    final req = await _api.getActiveDeletionRequest();
+    if (mounted) {
+      setState(() {
+        _activeRequest = req;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showValidationAlert(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Required Field'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    if (_firstNameController.text.trim().isEmpty || 
+        _lastNameController.text.trim().isEmpty || 
+        _emailController.text.trim().isEmpty || 
+        _phoneController.text.trim().isEmpty) {
+      _showValidationAlert('Please fill all fields.');
+      return;
+    }
+    
+    if (_reasonController.text.trim().length < 20) {
+      _showValidationAlert('Reason must be at least 20 characters long.');
+      return;
+    }
+
+    // First Warning
+    bool? proceed1 = await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Warning'),
+        content: const Text('You understand after requesting data deletion you will not be able to use our app after data is deleted, and if you want to use it again you will have to register again.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('I Understand')),
+        ],
+      ),
+    );
+    if (proceed1 != true) return;
+
+    // Second Warning
+    bool? proceed2 = await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Final Confirmation', style: TextStyle(color: Colors.red)),
+        content: const Text('Are you ready to lose track of your financial health permanently?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true), 
+            child: const Text('Yes, Delete My Data', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (proceed2 != true) return;
+
+    setState(() => _isSubmitting = true);
+    try {
+      await _api.submitDeletionRequest({
+        'first_name': _firstNameController.text.trim(),
+        'last_name': _lastNameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'reason': _reasonController.text.trim(),
+      });
+      
+      if (mounted) {
+        // Pop the bottom sheet so we can show the alert
+        Navigator.pop(context);
+        
+        // Show success alert using dialog instead of snackbar (guarantees visibility)
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Request Submitted'),
+            content: const Text('Request forwarded to the concerned team.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch(e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  Future<void> _withdraw() async {
+    setState(() => _isSubmitting = true);
+    try {
+      await _api.withdrawDeletionRequest();
+      if (mounted) {
+        // Pop the bottom sheet first so the alert is visible
+        Navigator.pop(context);
+
+        // Show prominent dialog confirming withdrawal
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Request Withdrawn'),
+            content: const Text('Your data deletion request has been successfully cancelled.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch(e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24, right: 24, top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: _isLoading 
+        ? const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()))
+        : SingleChildScrollView(
+            child: _activeRequest != null ? _buildActiveRequestView(isDark) : _buildFormView(isDark),
+          ),
+    );
+  }
+
+  Widget _buildActiveRequestView(bool isDark) {
+    final scheduledDate = _activeRequest!['scheduled_for'] != null 
+        ? DateTime.parse(_activeRequest!['scheduled_for'].toString()).toLocal().toString().split(' ')[0]
+        : 'in 7 days';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Icon(Icons.warning_rounded, color: AppColors.warning, size: 48),
+        const SizedBox(height: 16),
+        const Text('Deletion Scheduled', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        Text(
+          'Your account and all associated data is scheduled to be permanently deleted on $scheduledDate.\n\nIf you change your mind, you can withdraw this request before the scheduled date.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, height: 1.5),
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: _isSubmitting ? null : _withdraw,
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+          child: _isSubmitting 
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+              : const Text('Withdraw Deletion Request'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFormView(bool isDark) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Request Data Deletion', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black)),
+        const SizedBox(height: 12),
+        Text('Submit a request to permanently delete your account and all associated financial data. This process takes 7 days to complete.', 
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, height: 1.5)),
+        const SizedBox(height: 32),
+        
+        _buildTextField('First Name', _firstNameController, Icons.person_outline),
+        const SizedBox(height: 16),
+        _buildTextField('Last Name', _lastNameController, Icons.person_outline),
+        const SizedBox(height: 16),
+        _buildTextField('Email Address', _emailController, Icons.email_outlined, TextInputType.emailAddress, true), // Passing true for readOnly
+        const SizedBox(height: 16),
+        _buildTextField('Mobile Number', _phoneController, Icons.phone_android_outlined, TextInputType.phone),
+        const SizedBox(height: 16),
+        
+        TextField(
+          controller: _reasonController,
+          maxLines: 4,
+          style: TextStyle(color: isDark ? Colors.white : Colors.black),
+          decoration: const InputDecoration(
+            labelText: 'Reason for deletion (Min 20 chars)',
+            alignLabelWithHint: true,
+          ),
+        ),
+        
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: _isSubmitting ? null : _submit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.danger,
+            padding: const EdgeInsets.symmetric(vertical: 16)
+          ),
+          child: _isSubmitting 
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+              : const Text('Request Deletion', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller, IconData icon, [TextInputType? type, bool readOnly = false]) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return TextField(
+      controller: controller,
+      keyboardType: type,
+      readOnly: readOnly,
+      style: TextStyle(
+        color: readOnly ? Colors.grey : (isDark ? Colors.white : Colors.black)
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        filled: readOnly,
+        fillColor: readOnly ? (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)) : null,
       ),
     );
   }

@@ -543,6 +543,12 @@ describe('Rebuilt QrLoginPanel (Supabase Realtime Contract)', () => {
       </MemoryRouter>
     );
 
+    expect(screen.getByTestId('qr-idle-state')).toBeInTheDocument();
+    const generateBtn = screen.getByTestId('generate-qr-button');
+    expect(generateBtn).toBeInTheDocument();
+
+    fireEvent.click(generateBtn);
+
     expect(screen.getByTestId('qr-loading')).toBeInTheDocument();
 
     await act(async () => {
@@ -696,14 +702,12 @@ describe('Rebuilt QrLoginPanel (Supabase Realtime Contract)', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // 16. Manual Generate QR button with 5s countdown when autoStart={false}
+  // 16. Manual Generate QR button immediately starts Realtime session without countdown
   // ---------------------------------------------------------------------------
-  it('16. renders Generate QR button when autoStart={false}, and triggers Realtime session after 5s countdown', async () => {
-    vi.useFakeTimers();
-
+  it('16. renders Generate QR button when autoStart={false}, and immediately triggers Realtime session without countdown', async () => {
     render(
       <MemoryRouter>
-        <QrLoginPanel autoStart={false} countdownSeconds={5} />
+        <QrLoginPanel autoStart={false} />
       </MemoryRouter>
     );
 
@@ -713,55 +717,41 @@ describe('Rebuilt QrLoginPanel (Supabase Realtime Contract)', () => {
     expect(generateBtn).toBeInTheDocument();
     expect(screen.getByText('Instant QR Login')).toBeInTheDocument();
 
-    // Click "Generate QR Code"
+    // Click "Generate QR Code" -> immediate transition to loading, channel created immediately (no countdown)
     fireEvent.click(generateBtn);
 
-    // Countdown active
-    expect(screen.getByTestId('qr-generating-countdown')).toBeInTheDocument();
-    expect(screen.getByText('Generating QR Code...')).toBeInTheDocument();
-    expect(supabase.channel).not.toHaveBeenCalled();
-
-    // Advance 3 seconds -> still counting down
-    act(() => {
-      vi.advanceTimersByTime(3000);
-    });
-    expect(supabase.channel).not.toHaveBeenCalled();
-
-    // Advance remaining 2 seconds -> triggers session initialization
-    act(() => {
-      vi.advanceTimersByTime(2000);
-    });
-
+    expect(screen.getByTestId('qr-loading')).toBeInTheDocument();
+    expect(screen.queryByTestId('qr-generating-countdown')).not.toBeInTheDocument();
     expect(supabase.channel).toHaveBeenCalledTimes(1);
     expect(mockChannel.subscribe).toHaveBeenCalledTimes(1);
   });
 
   // ---------------------------------------------------------------------------
-  // 17. Cancel during 5s countdown returns to idle state without creating session
+  // 17. Directly re-initializes session without countdown when Retry is clicked
   // ---------------------------------------------------------------------------
-  it('17. cancels countdown and returns to idle state when Cancel button is clicked', async () => {
-    vi.useFakeTimers();
-
+  it('17. directly re-initializes session without countdown when Retry is clicked after error', async () => {
     render(
       <MemoryRouter>
-        <QrLoginPanel autoStart={false} countdownSeconds={5} />
+        <QrLoginPanel autoStart={false} />
       </MemoryRouter>
     );
 
     fireEvent.click(screen.getByTestId('generate-qr-button'));
-    expect(screen.getByTestId('qr-generating-countdown')).toBeInTheDocument();
+    expect(supabase.channel).toHaveBeenCalledTimes(1);
 
-    // Click Cancel
-    fireEvent.click(screen.getByText('Cancel'));
-
-    expect(screen.getByTestId('qr-idle-state')).toBeInTheDocument();
-    expect(screen.getByTestId('generate-qr-button')).toBeInTheDocument();
-
-    // Advance time to verify countdown was stopped
-    act(() => {
-      vi.advanceTimersByTime(6000);
+    // Simulate error during subscribe
+    await act(async () => {
+      subscribeCallback?.('CHANNEL_ERROR');
     });
 
-    expect(supabase.channel).not.toHaveBeenCalled();
+    const retryBtn = await screen.findByText('Try again');
+    expect(retryBtn).toBeInTheDocument();
+
+    // Click Try again -> immediately calls initQrSession without countdown
+    fireEvent.click(retryBtn);
+
+    expect(screen.getByTestId('qr-loading')).toBeInTheDocument();
+    expect(screen.queryByTestId('qr-generating-countdown')).not.toBeInTheDocument();
+    expect(supabase.channel).toHaveBeenCalledTimes(2);
   });
 });

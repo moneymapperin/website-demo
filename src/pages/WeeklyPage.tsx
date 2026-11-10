@@ -107,10 +107,10 @@ export const WeeklyPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0D0B14] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0D0B14] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-medium text-zinc-400">Loading weekly tracker...</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-zinc-400">Loading weekly tracker...</p>
         </div>
       </div>
     );
@@ -118,13 +118,13 @@ export const WeeklyPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0D0B14] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[#161224] p-6 rounded-3xl border border-zinc-800 text-center shadow-lg">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0D0B14] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white dark:bg-[#161224] p-6 rounded-3xl border border-slate-200 dark:border-zinc-800 text-center shadow-lg">
           <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
             !
           </div>
-          <h2 className="text-lg font-bold text-white mb-2">Failed to Load Weekly Data</h2>
-          <p className="text-sm text-zinc-400 mb-6">{error}</p>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Failed to Load Weekly Data</h2>
+          <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6">{error}</p>
           <button
             onClick={() => refetch()}
             className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-sm transition"
@@ -138,13 +138,13 @@ export const WeeklyPage: React.FC = () => {
 
   if (isEmpty || !currentWeek) {
     return (
-      <div className="min-h-screen bg-[#0D0B14] p-4 md:p-8">
-        <div className="max-w-xl mx-auto mt-12 bg-[#161224] border border-zinc-800 rounded-3xl p-8 text-center shadow-xl">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0D0B14] p-4 md:p-8">
+        <div className="max-w-xl mx-auto mt-12 bg-white dark:bg-[#161224] border border-slate-200 dark:border-zinc-800 rounded-3xl p-8 text-center shadow-xl">
           <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-5 text-3xl">
             📅
           </div>
-          <h1 className="text-2xl font-black text-white mb-2">No Active Week Data</h1>
-          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-2">No Active Week Data</h1>
+          <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 leading-relaxed">
             Log your parameters to derive dynamic, intelligent spending limits. Complete your profile in Master Data to get started.
           </p>
           <button
@@ -162,7 +162,7 @@ export const WeeklyPage: React.FC = () => {
     d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-zinc-100 pb-20">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090B] text-slate-900 dark:text-zinc-100 pb-20">
       {/* 1. Top Header Banner Card matching Image 4 */}
       <div className="bg-gradient-to-r from-[#210B45] via-[#1A093D] to-[#120529] text-white pt-6 pb-8 px-4 md:px-8 rounded-b-[32px] border-b border-indigo-500/20 shadow-xl">
         <div className="max-w-7xl mx-auto space-y-6">
@@ -258,15 +258,15 @@ export const WeeklyPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 md:px-8 mt-6 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           {/* Discipline Score Card Left matching Image 4 */}
-          <section className="lg:col-span-7 bg-[#14121F] p-6 rounded-3xl border border-zinc-800 shadow-sm flex flex-col justify-between space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+          <section className="lg:col-span-7 bg-white dark:bg-[#14121F] p-6 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800/80 pb-3">
               <div>
-                <h2 className="text-base font-black text-white flex items-center gap-2">
-                  <span>📊</span> Discipline Score <Info className="w-3.5 h-3.5 text-zinc-500" />
+                <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>📊</span> Discipline Score <Info className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
                 </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">Your weekly financial discipline</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Your weekly financial discipline</p>
               </div>
-              <span className="px-3 py-1 rounded-xl bg-zinc-800 border border-zinc-700 text-xs font-black text-white">
+              <span className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-black text-slate-700 dark:text-white">
                 Hit Rate: {targetsHit}/5
               </span>
             </div>
@@ -322,8 +322,8 @@ export const WeeklyPage: React.FC = () => {
                 </svg>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-black text-white">{Math.round(disciplineScore)}</span>
-                  <span className="text-[9px] uppercase font-bold text-zinc-400 tracking-wider">SCORE</span>
+                  <span className="text-3xl font-black text-slate-900 dark:text-white">{Math.round(disciplineScore)}</span>
+                  <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-zinc-400 tracking-wider">SCORE</span>
                 </div>
               </div>
 
@@ -332,31 +332,31 @@ export const WeeklyPage: React.FC = () => {
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-indigo-400" />
-                    <span className="font-bold text-zinc-300">Fixed Limits</span>
+                    <span className="font-bold text-slate-700 dark:text-zinc-300">Fixed Limits</span>
                   </div>
-                  <span className="font-black text-indigo-400">{Math.round(fixedProgress * 100)}%</span>
+                  <span className="font-black text-indigo-500 dark:text-indigo-400">{Math.round(fixedProgress * 100)}%</span>
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                    <span className="font-bold text-zinc-300">Flexible Limits</span>
+                    <span className="font-bold text-slate-700 dark:text-zinc-300">Flexible Limits</span>
                   </div>
-                  <span className="font-black text-amber-400">{Math.round(flexProgress * 100)}%</span>
+                  <span className="font-black text-amber-500 dark:text-amber-400">{Math.round(flexProgress * 100)}%</span>
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                    <span className="font-bold text-zinc-300">Savings Goal</span>
+                    <span className="font-bold text-slate-700 dark:text-zinc-300">Savings Goal</span>
                   </div>
-                  <span className="font-black text-emerald-400">{Math.round(savingsProgress * 100)}%</span>
+                  <span className="font-black text-emerald-500 dark:text-emerald-400">{Math.round(savingsProgress * 100)}%</span>
                 </div>
               </div>
             </div>
 
             {/* Bottom Target Streak Badge matching Image 4 */}
-            <div className="p-3 px-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center gap-2 text-xs font-bold text-zinc-300 text-center">
+            <div className="p-3 px-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-xs font-bold text-slate-600 dark:text-zinc-300 text-center">
               <span>🎯</span>
               <span>Hit at least 5 targets this week to maintain your streak!</span>
             </div>
@@ -365,36 +365,36 @@ export const WeeklyPage: React.FC = () => {
           {/* Right Column: Income, Fin Tip & Submit Button matching Image 4 */}
           <div className="lg:col-span-5 space-y-6 flex flex-col justify-between">
             {/* Income Card */}
-            <section className="bg-[#14121F] p-5 rounded-3xl border border-zinc-800 flex items-center justify-between shadow-sm">
+            <section className="bg-white dark:bg-[#14121F] p-5 rounded-3xl border border-slate-200 dark:border-zinc-800 flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
                   ₹
                 </div>
                 <div>
-                  <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">
+                  <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider">
                     this week's income
                   </span>
-                  <div className="text-2xl font-black text-white mt-0.5">{formatInr(weeklyIncome || 25000)}</div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{formatInr(weeklyIncome || 25000)}</div>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => navigate('/master-data?target=expenses')}
-                className="text-xs px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-800/80 hover:bg-zinc-700 text-white font-bold transition cursor-pointer"
+                className="text-xs px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800/80 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-white font-bold transition cursor-pointer"
               >
                 Update
               </button>
             </section>
 
             {/* Fin Tip Card matching Image 4 */}
-            <section className="bg-amber-500/10 p-5 rounded-3xl border border-amber-500/20 flex items-start gap-3.5 shadow-sm">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 text-lg flex items-center justify-center shrink-0">
+            <section className="bg-amber-50 dark:bg-amber-500/10 p-5 rounded-3xl border border-amber-200 dark:border-amber-500/20 flex items-start gap-3.5 shadow-sm">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 text-lg flex items-center justify-center shrink-0">
                 💡
               </div>
               <div>
-                <span className="text-xs font-black text-amber-400 uppercase tracking-wider">Fin Says 🦉</span>
-                <p className="text-xs text-zinc-300 mt-1 leading-relaxed font-medium">
+                <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">Fin Says 🦉</span>
+                <p className="text-xs text-slate-700 dark:text-zinc-300 mt-1 leading-relaxed font-medium">
                   {getFinMessage(disciplineScore, savingsDecision !== 'missed')}
                 </p>
               </div>
@@ -407,7 +407,7 @@ export const WeeklyPage: React.FC = () => {
               onClick={handleSubmitReport}
               className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
                 currentWeek.is_submitted
-                  ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed shadow-none'
+                  ? 'bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 border border-slate-200 dark:border-zinc-700 cursor-not-allowed shadow-none'
                   : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white hover:opacity-95 shadow-indigo-600/30 active:scale-[0.99] cursor-pointer'
               }`}
             >
@@ -424,37 +424,37 @@ export const WeeklyPage: React.FC = () => {
         </div>
 
         {/* 3. Target Ranges Section matching Image 4 */}
-        <section className="bg-[#14121F] p-6 rounded-3xl border border-zinc-800 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+        <section className="bg-white dark:bg-[#14121F] p-6 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800/80 pb-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
                 🎯
               </div>
               <div>
-                <h2 className="text-base font-black text-white">
+                <h2 className="text-base font-black text-slate-900 dark:text-white">
                   Week {currentWeek.index} Target Ranges
                 </h2>
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-slate-500 dark:text-zinc-400">
                   {dateFormat(currentWeek.start)} – {dateFormat(currentWeek.end)}
                 </span>
               </div>
             </div>
 
-            <span className="text-xs font-bold px-3 py-1 rounded-xl bg-zinc-800 text-zinc-300 border border-zinc-700 flex items-center gap-1">
+            <span className="text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 flex items-center gap-1">
               3/3 Targets <ChevronDown className="w-3.5 h-3.5" />
             </span>
           </div>
 
           {/* 1. Fixed Expenses Row */}
-          <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-3">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800/80 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center shrink-0">
                   <Home className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">Fixed expenses</div>
-                  <p className="text-xs text-zinc-400">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">Fixed expenses</div>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">
                     Limit: {formatInr(currentWeek.range_fixed[0] || 10750)} – {formatInr(currentWeek.range_fixed[1] || 11750)}
                   </p>
                 </div>
@@ -462,7 +462,7 @@ export const WeeklyPage: React.FC = () => {
 
               {/* Decision Toggle Buttons */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-zinc-400 mr-2">{formatInr(actualFixed)} spent</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-zinc-400 mr-2">{formatInr(actualFixed)} spent</span>
                 <button
                   type="button"
                   disabled={currentWeek.is_submitted}
@@ -470,7 +470,7 @@ export const WeeklyPage: React.FC = () => {
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
                     fixedDecision === 'missed'
                       ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/20'
-                      : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700'
                   }`}
                 >
                   Missed
@@ -482,17 +482,17 @@ export const WeeklyPage: React.FC = () => {
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
                     fixedDecision === 'achieved'
                       ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/20'
-                      : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700'
                   }`}
                 >
                   Achieved
                 </button>
-                <ChevronRight className="w-4 h-4 text-zinc-500" />
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-300 ${
                   actualFixed > currentWeek.range_fixed[1] ? 'bg-rose-500' : 'bg-indigo-500'
@@ -503,15 +503,15 @@ export const WeeklyPage: React.FC = () => {
           </div>
 
           {/* 2. Flexible Expenses Row */}
-          <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-3">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800/80 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 dark:text-amber-400 flex items-center justify-center shrink-0">
                   <ShoppingCart className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">Flexible expenses</div>
-                  <p className="text-xs text-zinc-400">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">Flexible expenses</div>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">
                     Limit: {formatInr(currentWeek.range_flex[0] || 8250)} – {formatInr(currentWeek.range_flex[1] || 9250)}
                   </p>
                 </div>
@@ -519,7 +519,7 @@ export const WeeklyPage: React.FC = () => {
 
               {/* Decision Toggle Buttons */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-zinc-400 mr-2">{formatInr(actualFlex)} spent</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-zinc-400 mr-2">{formatInr(actualFlex)} spent</span>
                 <button
                   type="button"
                   disabled={currentWeek.is_submitted}
@@ -527,7 +527,7 @@ export const WeeklyPage: React.FC = () => {
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
                     flexibleDecision === 'missed'
                       ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/20'
-                      : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700'
                   }`}
                 >
                   Missed
@@ -539,17 +539,17 @@ export const WeeklyPage: React.FC = () => {
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
                     flexibleDecision === 'achieved'
                       ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/20'
-                      : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700'
                   }`}
                 >
                   Achieved
                 </button>
-                <ChevronRight className="w-4 h-4 text-zinc-500" />
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-300 ${
                   actualFlex > currentWeek.range_flex[1] ? 'bg-rose-500' : 'bg-amber-500'
@@ -560,15 +560,15 @@ export const WeeklyPage: React.FC = () => {
           </div>
 
           {/* 3. Savings Goal Row */}
-          <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-3">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800/80 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                   <PiggyBank className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">Savings Goal</div>
-                  <p className="text-xs text-zinc-400">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">Savings Goal</div>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">
                     Target: {formatInr(currentWeek.range_save[0] || 5750)} – {formatInr(currentWeek.range_save[1] || 6750)}
                   </p>
                 </div>
@@ -576,7 +576,7 @@ export const WeeklyPage: React.FC = () => {
 
               {/* Decision Toggle Buttons */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-zinc-400 mr-2">{formatInr(actualSaved)} saved</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-zinc-400 mr-2">{formatInr(actualSaved)} saved</span>
                 <button
                   type="button"
                   disabled={currentWeek.is_submitted}
@@ -584,7 +584,7 @@ export const WeeklyPage: React.FC = () => {
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
                     savingsDecision === 'missed'
                       ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/20'
-                      : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700'
                   }`}
                 >
                   Missed
@@ -596,17 +596,17 @@ export const WeeklyPage: React.FC = () => {
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
                     savingsDecision === 'achieved'
                       ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/20'
-                      : 'border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700'
                   }`}
                 >
                   Achieved
                 </button>
-                <ChevronRight className="w-4 h-4 text-zinc-500" />
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-emerald-500 transition-all duration-500"
                 style={{ width: `${Math.min(100, Math.round(savingsProgress * 100))}%` }}
@@ -619,16 +619,16 @@ export const WeeklyPage: React.FC = () => {
       {/* Log Exact Amount Modal */}
       {modalTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-[#161224] rounded-3xl p-6 border border-zinc-800 shadow-2xl space-y-4">
-            <h3 className="text-base font-bold capitalize text-white">
+          <div className="w-full max-w-sm bg-white dark:bg-[#161224] rounded-3xl p-6 border border-slate-200 dark:border-zinc-800 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold capitalize text-slate-900 dark:text-white">
               Log {modalTarget} Expenses
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-slate-500 dark:text-zinc-400">
               Enter the exact amount spent or saved this week:
             </p>
 
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 font-bold text-sm">
                 ₹
               </span>
               <input
@@ -637,7 +637,7 @@ export const WeeklyPage: React.FC = () => {
                 placeholder="0"
                 value={modalAmount}
                 onChange={(e) => setModalAmount(e.target.value)}
-                className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-zinc-700 bg-[#0D0B14] text-white font-semibold text-sm outline-none focus:border-indigo-500 transition"
+                className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-[#0D0B14] text-slate-900 dark:text-white font-semibold text-sm outline-none focus:border-indigo-500 transition"
               />
             </div>
 
@@ -645,7 +645,7 @@ export const WeeklyPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setModalTarget(null)}
-                className="flex-1 py-2.5 rounded-xl border border-zinc-700 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 transition"
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition"
               >
                 Cancel
               </button>

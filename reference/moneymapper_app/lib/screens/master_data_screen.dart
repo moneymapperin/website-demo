@@ -681,9 +681,29 @@ class _MasterDataScreenState extends State<MasterDataScreen> with SingleTickerPr
                           'Data Processing Consent',
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                         ),
-                        subtitle: const Text(
-                          'I agree to share and process my data for providing personalized financial insights and statistics. I understand I can opt-out by sending a formal email to remove my data.',
-                          style: TextStyle(fontSize: 11),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'I agree to share and process my data for providing personalized financial insights and statistics. I understand I can opt-out by sending a formal email to remove my data.',
+                              style: TextStyle(fontSize: 11),
+                            ),
+                            const SizedBox(height: 8),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/disclaimer_consent');
+                              },
+                              child: const Text(
+                                '📄 Read Disclaimer & Data Processing Consent Policy',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         controlAffinity: ListTileControlAffinity.leading,
                         contentPadding: EdgeInsets.zero,

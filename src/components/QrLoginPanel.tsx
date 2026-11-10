@@ -13,7 +13,6 @@ const isTestEnv =
 
 export type QrSessionStatus =
   | 'idle'
-  | 'generating'
   | 'loading'
   | 'ready'
   | 'authenticated'
@@ -28,7 +27,6 @@ export interface QrLoginPanelProps {
 
 export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
   autoStart = true,
-  countdownSeconds = 5,
 }) => {
   const navigate = useNavigate();
   const navigateRef = useRef(navigate);
@@ -46,9 +44,7 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
   const [status, setStatus] = useState<QrSessionStatus>(autoStart ? 'loading' : 'idle');
   const [errorMessage, setErrorMessage] = useState<string>('Login failed, please retry');
   const [secondsRemaining, setSecondsRemaining] = useState<number>(120);
-  const [countdown, setCountdown] = useState<number>(countdownSeconds);
 
-  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const statusRef = useRef<QrSessionStatus>(autoStart ? 'loading' : 'idle');
   statusRef.current = status;
 
@@ -67,15 +63,6 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
 
   // Best-effort session cleanup helper
   const cleanupSession = useCallback((tokenToClean?: string) => {
-    if (countdownIntervalRef.current) {
-      try {
-        clearInterval(countdownIntervalRef.current);
-      } catch {
-        // Safe catch
-      }
-      countdownIntervalRef.current = null;
-    }
-
     if (timerIdRef.current) {
       try {
         clearInterval(timerIdRef.current);
@@ -516,51 +503,6 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
     cleanupSessionRef.current = cleanupSession;
   }, [cleanupSession]);
 
-  const handleStartGenerating = useCallback(() => {
-    setStatus('generating');
-    setCountdown(countdownSeconds);
-
-    if (countdownIntervalRef.current) {
-      try {
-        clearInterval(countdownIntervalRef.current);
-      } catch {
-        // Safe catch
-      }
-      countdownIntervalRef.current = null;
-    }
-
-    let current = countdownSeconds;
-    countdownIntervalRef.current = setInterval(() => {
-      current -= 1;
-      if (!isMountedRef.current) return;
-      setCountdown(current);
-
-      if (current <= 0) {
-        if (countdownIntervalRef.current) {
-          try {
-            clearInterval(countdownIntervalRef.current);
-          } catch {
-            // Safe catch
-          }
-          countdownIntervalRef.current = null;
-        }
-        initQrSessionRef.current();
-      }
-    }, 1000);
-  }, [countdownSeconds]);
-
-  const handleCancelGenerating = useCallback(() => {
-    if (countdownIntervalRef.current) {
-      try {
-        clearInterval(countdownIntervalRef.current);
-      } catch {
-        // Safe catch
-      }
-      countdownIntervalRef.current = null;
-    }
-    setStatus('idle');
-  }, []);
-
   useEffect(() => {
     console.log('[QR_DEBUG] Component mounted at:', new Date().toISOString(), 'Timestamp:', Date.now());
     isMountedRef.current = true;
@@ -582,8 +524,7 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
         statusRef.current !== 'expired' &&
         statusRef.current !== 'authenticated' &&
         statusRef.current !== 'loading' &&
-        statusRef.current !== 'idle' &&
-        statusRef.current !== 'generating'
+        statusRef.current !== 'idle'
       ) {
         if (Date.now() >= expiresAtRef.current) {
           if (timerIdRef.current) {
@@ -611,15 +552,6 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
         document.removeEventListener('visibilitychange', handleVisibilityChange);
       } catch {
         // Safe catch
-      }
-
-      if (countdownIntervalRef.current) {
-        try {
-          clearInterval(countdownIntervalRef.current);
-        } catch {
-          // Safe catch
-        }
-        countdownIntervalRef.current = null;
       }
 
       // StrictMode dev-mode guard:
@@ -674,33 +606,11 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
               <button
                 type="button"
                 data-testid="generate-qr-button"
-                onClick={handleStartGenerating}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-[#0091FF] hover:bg-[#007EE5] active:scale-95 text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_14px_rgba(0,145,255,0.35)] cursor-pointer"
+                onClick={initQrSession}
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-[#0091FF] hover:bg-[#007EE5] hover:scale-[1.03] active:scale-[0.98] transition-transform text-white rounded-xl text-xs font-bold shadow-[0_4px_14px_rgba(0,145,255,0.35)] hover:shadow-[0_4px_20px_rgba(0,132,255,0.5)] cursor-pointer"
               >
                 <QrCode className="w-3.5 h-3.5" />
                 <span>Generate QR Code</span>
-              </button>
-            </div>
-          )}
-
-          {status === 'generating' && (
-            <div data-testid="qr-generating-countdown" className="flex flex-col items-center justify-center text-center p-3 w-full">
-              <div className="relative w-14 h-14 flex items-center justify-center mb-3">
-                <div className="absolute inset-0 rounded-full border-2 border-[#0091FF] animate-ping opacity-25" />
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-[#0091FF] flex items-center justify-center text-[#0091FF] font-black text-lg shadow-sm">
-                  {countdown}s
-                </div>
-              </div>
-              <p className="text-xs font-bold text-slate-800 mb-1">Generating QR Code...</p>
-              <p className="text-[11px] text-slate-500 mb-3">
-                Opening secure code in {countdown}s
-              </p>
-              <button
-                type="button"
-                onClick={handleCancelGenerating}
-                className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-              >
-                Cancel
               </button>
             </div>
           )}
@@ -720,16 +630,18 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
           )}
 
           {(status === 'ready' || status === 'expired' || status === 'session_error') && sessionToken && (
-            <QRCodeSVG
-              data-testid="qr-code-svg"
-              data-token={sessionToken}
-              data-value={sessionToken}
-              value={sessionToken}
-              size={184}
-              level="M"
-              includeMargin={false}
-              className={status === 'expired' ? 'opacity-10 blur-sm' : ''}
-            />
+            <div className="motion-safe:animate-qr-in">
+              <QRCodeSVG
+                data-testid="qr-code-svg"
+                data-token={sessionToken}
+                data-value={sessionToken}
+                value={sessionToken}
+                size={184}
+                level="M"
+                includeMargin={false}
+                className={status === 'expired' ? 'opacity-10 blur-sm' : ''}
+              />
+            </div>
           )}
 
           {/* Expired Overlay */}
@@ -769,10 +681,6 @@ export const QrLoginPanel: React.FC<QrLoginPanelProps> = ({
         {status === 'ready' ? (
           <p className="text-white/40 text-[11px]">
             Code expires in <span className="text-white/75 font-mono">{secondsRemaining}s</span>
-          </p>
-        ) : status === 'generating' ? (
-          <p className="text-white/40 text-[11px]">
-            Preparing secure session in <span className="text-[#0091FF] font-mono font-bold">{countdown}s</span>
           </p>
         ) : status === 'idle' ? (
           <p className="text-white/40 text-[11px]">

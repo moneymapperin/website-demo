@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/api_service.dart';
@@ -98,12 +99,18 @@ class ChatIntentService {
       route: '/emergency_fund_p',
       redirectLabel: 'Check Emergency Fund',
       responseBuilder: (data) {
+        final fitness = data?['financial_fitness_scores'] as Map<String, dynamic>?;
         final savings = data?['savings_scores'] as Map<String, dynamic>?;
-        if (savings != null) {
-          final current = (savings['ef_current_estimated'] ?? 0).toDouble();
-          final target = (savings['ef_target_amount'] ?? 0).toDouble();
+        final rawPillarScore = fitness?['savings_pillar_score'];
+        final int pillarScore = rawPillarScore != null ? (double.tryParse(rawPillarScore.toString())?.round() ?? 0) : 0;
+
+        if (savings != null || pillarScore > 0) {
+          final current = (savings?['ef_current_estimated'] ?? 0).toDouble();
+          final target = (savings?['ef_target_amount'] ?? 0).toDouble();
           final shortfall = (target - current) > 0 ? (target - current) : 0.0;
+          final String scoreStr = pillarScore > 0 ? '• **Emergency Savings Pillar Score:** **$pillarScore / 100** ⭐\n' : '';
           return 'Your **Emergency Fund** status:\n'
+              '$scoreStr'
               '• Current Balance: **₹${current.toStringAsFixed(0)}**\n'
               '• Target Cushion: **₹${target.toStringAsFixed(0)}**\n'
               '• Shortfall: **₹${shortfall.toStringAsFixed(0)}**\n\n'
@@ -126,11 +133,17 @@ class ChatIntentService {
       route: '/income_p',
       redirectLabel: 'Analyze Income',
       responseBuilder: (data) {
+        final fitness = data?['financial_fitness_scores'] as Map<String, dynamic>?;
         final income = data?['income_scores'] as Map<String, dynamic>?;
-        if (income != null) {
-          final active = income['active_income_score'] ?? 0;
-          final passive = income['passive_income_score'] ?? 0;
+        final rawPillarScore = fitness?['income_pillar_score'];
+        final int pillarScore = rawPillarScore != null ? (double.tryParse(rawPillarScore.toString())?.round() ?? 0) : 0;
+
+        if (income != null || pillarScore > 0) {
+          final active = income?['active_income_score'] ?? 0;
+          final passive = income?['passive_income_score'] ?? 0;
+          final String scoreStr = pillarScore > 0 ? '• **Income Pillar Score:** **$pillarScore / 100** ⭐\n' : '';
           return 'Here is your **Income Pillar** breakdown:\n'
+              '$scoreStr'
               '• Active Income Score: **$active**\n'
               '• Passive Income Score: **$passive**\n\n'
               'Track cashflow and build passive streams to grow your wealth!';
@@ -143,26 +156,88 @@ class ChatIntentService {
     _IntentRule(
       keywords: [
         'expense',
+        'expenses',
+        'weekly expenses',
+        'weekly expense',
         'spending',
         'fixed spend',
         'flexible spend',
         '50/30/20',
         'budget'
       ],
-      route: '/dashboard',
-      redirectLabel: 'View Dashboard',
+      route: '/weekly_expense_p',
+      redirectLabel: 'Log Weekly Expenses',
       responseBuilder: (data) {
-        final expense = data?['expense_scores'] as Map<String, dynamic>?;
-        if (expense != null) {
-          final fixed = expense['fixed_score'] ?? 0;
-          final flex = expense['flexible_score'] ?? 0;
-          final tip = expense['discipline_message'] ?? 'Keep tracking expenses daily.';
-          return 'Your **Expense & Budget** Breakdown:\n'
-              '• Fixed Spend Score: **$fixed**\n'
-              '• Flexible Spend Score: **$flex**\n'
-              '• Tip: **$tip**';
+        final dashboard = data?['dashboard'] as Map<String, dynamic>? ?? data;
+        final profile = data?['profile'] as Map<String, dynamic>?;
+        final weekly = data?['weekly'] as Map<String, dynamic>?;
+
+        final fitness = dashboard?['financial_fitness_scores'] as Map<String, dynamic>?;
+        final expense = dashboard?['expense_scores'] as Map<String, dynamic>?;
+
+        final double rawPillarScore = double.tryParse(fitness?['expense_pillar_score']?.toString() ?? '') ?? 0.0;
+        final double rawFixedScore = double.tryParse(expense?['fixed_score']?.toString() ?? '') ?? 0.0;
+        final double rawFlexScore = double.tryParse(expense?['flexible_score']?.toString() ?? '') ?? 0.0;
+
+        // Dynamic Profile calculations
+        final double monthlyIncome = double.tryParse(profile?['monthlyActiveIncome']?.toString() ?? '0') ?? 0.0;
+        final double monthlyFixed = double.tryParse(profile?['monthlyFixedExpenses']?.toString() ?? '0') ?? 0.0;
+
+        int pillarScore = rawPillarScore.round();
+        int fixedScore = rawFixedScore.round();
+        int flexScore = rawFlexScore.round();
+
+        // If DB has default 25/10/10 or uncalculated score, calculate live dynamic score from Master Profile!
+        if (monthlyIncome > 0 && (pillarScore <= 25 || fixedScore <= 10)) {
+          final double fixedRatio = monthlyFixed / monthlyIncome;
+          final double flexRatio = math.max(0.1, 0.35 - fixedRatio * 0.3);
+          final double saveRatio = math.max(0.0, 1.0 - fixedRatio - flexRatio);
+
+          fixedScore = fixedRatio <= 0.50 ? 85 : (fixedRatio <= 0.65 ? 65 : 35);
+          flexScore = flexRatio <= 0.30 ? 85 : (flexRatio <= 0.40 ? 60 : 35);
+          final int saveScore = saveRatio >= 0.20 ? 85 : (saveRatio >= 0.10 ? 60 : 30);
+
+          pillarScore = (fixedScore * 0.4 + flexScore * 0.3 + saveScore * 0.3).round();
         }
-        return 'Track your **spending habits**, fixed & flexible costs using the 50/30/20 budget framework.';
+
+        if (pillarScore == 0 && monthlyIncome == 0) {
+          return 'Your **Expenses Pillar Score** is calculated in real-time using the **50/30/20 budget framework** (Needs, Wants, Savings).\n\n'
+              '💡 *Please fill your Monthly Income & Fixed Expenses in **Master Profile** to view your personalized live score!*';
+        }
+
+        final String healthBadge = pillarScore >= 75
+            ? '✅ Healthy Budget Control'
+            : (pillarScore >= 50 ? '⚠️ Moderate Spending Stress' : '🚨 High Spending Stress Risk');
+
+        final String tipMsg = pillarScore >= 75
+            ? 'Great spending discipline! Your fixed expenses are within recommended limits.'
+            : (pillarScore >= 50
+                ? 'Keep monitoring flexible spending to avoid budget overruns.'
+                : 'High fixed expense load detected! Try optimizing subscriptions & non-essential costs.');
+
+        final StringBuffer sb = StringBuffer();
+        sb.writeln('Your **Expense & Budget** Breakdown:');
+        sb.writeln('• **Expenses Pillar Score:** **$pillarScore / 100** ⭐');
+        sb.writeln('• **Fixed Spend Score:** **$fixedScore / 100**');
+        sb.writeln('• **Flexible Spend Score:** **$flexScore / 100**');
+        sb.writeln('• **Status:** $healthBadge');
+
+        if (monthlyIncome > 0) {
+          sb.writeln('• **Monthly Income:** ₹${monthlyIncome.round()} | **Fixed Costs:** ₹${monthlyFixed.round()}');
+        }
+
+        final List<dynamic> logs = (weekly?['data'] as List<dynamic>?) ?? [];
+        if (logs.isNotEmpty) {
+          final double totalSpentFixed = logs.fold(0.0, (sum, l) => sum + (double.tryParse(l['spent_fixed']?.toString() ?? '0') ?? 0.0));
+          final double totalSpentFlex = logs.fold(0.0, (sum, l) => sum + (double.tryParse(l['spent_flexible']?.toString() ?? '0') ?? 0.0));
+          if (totalSpentFixed > 0 || totalSpentFlex > 0) {
+            sb.writeln('• **Logged Spending:** ₹${(totalSpentFixed + totalSpentFlex).round()} (${logs.length} weeks tracked)');
+          }
+        }
+
+        sb.writeln('• **Tip:** $tipMsg');
+
+        return sb.toString();
       },
     ),
 
@@ -180,11 +255,17 @@ class ChatIntentService {
       route: '/insurance_p',
       redirectLabel: 'Insurance Review',
       responseBuilder: (data) {
+        final fitness = data?['financial_fitness_scores'] as Map<String, dynamic>?;
         final prot = data?['protection_scores'] as Map<String, dynamic>?;
-        if (prot != null) {
-          final term = prot['term_score'] ?? 0;
-          final health = prot['health_score'] ?? 0;
+        final rawPillarScore = fitness?['protection_pillar_score'];
+        final int pillarScore = rawPillarScore != null ? (double.tryParse(rawPillarScore.toString())?.round() ?? 0) : 0;
+
+        if (prot != null || pillarScore > 0) {
+          final term = prot?['term_score'] ?? 0;
+          final health = prot?['health_score'] ?? 0;
+          final String scoreStr = pillarScore > 0 ? '• **Protection Pillar Score:** **$pillarScore / 100** ⭐\n' : '';
           return 'Your **Protection Pillar** status:\n'
+              '$scoreStr'
               '• Term Insurance Score: **$term**\n'
               '• Health Insurance Score: **$health**';
         }
@@ -207,12 +288,18 @@ class ChatIntentService {
       route: '/mutual_fund_p',
       redirectLabel: 'Explore Investments',
       responseBuilder: (data) {
+        final fitness = data?['financial_fitness_scores'] as Map<String, dynamic>?;
         final inv = data?['investment_scores'] as Map<String, dynamic>?;
-        if (inv != null) {
-          final equity = inv['equity_score'] ?? 0;
-          final sip = inv['sip_score'] ?? 0;
-          final asset = inv['asset_balance_score'] ?? 0;
+        final rawPillarScore = fitness?['investment_pillar_score'];
+        final int pillarScore = rawPillarScore != null ? (double.tryParse(rawPillarScore.toString())?.round() ?? 0) : 0;
+
+        if (inv != null || pillarScore > 0) {
+          final equity = inv?['equity_score'] ?? 0;
+          final sip = inv?['sip_score'] ?? 0;
+          final asset = inv?['asset_balance_score'] ?? 0;
+          final String scoreStr = pillarScore > 0 ? '• **Investment Pillar Score:** **$pillarScore / 100** ⭐\n' : '';
           return 'Your **Investment Pillar** status:\n'
+              '$scoreStr'
               '• Equity Score: **$equity**\n'
               '• SIP Score: **$sip**\n'
               '• Asset Balance Score: **$asset**';
@@ -356,11 +443,24 @@ class ChatIntentService {
   static List<Map<String, dynamic>>? _cachedPlans;
   static List<Map<String, dynamic>>? _cachedIpos;
 
+  Future<List<Map<String, dynamic>>> _fetchAll(String table) async {
+    List<Map<String, dynamic>> allRows = [];
+    int offset = 0;
+    final int pageSize = 1000;
+    while (true) {
+      final res = await _supabase.schema('bse_data').from(table).select().range(offset, offset + pageSize - 1);
+      final chunk = List<Map<String, dynamic>>.from(res);
+      allRows.addAll(chunk);
+      if (chunk.length < pageSize) break;
+      offset += pageSize;
+    }
+    return allRows;
+  }
+
   Future<List<Map<String, dynamic>>> _getStocks() async {
     if (_cachedStocks != null && _cachedStocks!.isNotEmpty) return _cachedStocks!;
     try {
-      final res = await _supabase.schema('bse_data').from('stock_signals').select();
-      _cachedStocks = List<Map<String, dynamic>>.from(res);
+      _cachedStocks = await _fetchAll('stock_signals');
       return _cachedStocks!;
     } catch (_) {
       return _cachedStocks ?? [];
@@ -370,8 +470,7 @@ class ChatIntentService {
   Future<List<Map<String, dynamic>>> _getFunds() async {
     if (_cachedFunds != null && _cachedFunds!.isNotEmpty) return _cachedFunds!;
     try {
-      final res = await _supabase.schema('bse_data').from('mutual_fund_signals').select();
-      _cachedFunds = List<Map<String, dynamic>>.from(res);
+      _cachedFunds = await _fetchAll('mutual_fund_signals');
       return _cachedFunds!;
     } catch (_) {
       return _cachedFunds ?? [];
@@ -381,8 +480,7 @@ class ChatIntentService {
   Future<List<Map<String, dynamic>>> _getPlans() async {
     if (_cachedPlans != null && _cachedPlans!.isNotEmpty) return _cachedPlans!;
     try {
-      final res = await _supabase.schema('bse_data').from('insurance_plans').select();
-      _cachedPlans = List<Map<String, dynamic>>.from(res);
+      _cachedPlans = await _fetchAll('insurance_plans');
       return _cachedPlans!;
     } catch (_) {
       return _cachedPlans ?? [];
@@ -392,8 +490,7 @@ class ChatIntentService {
   Future<List<Map<String, dynamic>>> _getIpos() async {
     if (_cachedIpos != null && _cachedIpos!.isNotEmpty) return _cachedIpos!;
     try {
-      final res = await _supabase.schema('bse_data').from('ipo_signals').select();
-      _cachedIpos = List<Map<String, dynamic>>.from(res);
+      _cachedIpos = await _fetchAll('ipo_signals');
       return _cachedIpos!;
     } catch (_) {
       return _cachedIpos ?? [];
@@ -411,11 +508,36 @@ class ChatIntentService {
     await Future.delayed(const Duration(milliseconds: 300));
 
     Map<String, dynamic>? dashboardData;
+    Map<String, dynamic>? profileData;
+    Map<String, dynamic>? weeklyData;
+
     try {
-      dashboardData = await _api.getDashboard();
+      final results = await Future.wait([
+        _api.getDashboard().catchError((_) => <String, dynamic>{}),
+        _api.getMasterProfile().catchError((_) => <String, dynamic>{}),
+        _api.getWeeklyCurrent().catchError((_) => <String, dynamic>{}),
+      ]);
+      dashboardData = results[0].isNotEmpty ? results[0] : null;
+      profileData = results[1]['data'] as Map<String, dynamic>?;
+      weeklyData = results[2];
     } catch (_) {
       dashboardData = null;
+      profileData = null;
+      weeklyData = null;
     }
+
+    final fullDataContext = {
+      if (dashboardData != null) ...dashboardData,
+      'dashboard': dashboardData,
+      'profile': profileData,
+      'weekly': weeklyData,
+      'financial_fitness_scores': dashboardData?['financial_fitness_scores'],
+      'expense_scores': dashboardData?['expense_scores'],
+      'income_scores': dashboardData?['income_scores'],
+      'savings_scores': dashboardData?['savings_scores'],
+      'protection_scores': dashboardData?['protection_scores'],
+      'investment_scores': dashboardData?['investment_scores'],
+    };
 
     final normalizedQuery = queryText.toLowerCase().trim();
 
@@ -424,7 +546,7 @@ class ChatIntentService {
         if (normalizedQuery.contains(keyword)) {
           String responseText;
           try {
-            responseText = rule.responseBuilder(dashboardData);
+            responseText = rule.responseBuilder(fullDataContext);
           } catch (_) {
             responseText = 'View your **Financial Health Dashboard** for detailed insights on this category.';
           }
@@ -523,7 +645,9 @@ class ChatIntentService {
         final name = selectedStock['company_name'] ?? selectedStock['stock_name'] ?? selectedStock['symbol'] ?? selectedStock['name'] ?? 'Top Stock';
         final rawScore = selectedStock['score'] ?? selectedStock['stock_score'] ?? 82;
         final score = double.tryParse(rawScore.toString())?.round() ?? 82;
-        final signal = selectedStock['signal'] ?? 'BUY';
+        String signal = (selectedStock['signal'] ?? 'BULLISH').toString().toUpperCase();
+        if (signal == 'BUY') signal = 'BULLISH';
+        if (signal == 'SELL') signal = 'BEARISH';
         final sector = selectedStock['sector'] ?? selectedStock['industry'] ?? 'Growth Sector';
         final return1Y = selectedStock['one_year_return'] ?? selectedStock['cagr'] ?? '24.5%';
 
@@ -703,17 +827,25 @@ class ChatIntentService {
       'mutual fund', 'mf', 'sip', 'elss', 'bluechip', 'small cap', 'mid cap',
       'flexi cap', 'large cap', 'index fund', 'debt fund', 'hybrid', 'fund', 'funds',
       'cagr', 'aum', 'sbi bluechip', 'nippon', 'parag parikh', 'mirae', 'quant',
-      'axis long term', 'hdfc balanced', 'kotak emerging', 'uti nifty', 'icici pru'
+      'axis long term', 'hdfc balanced', 'kotak emerging', 'uti nifty', 'icici pru',
+      'motilal', 'dsp', 'uti', 'kotak'
     ];
 
     bool isMfQuery = mfKeywords.any((kw) => norm.contains(kw));
     if (isMfQuery) {
       try {
         final List<Map<String, dynamic>> funds = await _getFunds();
-        final matchedFund = _findBestMatch(norm, funds, ['scheme_name', 'fund_name', 'category', 'cluster']);
+        final matchedFunds = _findBestMatches(
+          norm,
+          funds,
+          ['scheme_name', 'fund_name', 'category', 'cluster', 'provider_name', 'name'],
+        );
 
-        if (matchedFund != null) {
-          final text = ScoreCardAdvisor.generateMfAdvice(matchedFund);
+        if (matchedFunds.isNotEmpty) {
+          final String text = matchedFunds.length == 1
+              ? ScoreCardAdvisor.generateMfAdvice(matchedFunds.first)
+              : ScoreCardAdvisor.generateMultiMfDetails(matchedFunds, norm);
+
           return ChatMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             sender: 'bot',
@@ -747,17 +879,24 @@ class ChatIntentService {
       'insurance', 'policy', 'health plan', 'term plan', 'cover', 'csr', 'claim',
       'health cover', 'term cover', 'life cover', 'sum assured', 'premium',
       'hdfc ergo', 'optima', 'star health', 'care health', 'max bupa', 'icici lombard',
-      'tata aia', 'lic', 'niva bupa', 'aditya birla'
+      'tata aia', 'lic', 'niva bupa', 'aditya birla', 'ergo', 'health insurance'
     ];
 
     bool isInsQuery = insKeywords.any((kw) => norm.contains(kw));
     if (isInsQuery) {
       try {
         final List<Map<String, dynamic>> plans = await _getPlans();
-        final matchedPlan = _findBestMatch(norm, plans, ['plan_name', 'company_name', 'plan_type']);
+        final matchedPlans = _findBestMatches(
+          norm,
+          plans,
+          ['plan_name', 'company_name', 'provider_name', 'plan_type', 'category', 'name', 'type'],
+        );
 
-        if (matchedPlan != null) {
-          final text = ScoreCardAdvisor.generateInsuranceDetails(matchedPlan);
+        if (matchedPlans.isNotEmpty) {
+          final String text = matchedPlans.length == 1
+              ? ScoreCardAdvisor.generateInsuranceDetails(matchedPlans.first)
+              : ScoreCardAdvisor.generateMultiInsuranceDetails(matchedPlans, norm);
+
           return ChatMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             sender: 'bot',
@@ -787,17 +926,24 @@ class ChatIntentService {
 
     // 3. IPO SCORE CARD QUERY (Evaluated THIRD)
     final ipoKeywords = [
-      'ipo', 'upcoming ipo', 'price band', 'issue size', 'gmp', 'bidding', 'allotment'
+      'ipo', 'upcoming ipo', 'price band', 'issue size', 'gmp', 'bidding', 'allotment', 'initial public offering'
     ];
 
     bool isIpoQuery = ipoKeywords.any((kw) => norm.contains(kw));
     if (isIpoQuery) {
       try {
         final List<Map<String, dynamic>> ipos = await _getIpos();
-        final matchedIpo = _findBestMatch(norm, ipos, ['company_name', 'name']);
+        final matchedIpos = _findBestMatches(
+          norm,
+          ipos,
+          ['company_name', 'name', 'symbol', 'sector'],
+        );
 
-        if (matchedIpo != null) {
-          final text = ScoreCardAdvisor.generateIpoDetails(matchedIpo);
+        if (matchedIpos.isNotEmpty) {
+          final String text = matchedIpos.length == 1
+              ? ScoreCardAdvisor.generateIpoDetails(matchedIpos.first)
+              : ScoreCardAdvisor.generateMultiIpoDetails(matchedIpos, norm);
+
           return ChatMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             sender: 'bot',
@@ -810,15 +956,18 @@ class ChatIntentService {
             ],
             timestamp: timestamp,
           );
-        } else if (!norm.contains('screener')) {
+        } else {
           return ChatMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             sender: 'bot',
-            text: "Sorry! I couldn't find active IPO score card details for that query. Check upcoming IPOs in the dashboard or Stock Screener!",
-            redirectTo: '/dashboard',
-            redirectLabel: 'Go to Dashboard',
+            text: "🚀 **Upcoming IPO Score Cards Feature is Coming Soon!**\n\n"
+                  "We are currently integrating live IPO Grey Market Premium (GMP) and subscription metrics.\n\n"
+                  "In the meantime, explore top growth companies in our **Stock Screener** or check the Dashboard!",
+            redirectTo: '/stock_screener',
+            redirectLabel: 'Open Stock Screener',
             quickActions: const [
               QuickAction(label: 'Stock Screener', route: '/stock_screener'),
+              QuickAction(label: 'Dashboard', route: '/dashboard'),
             ],
             timestamp: timestamp,
           );
@@ -840,10 +989,17 @@ class ChatIntentService {
     if (isStockQuery) {
       try {
         final List<Map<String, dynamic>> stocks = await _getStocks();
-        final matchedStock = _findBestMatch(norm, stocks, ['company_name', 'symbol', 'sector']);
+        final matchedStocks = _findBestMatches(
+          norm,
+          stocks,
+          ['company_name', 'symbol', 'sector', 'name', 'industry'],
+        );
 
-        if (matchedStock != null) {
-          final text = ScoreCardAdvisor.generateStockAdvice(matchedStock);
+        if (matchedStocks.isNotEmpty) {
+          final String text = matchedStocks.length == 1
+              ? ScoreCardAdvisor.generateStockAdvice(matchedStocks.first)
+              : ScoreCardAdvisor.generateMultiStockDetails(matchedStocks, norm);
+
           return ChatMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             sender: 'bot',
@@ -875,17 +1031,16 @@ class ChatIntentService {
     return null;
   }
 
-  Map<String, dynamic>? _findBestMatch(
+  List<Map<String, dynamic>> _findBestMatches(
     String queryNorm,
     List<Map<String, dynamic>> items,
-    List<String> searchFields,
-  ) {
+    List<String> searchFields, {
+    int maxResults = 5,
+  }) {
     const stopWords = {
-      'mutual', 'fund', 'funds', 'stock', 'stocks', 'share', 'shares',
-      'company', 'plan', 'plans', 'insurance', 'direct', 'growth',
-      'scheme', 'option', 'screener', 'score', 'card', 'tell', 'show',
-      'me', 'about', 'best', 'top', 'what', 'is', 'the', 'for', 'a',
-      'suggest', 'recommend', 'give', 'detail', 'details', 'info'
+      'tell', 'show', 'me', 'about', 'what', 'is', 'the', 'for', 'a', 'an',
+      'suggest', 'recommend', 'give', 'detail', 'details', 'info', 'screener',
+      'score', 'card', 'which', 'where', 'how', 'to', 'in', 'of', 'on', 'with'
     };
 
     final queryTokens = queryNorm
@@ -894,50 +1049,62 @@ class ChatIntentService {
         .where((w) => w.length >= 2 && !stopWords.contains(w))
         .toList();
 
-    if (queryTokens.isEmpty) return null;
+    if (queryTokens.isEmpty) return [];
 
-    final List<RegExp> tokenRegexes = queryTokens.map((t) =>
-      RegExp(r'\b' + RegExp.escape(t) + r'\b', caseSensitive: false)
-    ).toList();
-
-    Map<String, dynamic>? bestItem;
-    int maxScore = 0;
+    final String cleanPhrase = queryTokens.join(' ');
+    final List<MapEntry<int, Map<String, dynamic>>> scoredItems = [];
 
     for (final item in items) {
-      int score = 0;
+      int itemScore = 0;
+
       for (final field in searchFields) {
         final val = (item[field] ?? '').toString().toLowerCase();
         if (val.isEmpty) continue;
 
-        // Exact phrase match
-        final cleanPhrase = queryTokens.join(' ');
-        final fullPhraseRegex = RegExp(
-          RegExp.escape(cleanPhrase),
-          caseSensitive: false,
-        );
-        if (cleanPhrase.isNotEmpty && fullPhraseRegex.hasMatch(val)) {
-          score += 20;
+        // 1. Exact or Partial Phrase Match
+        if (cleanPhrase.isNotEmpty) {
+          if (val == cleanPhrase) {
+            itemScore += 50;
+          } else if (val.contains(cleanPhrase) || cleanPhrase.contains(val)) {
+            itemScore += 30;
+          }
         }
 
-        // Token RegExp matches
-        for (int i = 0; i < queryTokens.length; i++) {
-          final token = queryTokens[i];
-          final tokenRegex = tokenRegexes[i];
-
-          if (tokenRegex.hasMatch(val)) {
-            score += (token.length >= 4) ? 5 : 3;
-          } else if (val.contains(token)) {
-            score += (token.length >= 4) ? 3 : 1;
+        // 2. Token Matching
+        for (final token in queryTokens) {
+          if (val.contains(token)) {
+            if (val.split(RegExp(r'\s+')).contains(token)) {
+              itemScore += (token.length >= 4) ? 10 : 6;
+            } else {
+              itemScore += (token.length >= 4) ? 5 : 3;
+            }
           }
         }
       }
 
-      if (score > maxScore) {
-        maxScore = score;
-        bestItem = item;
+      if (itemScore >= 5) {
+        scoredItems.add(MapEntry(itemScore, item));
       }
     }
 
-    return (maxScore >= 3) ? bestItem : null;
+    if (scoredItems.isEmpty) return [];
+
+    // Sort by score descending
+    scoredItems.sort((a, b) => b.key.compareTo(a.key));
+
+    // Deduplicate and return top maxResults
+    final List<Map<String, dynamic>> results = [];
+    final Set<String> seenNames = {};
+
+    for (final entry in scoredItems) {
+      if (results.length >= maxResults) break;
+      final item = entry.value;
+      final String idOrName = (item['id'] ?? item['company_name'] ?? item['plan_name'] ?? item['scheme_name'] ?? item['name'] ?? '').toString();
+      if (idOrName.isNotEmpty && seenNames.contains(idOrName)) continue;
+      if (idOrName.isNotEmpty) seenNames.add(idOrName);
+      results.add(item);
+    }
+
+    return results;
   }
 }

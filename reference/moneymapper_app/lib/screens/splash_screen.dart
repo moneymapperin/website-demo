@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../screens/login_screen.dart';
+import '../screens/onboarding_wizard_screen.dart';
 import '../screens/main_screen.dart';
+import '../screens/corporate_dashboard_screen.dart';
 import '../theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -44,10 +47,18 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     final loggedIn = await AuthService().isLoggedIn();
     if (!mounted) return;
+
+    Widget targetScreen = const OnboardingWizardScreen();
+    if (loggedIn) {
+      final prefs = await SharedPreferences.getInstance();
+      final isCorporate = prefs.getBool('is_corporate_admin') ?? false;
+      targetScreen = isCorporate ? const CorporateDashboardScreen() : const MainScreen();
+    }
+
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => loggedIn ? const MainScreen() : const LoginScreen(),
+        pageBuilder: (_, __, ___) => targetScreen,
         transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
         transitionDuration: const Duration(milliseconds: 600),
       ),
@@ -63,30 +74,28 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             const Spacer(),
             
-            // Brand Logo & Text
+            // Brand Text
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 120, // Increased from 90
-                    height: 120,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Image.asset(
-                        'assets/log 3d- hd -.png',
-                        fit: BoxFit.contain,
-                      ),
+                  const Text(
+                    'Welcome to',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
                   const Text(
                     'MoneyMapper',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 32,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
+                      letterSpacing: 1.0,
                     ),
                   ),
                 ],

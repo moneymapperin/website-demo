@@ -178,10 +178,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
           data-testid="weekly-score-header"
           className={`${
             currentWeek?.is_current ? 'lg:col-span-7' : 'lg:col-span-12'
-          } relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-[#0A0B1A]/95 border border-indigo-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col sm:flex-row sm:items-center justify-between gap-6`}
+          } relative overflow-hidden p-5 sm:p-7 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200/80 dark:border-indigo-500/30 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex flex-col sm:flex-row sm:items-center justify-between gap-6`}
         >
           {/* Subtle Ambient Glow */}
-          <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-purple-900/20 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-purple-100/60 dark:from-purple-900/20 to-transparent pointer-events-none" />
 
           {/* Left: Wallet Icon Box + Score */}
           <div className="flex items-center gap-4 relative z-10">
@@ -190,17 +190,17 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
             </div>
 
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                 EXPENSE SCORE
               </div>
-              <div className="text-4xl sm:text-5xl font-black text-white mt-1 leading-none tracking-tight">
+              <div className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white mt-1 leading-none tracking-tight">
                 {Math.round(expenseScore)}
               </div>
             </div>
           </div>
 
           {/* Glowing Background Wave Graphic spanning from center across to rings */}
-          <div className="absolute inset-y-0 left-[28%] right-0 hidden md:block pointer-events-none select-none overflow-hidden">
+          <div className="absolute inset-y-0 left-[28%] right-0 hidden md:block pointer-events-none select-none overflow-hidden opacity-35 dark:opacity-100">
             <svg
               className="w-full h-full"
               viewBox="0 0 700 130"
@@ -261,20 +261,20 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
           <div className="flex items-center gap-5 relative z-10 self-end sm:self-center">
             {/* Discipline Ring */}
             <div className="flex flex-col items-center">
-              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#A855F7] flex items-center justify-center text-base font-black text-white bg-[#150a24] shadow-[0_0_18px_rgba(168,85,247,0.35)]">
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#A855F7] flex items-center justify-center text-base font-black text-purple-700 dark:text-white bg-purple-50 dark:bg-[#150a24] shadow-sm dark:shadow-[0_0_18px_rgba(168,85,247,0.35)]">
                 {Math.round(disciplineScore)}
               </div>
-              <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 mt-1.5">
                 Discipline
               </span>
             </div>
 
             {/* Hit Rate Ring */}
             <div className="flex flex-col items-center">
-              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#38BDF8] flex items-center justify-center text-base font-black text-white bg-[#071324] shadow-[0_0_18px_rgba(56,189,248,0.35)]">
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 border-[#38BDF8] flex items-center justify-center text-base font-black text-sky-700 dark:text-white bg-sky-50 dark:bg-[#071324] shadow-sm dark:shadow-[0_0_18px_rgba(56,189,248,0.35)]">
                 {targetsHit}
               </div>
-              <span className="text-[11px] font-bold text-zinc-400 mt-1.5">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 mt-1.5">
                 Hit Rate
               </span>
             </div>
@@ -283,10 +283,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
 
         {/* Current Week Card (Right ~40%) */}
         <div
-          className="lg:col-span-5 relative overflow-hidden p-5 sm:p-6 rounded-[24px] bg-[#0A0B1A]/95 border border-indigo-500/30 shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex items-center justify-between"
+          className="lg:col-span-5 relative overflow-hidden p-5 sm:p-6 rounded-[24px] bg-white dark:bg-[#0A0B1A]/95 border border-slate-200/80 dark:border-indigo-500/30 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.6),0_0_25px_rgba(99,102,241,0.15)] flex items-center justify-between gap-3"
         >
           {/* Subtle Wave Graphic matching mockup */}
-          <div className="absolute inset-y-0 right-0 w-3/5 hidden sm:block pointer-events-none select-none overflow-hidden">
+          <div className="absolute inset-y-0 right-0 w-3/5 hidden sm:block pointer-events-none select-none overflow-hidden opacity-30 dark:opacity-60">
             <svg className="w-full h-full" viewBox="0 0 300 100" fill="none" preserveAspectRatio="none">
               <path
                 d="M 0 80 C 80 75, 160 35, 300 50"
@@ -294,24 +294,23 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 fill="none"
-                opacity="0.6"
               />
             </svg>
           </div>
 
-          <div className="flex items-center gap-3.5 relative z-10">
-            <div className="w-12 h-12 rounded-xl bg-purple-600/20 border border-purple-500/35 flex items-center justify-center text-purple-300 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-              <Target className="w-6 h-6 text-purple-300" />
+          <div className="flex items-center gap-3.5 relative z-10 min-w-0">
+            <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-600/20 border border-purple-200 dark:border-purple-500/35 flex items-center justify-center text-purple-600 dark:text-purple-300 shrink-0 shadow-sm dark:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+              <Target className="w-6 h-6 text-purple-600 dark:text-purple-300" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-white">Current Week</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+            <div className="min-w-0">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white truncate">Current Week</h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 truncate">
                 Week {currentWeek?.index ?? 1} · {currentWeek ? `${formatDateShort(currentWeek.start)} - ${formatDateShort(currentWeek.end)}` : ''}
               </p>
             </div>
           </div>
 
-          <span className="px-3 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 text-xs font-bold tracking-wider uppercase relative z-10">
+          <span className="px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold tracking-wider uppercase relative z-10 whitespace-nowrap shrink-0">
             CURRENT WEEK
           </span>
         </div>
@@ -336,12 +335,14 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               className={`py-3.5 px-3 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border ${
                 isSelected
                   ? 'bg-gradient-to-r from-[#4F46E5] to-[#6366F1] border-2 border-[#818CF8] shadow-[0_0_20px_rgba(99,102,241,0.4)] text-white scale-[1.02]'
-                  : 'bg-[#0B0D1B]/95 border-white/[0.08] text-zinc-400 hover:border-white/20 hover:text-white'
-              } ${isLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
+                  : isLocked
+                  ? 'bg-slate-100 dark:bg-[#0B0D1B]/95 border-slate-200 dark:border-white/[0.08] text-slate-400 dark:text-zinc-500 opacity-60 dark:opacity-40 cursor-not-allowed'
+                  : 'bg-white dark:bg-[#0B0D1B]/95 border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white shadow-sm dark:shadow-none'
+              }`}
             >
               <span
                 className={`text-[11px] font-semibold tracking-wide ${
-                  isSelected ? 'text-white' : 'text-zinc-400'
+                  isSelected ? 'text-white' : isLocked ? 'text-slate-400 dark:text-zinc-500' : 'text-slate-600 dark:text-zinc-400'
                 }`}
               >
                 Week {w.index}
@@ -350,14 +351,14 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 {isLocked ? (
                   <Lock
                     data-testid={`week-tab-lock-${w.index}`}
-                    className="w-4 h-4 text-zinc-500"
+                    className="w-4 h-4 text-slate-400 dark:text-zinc-500"
                   />
                 ) : isDone || isSelected ? (
-                  <div className="w-4 h-4 rounded-full border border-sky-400 flex items-center justify-center text-[10px] text-sky-400">
+                  <div className="w-4 h-4 rounded-full border border-sky-500 dark:border-sky-400 flex items-center justify-center text-[10px] text-sky-600 dark:text-sky-400">
                     ✓
                   </div>
                 ) : (
-                  <span className="text-xs font-bold text-zinc-200">
+                  <span className="text-xs font-bold text-slate-700 dark:text-zinc-200">
                     {formatDateShort(w.start)}
                   </span>
                 )}
@@ -375,16 +376,16 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
           {currentWeek?.is_current && (
             <div
               data-testid="current-week-overview-card"
-              className="p-5 sm:p-6 rounded-2xl bg-[#0B0D1B]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4"
+              className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0B0D1B]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <BarChart3 className="w-5 h-5 text-purple-400 shrink-0" />
+                  <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0" />
                   <div>
-                    <h2 className="text-base font-bold text-white">
-                      <span className="text-[#38BDF8]">Week {currentWeek.index}</span> Target Overview
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                      <span className="text-[#0284c7] dark:text-[#38BDF8]">Week {currentWeek.index}</span> Target Overview
                     </h2>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
                       {formatDateShort(currentWeek.start)} - {formatDateShort(currentWeek.end)}
                     </p>
                   </div>
@@ -393,31 +394,31 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
 
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5 font-semibold text-white">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#38BDF8] shrink-0 shadow-[0_0_8px_#38BDF8]" />
+                  <div className="flex items-center gap-2.5 font-semibold text-slate-800 dark:text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0284c7] dark:bg-[#38BDF8] shrink-0 shadow-[0_0_8px_#38BDF8]" />
                     <span>Fixed Expenses</span>
                   </div>
-                  <span className="text-zinc-400">
+                  <span className="text-slate-500 dark:text-zinc-400">
                     Range: {formatRupees(currentWeek.range_fixed[0])} – {formatRupees(currentWeek.range_fixed[1])}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5 font-semibold text-white">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] shrink-0 shadow-[0_0_8px_#F59E0B]" />
+                  <div className="flex items-center gap-2.5 font-semibold text-slate-800 dark:text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#d97706] dark:bg-[#F59E0B] shrink-0 shadow-[0_0_8px_#F59E0B]" />
                     <span>Flexible Expenses</span>
                   </div>
-                  <span className="text-zinc-400">
+                  <span className="text-slate-500 dark:text-zinc-400">
                     Range: {formatRupees(currentWeek.range_flex[0])} – {formatRupees(currentWeek.range_flex[1])}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5 font-semibold text-white">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#A855F7] shrink-0 shadow-[0_0_8px_#A855F7]" />
+                  <div className="flex items-center gap-2.5 font-semibold text-slate-800 dark:text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#9333ea] dark:bg-[#A855F7] shrink-0 shadow-[0_0_8px_#A855F7]" />
                     <span>Savings Goal</span>
                   </div>
-                  <span className="text-zinc-400">
+                  <span className="text-slate-500 dark:text-zinc-400">
                     Range: {formatRupees(currentWeek.range_save[0])} – {formatRupees(currentWeek.range_save[1])}
                   </span>
                 </div>
@@ -428,11 +429,11 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
           {/* Financial Observation Card */}
           <div
             data-testid="weekly-observation-card"
-            className="p-5 sm:p-6 rounded-2xl bg-[#0B0D1B]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-4"
+            className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0B0D1B]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-4"
           >
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <TrendingUp className="w-4 h-4 text-purple-400 shrink-0" />
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                <TrendingUp className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
                 <span>Financial Observation</span>
               </div>
 
@@ -440,25 +441,25 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 type="button"
                 data-testid="expense-advice-chip"
                 onClick={handleOpenAdvisoryDialog}
-                className="px-3 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-indigo-400 text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-900/60 transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-400 text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Expense Advice</span>
               </button>
             </div>
 
-            <p className="text-sm text-zinc-300 leading-relaxed font-medium">
+            <p className="text-sm text-slate-700 dark:text-zinc-300 leading-relaxed font-medium">
               {disciplineMsg || 'Excellent discipline.'}
             </p>
 
             {recommendedExpenseAction && (
-              <div className="p-4 rounded-xl bg-[#121528] border border-indigo-500/20 flex items-start gap-3.5">
-                <Lightbulb className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#121528] border border-indigo-100 dark:border-indigo-500/20 flex items-start gap-3.5">
+                <Lightbulb className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <div className="text-xs font-bold text-indigo-400">
+                  <div className="text-xs font-bold text-indigo-700 dark:text-indigo-400">
                     Recommended Expense Action
                   </div>
-                  <p className="text-xs text-zinc-200 leading-relaxed font-medium">
+                  <p className="text-xs text-slate-700 dark:text-zinc-200 leading-relaxed font-medium">
                     {recommendedExpenseAction}
                   </p>
                 </div>
@@ -469,21 +470,21 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
 
         {/* Right Column: Week N Target Ranges Card */}
         <div>
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#0B0D1B]/95 border border-white/[0.08] shadow-lg backdrop-blur-md space-y-5">
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0B0D1B]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-lg backdrop-blur-md space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Target className="w-5 h-5 text-purple-400 shrink-0" />
+                <Target className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0" />
                 <div>
-                  <h3 className="text-base font-bold text-white">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
                     Week {activeReportingWeek.index} Target Ranges
                   </h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
                     {formatDateShort(activeReportingWeek.start)} - {formatDateShort(activeReportingWeek.end)}
                   </p>
                 </div>
               </div>
               {isTargetWeekSubmitted && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-[11px] font-bold">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>COMPLETED</span>
                 </div>
@@ -493,13 +494,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
             {/* Fixed Expenses Decision */}
             <div data-testid="decision-card-fixed" className="space-y-2 pt-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-sm font-bold text-white">Fixed Expenses</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">Fixed Expenses</span>
                 <div className="text-right">
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-slate-500 dark:text-zinc-400">
                     Range: {formatRupees(activeReportingWeek.range_fixed[0])} – {formatRupees(activeReportingWeek.range_fixed[1])}
                   </span>
                   {actualFixed > 0 && (
-                    <span className="text-xs font-bold text-[#10B981] ml-2">
+                    <span className="text-xs font-bold text-emerald-600 dark:text-[#10B981] ml-2">
                       (Logged: {formatRupees(actualFixed)})
                     </span>
                   )}
@@ -515,7 +516,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                   className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                     fixedDecision === 'missed'
                       ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
-                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                      : 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20'
                   } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Missed
@@ -528,7 +529,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                   className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                     fixedDecision === 'achieved'
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
-                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                      : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20'
                   } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Achieved
@@ -539,13 +540,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
             {/* Flexible Expenses Decision */}
             <div data-testid="decision-card-flexible" className="space-y-2 pt-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-sm font-bold text-white">Flexible Expenses</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">Flexible Expenses</span>
                 <div className="text-right">
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-slate-500 dark:text-zinc-400">
                     Range: {formatRupees(activeReportingWeek.range_flex[0])} – {formatRupees(activeReportingWeek.range_flex[1])}
                   </span>
                   {actualFlex > 0 && (
-                    <span className="text-xs font-bold text-[#10B981] ml-2">
+                    <span className="text-xs font-bold text-emerald-600 dark:text-[#10B981] ml-2">
                       (Logged: {formatRupees(actualFlex)})
                     </span>
                   )}
@@ -561,7 +562,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                   className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                     flexibleDecision === 'missed'
                       ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
-                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                      : 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20'
                   } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Missed
@@ -574,7 +575,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                   className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                     flexibleDecision === 'achieved'
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
-                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                      : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20'
                   } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Achieved
@@ -585,13 +586,13 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
             {/* Savings Goal Decision */}
             <div data-testid="decision-card-savings" className="space-y-2 pt-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-sm font-bold text-white">Savings Goal</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">Savings Goal</span>
                 <div className="text-right">
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-slate-500 dark:text-zinc-400">
                     Range: {formatRupees(activeReportingWeek.range_save[0])} – {formatRupees(activeReportingWeek.range_save[1])}
                   </span>
                   {actualSaved > 0 && (
-                    <span className="text-xs font-bold text-[#10B981] ml-2">
+                    <span className="text-xs font-bold text-emerald-600 dark:text-[#10B981] ml-2">
                       (Logged: {formatRupees(actualSaved)})
                     </span>
                   )}
@@ -607,7 +608,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                   className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                     savingsDecision === 'missed'
                       ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
-                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                      : 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20'
                   } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Missed
@@ -620,7 +621,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                   className={`py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center justify-center cursor-pointer ${
                     savingsDecision === 'achieved'
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
-                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                      : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20'
                   } ${isTargetWeekSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Achieved
@@ -637,7 +638,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 onClick={handleSubmitReport}
                 className={`w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   isTargetWeekSubmitted
-                    ? 'bg-[#181B2B] text-zinc-400 cursor-not-allowed border border-white/5'
+                    ? 'bg-slate-100 dark:bg-[#181B2B] text-slate-400 dark:text-zinc-400 cursor-not-allowed border border-slate-200 dark:border-white/5'
                     : 'bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:opacity-95 text-white shadow-[0_0_20px_rgba(99,102,241,0.35)] active:scale-[0.99]'
                 }`}
               >
@@ -669,20 +670,20 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
       {modalTarget && activeReportingWeek && (
         <div
           data-testid="log-amount-modal"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/70 backdrop-blur-sm p-4"
         >
-          <div className="w-full max-w-md bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
             <div>
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 Log {getCategoryLabel(modalTarget)} (Week {activeReportingWeek.index})
               </h3>
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
                 Enter the exact amount for {getCategoryLabel(modalTarget)} for Week {activeReportingWeek.index}:
               </p>
             </div>
 
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-400">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400 dark:text-zinc-400">
                 ₹
               </span>
               <input
@@ -695,7 +696,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleConfirmAmount();
                 }}
-                className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#121528] border border-white/10 text-white font-bold text-base focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full pl-8 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-[#121528] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white font-bold text-base focus:outline-none focus:border-indigo-500 transition-colors"
               />
             </div>
 
@@ -703,7 +704,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setModalTarget(null)}
-                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -711,7 +712,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 type="button"
                 data-testid="modal-confirm-btn"
                 onClick={handleConfirmAmount}
-                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#4F46E5] to-[#6366F1] shadow-lg shadow-indigo-600/30 hover:opacity-90 transition-opacity"
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#4F46E5] to-[#6366F1] shadow-lg shadow-indigo-600/30 hover:opacity-90 transition-opacity cursor-pointer"
               >
                 Save
               </button>
@@ -724,35 +725,35 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
       {showAdvisoryDialog && (
         <div
           data-testid="expense-advisory-dialog"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/70 backdrop-blur-sm p-4"
         >
-          <div className="w-full max-w-md bg-[#0B0D1B] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-indigo-400 font-bold text-sm">
+              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
                 <Sparkles className="w-4 h-4" />
                 <span>Expense Advisory</span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAdvisoryDialog(false)}
-                className="p-1 rounded-lg text-zinc-400 hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:text-zinc-400 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-400">
-              Based on your current score of <span className="font-bold text-white">{Math.round(expenseScore)}</span>:
+            <p className="text-xs text-slate-500 dark:text-zinc-400">
+              Based on your current score of <span className="font-bold text-slate-900 dark:text-white">{Math.round(expenseScore)}</span>:
             </p>
 
-            <div className="p-4 rounded-xl bg-[#121528] border border-indigo-500/20 text-xs text-zinc-200 leading-relaxed font-medium">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#121528] border border-indigo-100 dark:border-indigo-500/20 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed font-medium">
               {dialogAdvice}
             </div>
 
             <button
               type="button"
               onClick={() => setShowAdvisoryDialog(false)}
-              className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#4F46E5] to-[#6366F1] shadow-lg shadow-indigo-600/30 hover:opacity-90 transition-opacity"
+              className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#4F46E5] to-[#6366F1] shadow-lg shadow-indigo-600/30 hover:opacity-90 transition-opacity cursor-pointer"
             >
               Got it!
             </button>

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/premium_service.dart';
@@ -6,6 +7,9 @@ import 'recommendations_screen.dart';
 import 'profile_screen.dart';
 import 'ai_assistant_screen.dart';
 import 'weekly_screen.dart';
+import '../widgets/announcement_popup.dart';
+import '../widgets/feature_flag_guard.dart';
+import '../widgets/platform_glass.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -77,6 +81,13 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     _pageController = PageController(initialPage: _currentIndex);
     _loadPremiumStatus();
 
+    // Check for announcements globally when the dashboard opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        AnnouncementPopup.checkAndShow(context);
+      }
+    });
+
     _mascotAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -123,7 +134,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
           // Push Weekly Tracker onto the stack as a full page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const WeeklyScreen()),
+            MaterialPageRoute(builder: (_) => FeatureFlagGuard(featureKey: 'weekly_expense', child: WeeklyScreen())),
           );
         },
         onOpenProfile: () => _navigateToTab(3), // Slide to Profile Tab (Index 3)
@@ -136,82 +147,151 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: null,
-      drawer: _buildDrawer(isDark),
+      drawer: null,
+      drawerEnableOpenDragGesture: false,
+      extendBody: true, // Required for the glass nav bar effect to float over content
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: screens,
       ),
-      bottomNavigationBar: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard : Colors.white,
-              border: Border(
-                top: BorderSide(
-                  color: isDark ? AppColors.darkBorder : AppColors.borderLight,
-                  width: 1,
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isTablet = MediaQuery.of(context).size.width >= 600;
+          
+          Widget navBar = ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkCard.withOpacity(0.65) : Colors.white.withOpacity(0.8),
+                  borderRadius: isTablet ? BorderRadius.circular(30) : BorderRadius.zero,
+                  border: Border.all(
+                    color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                    width: 1,
+                  ),
+                  boxShadow: isTablet ? [
+                    BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10))
+                  ] : null,
+                ),
+                child: BottomNavigationBar(
+                  currentIndex: _currentIndex,
+                  onTap: _navigateToTab,
+                  type: BottomNavigationBarType.fixed,
+                  selectedItemColor: AppColors.primary,
+                  unselectedItemColor: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  iconSize: 22,
+                  selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 9.5),
+                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 9.5),
+                  items: [
+                    _buildNavItem(0, 'Home', isDark),
+                    _buildNavItem(1, 'Insights', isDark),
+                    _buildNavItem(2, 'AI Assistant', isDark),
+                    _buildNavItem(3, 'Profile', isDark),
+                  ],
                 ),
               ),
             ),
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: _navigateToTab,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: AppColors.primary,
-              unselectedItemColor: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-              backgroundColor: isDark ? AppColors.darkCard : Colors.white,
-              elevation: 0,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-              items: [
-                _buildNavItem(0, 'Home', isDark),
-                _buildNavItem(1, 'Insights', isDark),
-                _buildNavItem(2, 'AI Assistant', isDark),
-                _buildNavItem(3, 'Profile', isDark),
-              ],
-            ),
-          ),
-          // Draggable Animated Mascot for the AI Assistant Tab
-          Builder(
-            builder: (context) {
-              final screenSize = MediaQuery.of(context).size;
-              // Default position: 3rd tab area (index 2), pushed up to clear label
-              final defaultX = screenSize.width * 0.50 + (screenSize.width * 0.25 / 2) - 30;
-              final defaultY = screenSize.height - 110;
+          );
 
-              final x = _mascotPosition?.dx ?? defaultX;
-              final y = _mascotPosition?.dy ?? defaultY;
+          return Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.bottomCenter,
+            children: [
+              isTablet 
+                  ? SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 24),
+                        child: navBar,
+                      ),
+                    ) 
+                  : navBar,
+              
+              // Draggable Animated Mascot for the AI Assistant Tab
+              Builder(
+                builder: (context) {
+                  final screenSize = MediaQuery.of(context).size;
+                  
+                  // Compute dynamic position handling tablet shifts
+                  final double tabletXOffset = isTablet ? 100 : 0;
+                  final double navWidth = isTablet ? screenSize.width - 200 : screenSize.width;
+                  
+                  // If it's a tablet, the mascot should float directly over the island navbar
+                  // If it's a phone, it sits right above the bottom nav bar
+                  final defaultX = tabletXOffset + (navWidth * 0.50) + (navWidth * 0.25 / 2) - 30;
+                  final defaultY = screenSize.height - (isTablet ? 130 : 100);
 
-              return Positioned(
-                left: x,
-                top: y,
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      _mascotPosition = Offset(
-                        (x + details.delta.dx).clamp(0.0, screenSize.width - 60),
-                        (y + details.delta.dy).clamp(0.0, screenSize.height - 60),
-                      );
-                    });
-                  },
-                  onTap: () => _navigateToTab(2),
-                  child: ScaleTransition(
-                    scale: _mascotScaleAnimation,
-                    child: Image.asset(
-                      'assets/mascot no background -s.png',
-                      height: 75,
-                      width: 75,
-                      fit: BoxFit.contain,
+                  final x = _mascotPosition?.dx ?? defaultX;
+                  final y = _mascotPosition?.dy ?? defaultY;
+
+                  return Positioned(
+                    left: x,
+                    top: y,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          _mascotPosition = Offset(
+                            (x + details.delta.dx).clamp(0.0, screenSize.width - 60),
+                            (y + details.delta.dy).clamp(0.0, screenSize.height - 60),
+                          );
+                        });
+                      },
+                      onTap: () => _navigateToTab(2),
+                      child: ScaleTransition(
+                        scale: _mascotScaleAnimation,
+                        child: ClipRect(
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            heightFactor: 0.9,
+                            child: Image.asset(
+                              'assets/mascot no background -s.png',
+                              height: 75,
+                              width: 75,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+                  );
+                },
+              ),
+            ],
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildNavRailIcon(int index, IconData solid, IconData outline, bool isDark, {bool isMascot = false}) {
+    final selected = _currentIndex == index;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: (selected && !isMascot) ? AppColors.primary.withOpacity(0.12) : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: isMascot
+          ? ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: 0.9, // Crops out the bottom empty space
+                child: Image.asset(
+                  'assets/mascot no background -s.png',
+                  width: 34,
+                  height: 34,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            )
+          : Icon(
+              selected ? solid : outline,
+              color: selected ? AppColors.primary : (isDark ? Colors.grey.shade500 : Colors.grey.shade400),
+              size: 26,
+            ),
     );
   }
 
@@ -220,18 +300,24 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     return BottomNavigationBarItem(
       icon: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        margin: const EdgeInsets.only(bottom: 4, top: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4), // Tighter padding
+        margin: const EdgeInsets.only(bottom: 2, top: 0),
         decoration: BoxDecoration(
           color: (selected && index != 2) ? AppColors.primary.withOpacity(0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: index == 2
-            ? Image.asset(
-                'assets/mascot no background -s.png',
-                width: 34,
-                height: 34,
-                fit: BoxFit.contain,
+            ? ClipRect(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  heightFactor: 0.9, // Crops out the bottom empty space
+                  child: Image.asset(
+                    'assets/mascot no background -s.png',
+                    width: 28,
+                    height: 28,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               )
             : Icon(
                 _iconFor(index, selected),

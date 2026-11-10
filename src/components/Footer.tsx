@@ -4,9 +4,9 @@ import { Lock, Shield } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 
 // Custom Crisp SVGs matching Lucide stroke style for Brand Socials
-const TwitterIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+const XIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
   </svg>
 );
 
@@ -32,10 +32,28 @@ const YoutubeIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }
 );
 
 export const Footer: React.FC = () => {
-  const socialLinks = [
-    { name: 'Twitter', icon: TwitterIcon },
-    { name: 'LinkedIn', icon: LinkedinIcon },
-    { name: 'Instagram', icon: InstagramIcon },
+  const socialLinks: {
+    name: string;
+    icon: React.FC<{ className?: string }>;
+    href?: string;
+    target?: string;
+    rel?: string;
+  }[] = [
+    { name: 'X', icon: XIcon, href: '#' },
+    {
+      name: 'LinkedIn',
+      icon: LinkedinIcon,
+      href: 'https://www.linkedin.com/company/moneymapper/',
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    },
+    {
+      name: 'Instagram',
+      icon: InstagramIcon,
+      href: 'https://www.instagram.com/moneymapper_in?srtk=MThrcXZ2Y3RhMGppMw%3D%3D',
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    },
     { name: 'YouTube', icon: YoutubeIcon },
   ];
 
@@ -55,7 +73,7 @@ export const Footer: React.FC = () => {
 
   const supportLinks: { label: string; href?: string }[] = [
     { label: 'Help Center' },
-    { label: 'FAQs' },
+    { label: 'FAQs', href: '/faq.html' },
     { label: 'Privacy Policy', href: '/privacy-policy.html' },
     { label: 'Terms of Service', href: '/terms-and-conditions.html' },
     { label: 'Cookie Policy', href: '/cookie-policy.html' },
@@ -90,12 +108,30 @@ export const Footer: React.FC = () => {
             <div className="flex items-center gap-3">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
+                const buttonClasses =
+                  'w-8 h-8 rounded-full bg-[#161326] border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:border-white/25 hover:bg-[#1f1a35] transition-all shadow-sm';
+
+                if (social.href) {
+                  return (
+                    <a
+                      key={social.name}
+                      href={social.href}
+                      target={social.target}
+                      rel={social.rel}
+                      aria-label={social.name}
+                      className={`${buttonClasses} cursor-pointer`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </a>
+                  );
+                }
+
                 return (
                   <span
                     key={social.name}
                     role="img"
                     aria-label={social.name}
-                    className="w-8 h-8 rounded-full bg-[#161326] border border-white/10 flex items-center justify-center text-white/70 shadow-sm cursor-default"
+                    className={`${buttonClasses} cursor-default`}
                   >
                     <Icon className="w-3.5 h-3.5" />
                   </span>

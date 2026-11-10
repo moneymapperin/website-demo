@@ -21,6 +21,36 @@ function renderSubscriptionPage() {
   );
 }
 
+const mockDbPlans = [
+  {
+    id: 'db_plan_3',
+    plan_code: 'mm_quarterly_prod',
+    title: 'Quarterly Plan',
+    months_duration: 3,
+    discounted_price: 1497,
+    original_price: 799,
+    is_recommended: false,
+  },
+  {
+    id: 'db_plan_6',
+    plan_code: 'mm_halfyearly_prod',
+    title: 'Half-Yearly Plan',
+    months_duration: 6,
+    discounted_price: 2394,
+    original_price: 799,
+    is_recommended: false,
+  },
+  {
+    id: 'db_plan_12',
+    plan_code: 'mm_yearly_prod',
+    title: 'Yearly Plan',
+    months_duration: 12,
+    discounted_price: 3588,
+    original_price: 799,
+    is_recommended: true,
+  },
+];
+
 describe('Subscription Purchase & Realtime Sync Tests', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -28,6 +58,13 @@ describe('Subscription Purchase & Realtime Sync Tests', () => {
     premiumService.resetSyncTimesForTesting?.();
     delete (window as any).__MOCK_PLAN__;
     vi.stubEnv('VITE_RAZORPAY_KEY_ID', 'rzp_test_mock_123');
+
+    // Default mock for payments.plans in Supabase
+    const mockOrder = vi.fn().mockResolvedValue({ data: mockDbPlans, error: null });
+    const mockSelect = vi.fn().mockReturnValue({ order: mockOrder });
+    const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
+    const mockSchema = vi.fn().mockReturnValue({ from: mockFrom });
+    vi.spyOn(supabase, 'schema').mockImplementation(mockSchema as any);
   });
 
   afterEach(() => {
@@ -61,7 +98,7 @@ describe('Subscription Purchase & Realtime Sync Tests', () => {
     expect(buyBtn).toHaveTextContent('Get Financially Free (₹3,588)');
   });
 
-  it('2. Shows "Online payments are not available right now." and does not grant PRO when VITE_RAZORPAY_KEY_ID is missing or edge function is unreachable', async () => {
+  it('2. Shows "Online payments are not available right now." and does not grant PRO when payment service is unavailable or network error occurs', async () => {
     vi.stubEnv('VITE_RAZORPAY_KEY_ID', '');
     vi.spyOn(apiService, 'getSubscriptionDetails').mockResolvedValue(null);
     renderSubscriptionPage();
@@ -70,8 +107,8 @@ describe('Subscription Purchase & Realtime Sync Tests', () => {
       expect(screen.getByTestId('buy-plan-btn')).toBeInTheDocument();
     });
 
-    // Mock startPurchase throwing UNAVAILABLE / missing key
-    vi.spyOn(paymentService, 'startPurchase').mockRejectedValue(new Error('VITE_RAZORPAY_KEY_ID_MISSING'));
+    // Mock startCheckout throwing network/unreachable error
+    vi.spyOn(paymentService, 'startCheckout').mockRejectedValue(new Error('Network error. Failed to initiate checkout.'));
 
     const buyBtn = screen.getByTestId('buy-plan-btn');
     await act(async () => {
@@ -92,7 +129,7 @@ describe('Subscription Purchase & Realtime Sync Tests', () => {
     });
 
     // Mock user dismiss
-    vi.spyOn(paymentService, 'startPurchase').mockRejectedValue({
+    vi.spyOn(paymentService, 'startCheckout').mockRejectedValue({
       isCancelled: true,
       message: 'Payment cancelled.',
     });
@@ -125,9 +162,9 @@ describe('Subscription Purchase & Realtime Sync Tests', () => {
 
     // Mock successful purchase
     const futureDate = new Date('2028-05-15T12:00:00Z').toISOString();
-    vi.spyOn(paymentService, 'startPurchase').mockImplementation(async () => {
+    vi.spyOn(paymentService, 'startCheckout').mockImplementation(async () => {
       currentPeriodEnd = futureDate;
-      return { ok: true, current_period_end: futureDate };
+      return { ok: true, orderId: 'MM_MOCK_123' };
     });
 
     const buyBtn = screen.getByTestId('buy-plan-btn');
@@ -218,5 +255,61 @@ describe('Subscription Purchase & Realtime Sync Tests', () => {
     });
 
     expect(refreshSpy).toHaveBeenCalledWith(true);
+  });
+
+  it('7. When payments.plans query fails or returns empty, fallback plans are displayed, purchase button is disabled, and toast warning is shown', async () => {
+    // Mock payments.plans query failure
+    const mockOrder = vi.fn().mockResolvedValue({ data: [], error: new Error('PostgREST schema payments not found') });
+    const mockSelect = vi.fn().mockReturnValue({ order: mockOrder });
+    const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
+    const mockSchema = vi.fn().mockReturnValue({ from: mockFrom });
+    vi.spyOn(supabase, 'schema').mockImplementation(mockSchema as any);
+
+    vi.spyOn(apiService, 'getSubscriptionDetails').mockResolvedValue(null);
+
+    renderSubscriptionPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('subscription-page-title')).toBeInTheDocument();
+    });
+
+    // Fallback plans are visible (3, 6, 12 months)
+    expect(screen.getByTestId('sub-plan-card-3')).toBeInTheDocument();
+    expect(screen.getByTestId('sub-plan-card-6')).toBeInTheDocument();
+    expect(screen.getByTestId('sub-plan-card-12')).toBeInTheDocument();
+
+    // Button is disabled
+    const buyBtn = screen.getByTestId('buy-plan-btn');
+    expect(buyBtn).toBeDisabled();
+
+    // Toast message is shown
+    expect(
+      await screen.findByText('Plans are unavailable right now. Please try again later.')
+    ).toBeInTheDocument();
+  });
+
+  it('8. Purchase flow shows sync delayed message and does NOT show welcome toast if finalizeTransaction fails or returns false', async () => {
+    vi.spyOn(apiService, 'getSubscriptionDetails').mockResolvedValue(null);
+    renderSubscriptionPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('buy-plan-btn')).toBeInTheDocument();
+    });
+
+    vi.spyOn(paymentService, 'startCheckout').mockRejectedValue(
+      new Error('Payment received but sync delayed. Please contact support if PRO is not active.')
+    );
+
+    const buyBtn = screen.getByTestId('buy-plan-btn');
+    await act(async () => {
+      fireEvent.click(buyBtn);
+    });
+
+    expect(
+      await screen.findByText('Payment received but sync delayed. Please contact support if PRO is not active.')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('🎉 Payment Successful! Welcome to Wealth Select Pro.')
+    ).not.toBeInTheDocument();
   });
 });

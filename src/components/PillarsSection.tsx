@@ -11,7 +11,6 @@ export const PillarsSection: React.FC = () => {
       badgeBg: 'bg-blue-500/20 border-blue-500/30 text-blue-400',
       titleColor: 'text-white',
       borderStyle: 'border-white/[0.08] hover:border-blue-500/40',
-      highlighted: false,
     },
     {
       id: 'mutual-funds',
@@ -19,9 +18,8 @@ export const PillarsSection: React.FC = () => {
       desc: 'Monitor SIPs, returns and top performing funds',
       icon: <LayoutGrid className="w-5 h-5 text-amber-400" />,
       badgeBg: 'bg-amber-500/20 border-amber-500/30 text-amber-400',
-      titleColor: 'text-amber-300',
-      borderStyle: 'border-amber-500/70 shadow-[0_0_25px_rgba(245,158,11,0.2)] bg-[#191522]',
-      highlighted: true,
+      titleColor: 'text-white',
+      borderStyle: 'border-white/[0.08] hover:border-amber-500/40',
     },
     {
       id: 'insurance',
@@ -31,7 +29,6 @@ export const PillarsSection: React.FC = () => {
       badgeBg: 'bg-purple-500/20 border-purple-500/30 text-purple-400',
       titleColor: 'text-white',
       borderStyle: 'border-white/[0.08] hover:border-purple-500/40',
-      highlighted: false,
     },
     {
       id: 'emergency-fund',
@@ -41,7 +38,6 @@ export const PillarsSection: React.FC = () => {
       badgeBg: 'bg-teal-500/20 border-teal-500/30 text-teal-400',
       titleColor: 'text-white',
       borderStyle: 'border-white/[0.08] hover:border-teal-500/40',
-      highlighted: false,
     },
     {
       id: 'goals-planning',
@@ -51,7 +47,6 @@ export const PillarsSection: React.FC = () => {
       badgeBg: 'bg-pink-500/20 border-pink-500/30 text-pink-400',
       titleColor: 'text-white',
       borderStyle: 'border-white/[0.08] hover:border-pink-500/40',
-      highlighted: false,
     },
   ];
 

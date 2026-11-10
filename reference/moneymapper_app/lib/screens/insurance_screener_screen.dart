@@ -49,15 +49,28 @@ class _InsuranceScreenerScreenState extends State<InsuranceScreenerScreen> {
     setState(() => _loading = true);
     
     try {
-      final res = await _supabase
-          .schema('bse_data')
-          .from('insurance_plans')
-          .select()
-          .order('smart_score', ascending: false);
+      List<Map<String, dynamic>> allRows = [];
+      int offset = 0;
+      final int pageSize = 1000;
+      
+      while (true) {
+        final res = await _supabase
+            .schema('bse_data')
+            .from('insurance_plans')
+            .select()
+            .order('smart_score', ascending: false)
+            .range(offset, offset + pageSize - 1);
+            
+        final chunk = List<Map<String, dynamic>>.from(res);
+        allRows.addAll(chunk);
+        
+        if (chunk.length < pageSize) break;
+        offset += pageSize;
+      }
       
       if (mounted) {
         setState(() {
-          _allPlans = List<Map<String, dynamic>>.from(res);
+          _allPlans = allRows;
           _filteredPlans = _allPlans;
           _loading = false;
         });

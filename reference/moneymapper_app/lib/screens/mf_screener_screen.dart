@@ -53,16 +53,29 @@ class _MutualFundScreenerScreenState extends State<MutualFundScreenerScreen> {
     try {
       debugPrint('DEBUG: Fetching from bse_data.mutual_fund_signals...');
       
-      final res = await _supabase
-          .schema('bse_data')
-          .from('mutual_fund_signals')
-          .select()
-          .order('final_score', ascending: false);
+      List<Map<String, dynamic>> allRows = [];
+      int offset = 0;
+      final int pageSize = 1000;
       
-      debugPrint('DEBUG: Received ${res.length} rows from Supabase');
+      while (true) {
+        final res = await _supabase
+            .schema('bse_data')
+            .from('mutual_fund_signals')
+            .select()
+            .order('final_score', ascending: false)
+            .range(offset, offset + pageSize - 1);
+            
+        final chunk = List<Map<String, dynamic>>.from(res);
+        allRows.addAll(chunk);
+        
+        if (chunk.length < pageSize) break;
+        offset += pageSize;
+      }
+      
+      debugPrint('DEBUG: Received ${allRows.length} rows from Supabase');
       
       if (mounted) {
-        final List<Map<String, dynamic>> funds = List<Map<String, dynamic>>.from(res);
+        final List<Map<String, dynamic>> funds = allRows;
         final uniqueCats = funds
             .map((f) => f['category']?.toString() ?? 'Uncategorised')
             .toSet()

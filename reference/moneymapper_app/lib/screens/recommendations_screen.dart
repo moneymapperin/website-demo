@@ -20,7 +20,10 @@ class RecommendationsScreen extends StatefulWidget {
   State<RecommendationsScreen> createState() => _RecommendationsScreenState();
 }
 
-class _RecommendationsScreenState extends State<RecommendationsScreen> {
+class _RecommendationsScreenState extends State<RecommendationsScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final _api = ApiService();
   final _premiumService = PremiumService();
   final _supabase = Supabase.instance.client;
@@ -184,12 +187,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
         children: [
           Row(
             children: [
-              Builder(
-                builder: (ctx) => IconButton(
-                  icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
-                  onPressed: () => Scaffold.of(ctx).openDrawer(),
-                ),
-              ),
+              const SizedBox(width: 48),
               const Expanded(
                 child: Center(
                   child: Text(
@@ -208,16 +206,6 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            "MoneyMapper Insights",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontWeight: FontWeight.w800,
-              fontSize: 16,
-              letterSpacing: 0.3,
-            ),
-          ),
         ],
       ),
     );
@@ -225,6 +213,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -254,7 +243,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
               const SizedBox(height: 32),
               _buildSectionHeader("Learn & Grow", Icons.menu_book_rounded),
               _buildHorizontalSlider(_blogItems, isDark, isNews: false),
-              const SizedBox(height: 60),
+              const SizedBox(height: 120), // ADDED EXTRA PADDING SO CONTENT CLEARS THE NAVBAR
             ],
           ),
         ),
@@ -361,116 +350,94 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
     final String typeLabel = isStock ? "STOCK" : "MUTUAL FUND";
     final Color typeColor = isStock ? Colors.blue : Colors.purple;
 
-    return GestureDetector(
-      onTap: () {
-        if (isLocked) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Upgrade to PRO to unlock all expert picks! 🚀"),
-              backgroundColor: AppColors.accent,
-            ),
-          );
-          return;
-        }
-        if (isStock) {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const StockScreenerScreen()));
-        } else {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const MfRecommendationsScreen(riskAppetite: "moderate")));
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.borderLight, width: 1.5),
-        ),
-        child: Stack(
-          children: [
-            ImageFiltered(
-              imageFilter: isLocked ? ImageFilter.blur(sigmaX: 8, sigmaY: 8) : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: typeColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Icon(isStock ? Icons.trending_up_rounded : Icons.pie_chart_rounded, color: typeColor, size: 24),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.borderLight, width: 1.5),
+      ),
+      child: Stack(
+        children: [
+          ImageFiltered(
+            imageFilter: isLocked ? ImageFilter.blur(sigmaX: 8, sigmaY: 8) : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: typeColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: typeColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(typeLabel, style: TextStyle(color: typeColor, fontSize: 8, fontWeight: FontWeight.w900)),
+                    child: Icon(isStock ? Icons.trending_up_rounded : Icons.pie_chart_rounded, color: typeColor, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: typeColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            title,
-                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, letterSpacing: -0.2),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            subTitle,
-                            style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.w500),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                          child: Text(typeLabel, style: TextStyle(color: typeColor, fontSize: 8, fontWeight: FontWeight.w900)),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          title,
+                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, letterSpacing: -0.2),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subTitle,
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.w500),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                    Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            if (isLocked)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  color: Colors.black.withOpacity(0.08),
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/subscription'),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.amber,
-                              shape: BoxShape.circle,
-                              boxShadow: [BoxShadow(color: Colors.amber.withOpacity(0.4), blurRadius: 10)],
-                            ),
-                            child: const Icon(Icons.lock_rounded, color: Colors.white, size: 20),
-                          ),
-                          const SizedBox(height: 6),
-                          const Text(
-                            "PRO UNLOCK",
-                            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 0.5),
-                          ),
-                        ],
+          ),
+          if (isLocked)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Container(
+                color: Colors.black.withOpacity(0.08),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.amber,
+                          shape: BoxShape.circle,
+                          boxShadow: [BoxShadow(color: Colors.amber.withOpacity(0.4), blurRadius: 10)],
+                        ),
+                        child: const Icon(Icons.lock_rounded, color: Colors.white, size: 20),
                       ),
-                    ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        "PRO UNLOCK",
+                        style: TextStyle(color: Colors.amber, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 0.5),
+                      ),
+                    ],
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -528,12 +495,12 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   }
 
   Widget _buildHorizontalSlider(List<dynamic> items, bool isDark, {required bool isNews}) {
-    if (_loadingNews && isNews) return const SizedBox(height: 300, child: Center(child: CircularProgressIndicator()));
-    if (_loadingBlogs && !isNews) return const SizedBox(height: 300, child: Center(child: CircularProgressIndicator()));
+    if (_loadingNews && isNews) return const SizedBox(height: 320, child: Center(child: CircularProgressIndicator()));
+    if (_loadingBlogs && !isNews) return const SizedBox(height: 320, child: Center(child: CircularProgressIndicator()));
     if (items.isEmpty) return const Padding(padding: EdgeInsets.all(20), child: Text("No items available."));
 
-    double cardWidth = context.wp(65);
-    double cardHeight = context.hp(52);
+    double cardWidth = context.wp(68).clamp(240.0, 320.0);
+    double cardHeight = context.hp(42).clamp(320.0, 360.0);
 
     return SizedBox(
       height: cardHeight,
@@ -564,25 +531,25 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
               margin: EdgeInsets.symmetric(horizontal: context.wp(2), vertical: 4),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkCard : Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.borderLight, width: 1.5),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AspectRatio(
-                    aspectRatio: 1.2,
+                    aspectRatio: 1.65,
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(23)),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
                       child: imageUrl != null
                           ? Image.network(imageUrl, fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(color: AppColors.primary.withOpacity(0.1), child: const Icon(Icons.image_outlined, size: 40)))
-                          : Container(color: AppColors.primary.withOpacity(0.1), child: const Icon(Icons.image_outlined, size: 40)),
+                              errorBuilder: (_, __, ___) => Container(color: AppColors.primary.withOpacity(0.1), child: const Icon(Icons.image_outlined, size: 36)))
+                          : Container(color: AppColors.primary.withOpacity(0.1), child: const Icon(Icons.image_outlined, size: 36)),
                     ),
                   ),
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.all(context.wp(4)),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -590,16 +557,26 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                             title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: context.sp(13), fontWeight: FontWeight.w800, height: 1.2),
+                            style: TextStyle(
+                              fontSize: context.sp(13.5),
+                              fontWeight: FontWeight.w900,
+                              height: 1.2,
+                            ),
                           ),
                           const SizedBox(height: 6),
-                          Text(
-                            desc,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: context.sp(10), color: Colors.grey, height: 1.3),
+                          Expanded(
+                            child: Text(
+                              desc,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: context.sp(11.0),
+                                color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                                height: 1.3,
+                              ),
+                            ),
                           ),
-                          const Spacer(),
+                          const SizedBox(height: 6),
                           Row(
                             children: [
                               Expanded(
@@ -607,11 +584,16 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                                   footerLabel,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: context.sp(8.5), fontWeight: FontWeight.w900, color: AppColors.primary),
+                                  style: TextStyle(
+                                    fontSize: context.sp(9.5),
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.primary,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              Icon(Icons.arrow_forward_ios_rounded, size: context.sp(9), color: AppColors.primary),
+                              Icon(Icons.arrow_forward_ios_rounded, size: context.sp(10), color: AppColors.primary),
                             ],
                           ),
                         ],

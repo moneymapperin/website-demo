@@ -41,7 +41,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
         backgroundColor: isDark ? AppColors.darkCard : AppColors.primary,
         foregroundColor: Colors.white,
         title: const Text(
-          'Privacy Policy',
+          'About & Privacy Policy',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         centerTitle: true,
