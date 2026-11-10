@@ -126,5 +126,22 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   animation: qr-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-visible {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+}
 
 

@@ -16,10 +16,10 @@ export const Hero: React.FC = () => {
   return (
     <section id="home" className="scroll-mt-24 relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 isolate">
       {/* Dedicated Background Video Wrapper: subtle texture, auto-plays muted, hidden in light mode for readability */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none dark:block hidden" aria-hidden="true">
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none dark:block hidden bg-[#0b0a14]" aria-hidden="true">
         <video
           ref={videoRef}
-          className="w-full h-full object-cover object-center opacity-40"
+          className="w-full h-full object-contain object-center opacity-40"
           autoPlay
           muted
           loop

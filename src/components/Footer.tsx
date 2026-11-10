@@ -196,14 +196,6 @@ export const Footer: React.FC = () => {
                     Email: info@moneymapper.in
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="tel:+918770835843"
-                    className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
-                  >
-                    Phone: +918770835843
-                  </a>
-                </li>
               </ul>
             </div>
 

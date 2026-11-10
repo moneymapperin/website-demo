@@ -12,6 +12,7 @@ import { SecurityPrivacySection } from '../components/SecurityPrivacySection';
 import { TeamSection } from '../components/TeamSection';
 import { StartJourneySection } from '../components/StartJourneySection';
 import { CTASection } from '../components/CTASection';
+import { Reveal } from '../components/common/Reveal';
 
 export const HomePage: React.FC = () => {
   useEffect(() => {
@@ -21,18 +22,42 @@ export const HomePage: React.FC = () => {
   return (
     <>
       <Hero />
-      <FeatureCards />
-      <WhyMoneyMapper />
-      <FinancialFitnessScoreSection />
-      <ProductPreviewSection />
-      <HowItWorksSection />
-      <HomeAiAssistantSection />
-      <InsideDashboardSection />
-      <BusinessSection />
-      <SecurityPrivacySection />
-      <TeamSection />
-      <StartJourneySection />
-      <CTASection />
+      <Reveal>
+        <FeatureCards />
+      </Reveal>
+      <Reveal>
+        <WhyMoneyMapper />
+      </Reveal>
+      <Reveal>
+        <FinancialFitnessScoreSection />
+      </Reveal>
+      <Reveal>
+        <ProductPreviewSection />
+      </Reveal>
+      <Reveal>
+        <HowItWorksSection />
+      </Reveal>
+      <Reveal>
+        <HomeAiAssistantSection />
+      </Reveal>
+      <Reveal>
+        <InsideDashboardSection />
+      </Reveal>
+      <Reveal>
+        <BusinessSection />
+      </Reveal>
+      <Reveal>
+        <SecurityPrivacySection />
+      </Reveal>
+      <Reveal>
+        <TeamSection />
+      </Reveal>
+      <Reveal>
+        <StartJourneySection />
+      </Reveal>
+      <Reveal>
+        <CTASection />
+      </Reveal>
     </>
   );
 };
