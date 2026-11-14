@@ -51,6 +51,7 @@ import { LegalLayout } from './pages/legal/LegalLayout';
 const PrivacyPolicyPage = React.lazy(() => import('./pages/legal/PrivacyPolicyPage'));
 const TermsPage = React.lazy(() => import('./pages/legal/TermsPage'));
 const CookiePolicyPage = React.lazy(() => import('./pages/legal/CookiePolicyPage'));
+const DisclaimerPage = React.lazy(() => import('./pages/legal/DisclaimerPage'));
 
 const SuspenseFallback: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center bg-background text-white">
@@ -192,10 +193,32 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                         </React.Suspense>
                       }
                     />
+                    <Route
+                      path="/disclaimer"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <DisclaimerPage />
+                        </React.Suspense>
+                      }
+                    />
+                    <Route
+                      path="/disclaimer-and-data-processing-consent"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <DisclaimerPage />
+                        </React.Suspense>
+                      }
+                    />
+                    <Route
+                      path="/disclaimer-and-data-processing-consent.html"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <DisclaimerPage />
+                        </React.Suspense>
+                      }
+                    />
                   </Route>
 
-                  <Route path="/disclaimer" element={<LegalRedirect url="/disclaimer-and-data-processing-consent.html" />} />
-                  <Route path="/disclaimer-and-data-processing-consent.html" element={<LegalRedirect url="/disclaimer-and-data-processing-consent.html" />} />
                   <Route path="/grievance-redressal-policy.html" element={<LegalRedirect url="/grievance-redressal-policy.html" />} />
                   <Route path="/delete_my_data" element={<LegalRedirect url="/delete_my_data.html" />} />
                   <Route path="/delete_my_data.html" element={<LegalRedirect url="/delete_my_data.html" />} />
