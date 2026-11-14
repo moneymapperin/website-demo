@@ -1,5 +1,6 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 import { usePlan } from '../../hooks/usePlan';
@@ -557,7 +558,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
         </header>
 
-        {children || <Outlet />}
+        <ErrorBoundary key={location.pathname}>
+          {children || <Outlet />}
+        </ErrorBoundary>
       </main>
 
       {/* Mobile Bottom Navigation Bar */}

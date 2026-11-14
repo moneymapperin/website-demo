@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { RotateCw, Info } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { usePlan } from '../hooks/usePlan';
@@ -7,6 +7,8 @@ import { useToast } from '../context/ToastContext';
 import { premiumService, PremiumService, isProPlan } from '../services/premiumService';
 import { paymentService } from '../services/paymentService';
 import { supabase } from '../lib/supabase';
+import { validateReferralCode, REFERRAL_STORAGE_KEY } from '../services/referralService';
+import { calculateDiscountedPrice } from '../config/referralRules';
 import { APP_COLORS } from '../theme/tokens';
 import quarterlyImg from '../assets/app/quarterly_plan.png';
 import halfYearlyImg from '../assets/app/half_yearly_2.png';
@@ -32,6 +34,7 @@ export const SUBSCRIPTION_PLANS: SubPlan[] = [
     id: 'moneymapper_quarterly_sub',
     title: 'Quarterly Plan',
     months: 3,
+    rawPrice: 1497,
     storePrice: '₹499',
     totalBilledPrice: '₹1,497',
     originalPrice: '₹799',
@@ -43,6 +46,7 @@ export const SUBSCRIPTION_PLANS: SubPlan[] = [
     id: 'moneymapper_halfyearly_sub',
     title: 'Half-Yearly Plan',
     months: 6,
+    rawPrice: 2394,
     storePrice: '₹399',
     totalBilledPrice: '₹2,394',
     originalPrice: '₹799',
@@ -54,6 +58,7 @@ export const SUBSCRIPTION_PLANS: SubPlan[] = [
     id: 'moneymapper_yearly_sub',
     title: 'Yearly Plan',
     months: 12,
+    rawPrice: 3588,
     storePrice: '₹299',
     totalBilledPrice: '₹3,588',
     originalPrice: '₹799',
@@ -82,6 +87,80 @@ export const SubscriptionPage: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
+
+  const [referralCode, setReferralCode] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
+  const [referralMessage, setReferralMessage] = useState<string>('');
+  const [isCheckingReferral, setIsCheckingReferral] = useState(false);
+  const [isReferralValid, setIsReferralValid] = useState<boolean>(false);
+
+  const handleApplyReferral = useCallback(
+    async (overrideCode?: string, overridePlan?: SubPlan) => {
+      const code = (overrideCode !== undefined ? overrideCode : referralCode).trim().toUpperCase();
+      const planToValidate = overridePlan || selectedPlan;
+
+      if (!code) {
+        setAppliedDiscount(0);
+        setReferralMessage('');
+        setIsReferralValid(false);
+        return;
+      }
+
+      setIsCheckingReferral(true);
+      try {
+        const planCode = planToValidate.planCode || planToValidate.id;
+        const result = await validateReferralCode(
+          code,
+          supabase,
+          undefined,
+          planCode,
+          planToValidate.rawPrice
+        );
+        if (result.valid) {
+          setAppliedDiscount(result.discountAmount);
+          setReferralMessage(result.message);
+          setIsReferralValid(true);
+        } else {
+          setAppliedDiscount(0);
+          setReferralMessage(result.message);
+          setIsReferralValid(false);
+        }
+      } catch {
+        setAppliedDiscount(0);
+        setReferralMessage('Error validating code.');
+        setIsReferralValid(false);
+      } finally {
+        setIsCheckingReferral(false);
+      }
+    },
+    [referralCode, selectedPlan]
+  );
+
+  // Re-run validation whenever the selected plan changes. Clear the applied discount until re-validated.
+  const handleSelectPlan = (newPlan: SubPlan) => {
+    setSelectedPlan(newPlan);
+    setAppliedDiscount(0);
+    setIsReferralValid(false);
+    if (referralCode.trim()) {
+      handleApplyReferral(referralCode, newPlan);
+    } else {
+      setReferralMessage('');
+    }
+  };
+
+  // Auto-fill and validate saved referral code if present in localStorage
+  useEffect(() => {
+    try {
+      const savedCode = localStorage.getItem(REFERRAL_STORAGE_KEY);
+      if (savedCode && savedCode.trim()) {
+        const code = savedCode.trim().toUpperCase();
+        setReferralCode(code);
+        handleApplyReferral(code);
+      }
+    } catch (e) {
+      console.warn('Could not read saved referral code:', e);
+    }
+  }, [handleApplyReferral]);
 
   const processSubscriptionDetails = useCallback(async (details: any, updateServicePlan: boolean = true) => {
     if (details?.current_period_end) {
@@ -259,9 +338,16 @@ export const SubscriptionPage: React.FC = () => {
       return;
     }
 
+    const canSendReferral =
+      appliedDiscount > 0 &&
+      isReferralValid &&
+      Boolean(referralCode.trim());
+
     try {
       setPaymentLoading(true);
       await paymentService.startCheckout(selectedPlan, {
+        referralCode: canSendReferral ? referralCode.trim().toUpperCase() : undefined,
+        isReferralValid: canSendReferral,
         navigate,
         showToast,
         refreshPlan,
@@ -307,6 +393,14 @@ export const SubscriptionPage: React.FC = () => {
       setPaymentLoading(false);
     }
   };
+
+  const isSelectedPlanDiscounted =
+    appliedDiscount > 0 &&
+    isReferralValid;
+
+  const selectedPriceCalc = isSelectedPlanDiscounted && selectedPlan.rawPrice
+    ? calculateDiscountedPrice(selectedPlan.rawPrice, appliedDiscount)
+    : { effectiveDiscount: 0, finalPrice: selectedPlan.rawPrice || 0 };
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-8">
@@ -384,11 +478,20 @@ export const SubscriptionPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {plans.map((plan) => {
             const isSelected = selectedPlan.id === plan.id;
+            const isCodeValidForThisPlan =
+              isSelected &&
+              appliedDiscount > 0 &&
+              isReferralValid;
+
+            const { effectiveDiscount, finalPrice } = isCodeValidForThisPlan && plan.rawPrice
+              ? calculateDiscountedPrice(plan.rawPrice, appliedDiscount)
+              : { effectiveDiscount: 0, finalPrice: plan.rawPrice || 0 };
+
             return (
               <div
                 key={plan.id}
                 data-testid={`sub-plan-card-${plan.months}`}
-                onClick={() => setSelectedPlan(plan)}
+                onClick={() => handleSelectPlan(plan)}
                 className={`p-6 rounded-3xl border transition-all cursor-pointer flex flex-col justify-between relative ${
                   isSelected
                     ? 'bg-indigo-500/5 border-indigo-500 shadow-xl ring-2 ring-indigo-500/20 scale-[1.02]'
@@ -409,8 +512,19 @@ export const SubscriptionPage: React.FC = () => {
 
                   <div className="my-4 flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-black text-[var(--color-text)]">
-                        {plan.storePrice}
+                      <div className="text-3xl font-black text-[var(--color-text)] flex items-baseline gap-2">
+                        {isCodeValidForThisPlan && plan.rawPrice ? (
+                          <>
+                            <span className="text-emerald-600 dark:text-emerald-400">
+                              ₹{Math.round(finalPrice / plan.months).toLocaleString('en-IN')}
+                            </span>
+                            <span className="text-lg line-through text-gray-400 font-normal">
+                              {plan.storePrice}
+                            </span>
+                          </>
+                        ) : (
+                          plan.storePrice
+                        )}
                       </div>
                       <div className="text-xs font-bold text-gray-400">/ month</div>
                     </div>
@@ -423,9 +537,25 @@ export const SubscriptionPage: React.FC = () => {
 
                   <div className="space-y-1.5 pt-2 border-t border-[var(--color-border)]/50">
                     <div className="text-xs text-gray-400">
-                      Billed upfront as {plan.totalBilledPrice} • <span className="line-through">{plan.originalPrice}</span>{' '}
+                      Billed upfront as{' '}
+                      {isCodeValidForThisPlan && plan.rawPrice ? (
+                        <>
+                          <span className="line-through mr-1">{plan.totalBilledPrice}</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold mr-1">
+                            ₹{Math.round(finalPrice).toLocaleString('en-IN')}
+                          </span>
+                        </>
+                      ) : (
+                        <>{plan.totalBilledPrice} • </>
+                      )}
+                      <span className="line-through">{plan.originalPrice}</span>{' '}
                       <span className="text-indigo-600 dark:text-indigo-400 font-bold">{plan.discount}</span>
                     </div>
+                    {isCodeValidForThisPlan && effectiveDiscount > 0 && (
+                      <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        ₹{effectiveDiscount} Referral discount applied
+                      </div>
+                    )}
                     <div className="text-xs font-black text-amber-500">
                       {plan.savings}
                     </div>
@@ -449,6 +579,67 @@ export const SubscriptionPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Referral Code Section */}
+      <div
+        data-testid="referral-code-section"
+        className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-sm space-y-2"
+      >
+        <label
+          htmlFor="referral-code-input"
+          className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]"
+        >
+          Have a Referral Code?
+        </label>
+        <div className="flex gap-2.5">
+          <input
+            id="referral-code-input"
+            type="text"
+            data-testid="referral-code-input"
+            value={referralCode}
+            onChange={(e) => {
+              setReferralCode(e.target.value.toUpperCase());
+              if (appliedDiscount > 0 || referralMessage) {
+                setAppliedDiscount(0);
+                setReferralMessage('');
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleApplyReferral();
+              }
+            }}
+            placeholder="Enter Referral Code (Optional)"
+            className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-[#070B1F]/90 border border-slate-200 dark:border-[#1E2954] rounded-xl text-[var(--color-text)] placeholder-slate-400 focus:outline-none focus:border-[#0084FF] focus:ring-1 focus:ring-[#0084FF] transition-all text-sm font-semibold uppercase tracking-wider"
+          />
+          <button
+            type="button"
+            data-testid="apply-referral-btn"
+            disabled={isCheckingReferral || !referralCode.trim()}
+            onClick={() => handleApplyReferral()}
+            className="px-5 py-2.5 bg-[#0084FF] hover:bg-[#0070DD] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px]"
+          >
+            {isCheckingReferral ? (
+              <RotateCw className="w-4 h-4 animate-spin text-white" />
+            ) : (
+              'APPLY'
+            )}
+          </button>
+        </div>
+        {referralMessage && (
+          <p
+            data-testid="referral-status-message"
+            className={`text-xs font-semibold ${
+              appliedDiscount > 0
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-red-500 dark:text-red-400'
+            }`}
+          >
+            {referralMessage}
+          </p>
+        )}
+      </div>
+
       {/* Purchase CTA */}
       <div className="space-y-3 pt-4">
         <button
@@ -464,6 +655,8 @@ export const SubscriptionPage: React.FC = () => {
               <RotateCw className="w-4 h-4 animate-spin" />
               Processing...
             </span>
+          ) : isSelectedPlanDiscounted && selectedPlan.rawPrice ? (
+            `Get Financially Free (₹${Math.round(selectedPriceCalc.finalPrice).toLocaleString('en-IN')})`
           ) : (
             `Get Financially Free (${selectedPlan.totalBilledPrice})`
           )}
@@ -471,14 +664,14 @@ export const SubscriptionPage: React.FC = () => {
 
         {/* Terms and conditions apply note */}
         <div className="flex justify-center pt-2">
-          <a
-            href="/terms-and-conditions.html"
+          <Link
+            to="/terms-and-conditions"
             data-testid="terms-and-conditions-link"
             className="group inline-flex flex-col items-center justify-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors cursor-pointer p-1.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <Info className="w-4 h-4 text-[var(--color-text-muted)] group-hover:text-[var(--color-text)] transition-colors" />
             <span className="font-medium">Terms and conditions apply</span>
-          </a>
+          </Link>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Building2, Network, Smartphone, IndianRupee } from 'lucide-react';
 import { navigateTo } from '../lib/navigation';
 
@@ -35,6 +36,8 @@ const businessCards: BusinessCard[] = [
     icon: <IndianRupee className="w-5 h-5 text-purple-300" />,
   },
 ];
+
+const SHOW_BUSINESS_DETAILS_BUTTON = false;
 
 export const BusinessSection: React.FC = () => {
   return (
@@ -89,14 +92,14 @@ export const BusinessSection: React.FC = () => {
       {/* Two Buttons Below the Cards */}
       <div className="mt-10 sm:mt-12 flex flex-wrap items-center gap-4">
         {/* Filled Gradient Button */}
-        <a
-          href="/business-details.html"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:opacity-95 text-white font-semibold text-sm shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer inline-flex items-center gap-2"
-        >
-          Full business details →
-        </a>
+        {SHOW_BUSINESS_DETAILS_BUTTON && (
+          <Link
+            to="/business-details"
+            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:opacity-95 text-white font-semibold text-sm shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer inline-flex items-center gap-2"
+          >
+            Full business details →
+          </Link>
+        )}
 
         {/* Dark Outlined Button */}
         <button

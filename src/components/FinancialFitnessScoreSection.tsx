@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface PillarBar {
   name: string;
@@ -74,14 +75,12 @@ export const FinancialFitnessScoreSection: React.FC = () => {
 
           {/* Full-width Button */}
           <div className="mt-8 w-full">
-            <a
-              href="/moneymapper-score-story.html"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/score-story"
               className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-500 hover:opacity-95 text-white font-semibold text-sm shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer text-center flex items-center justify-center gap-2"
             >
               How the score works →
-            </a>
+            </Link>
           </div>
         </div>
 

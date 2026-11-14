@@ -56,3 +56,4 @@ export const LegalLayout: React.FC = () => {
 };
 
 export default LegalLayout;
+

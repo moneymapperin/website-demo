@@ -57,6 +57,8 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
 
   const {
     loading,
+    error,
+    isEmpty,
     weeks,
     currentViewWeekIndex,
     setCurrentViewWeekIndex,
@@ -73,6 +75,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
     disciplineScore,
     targetsHit,
     disciplineMsg,
+    refetch,
   } = useWeeklyTracker();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -161,6 +164,72 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+        <div
+          data-testid="weekly-error-state"
+          className="p-8 rounded-3xl bg-white dark:bg-[#0B0D1B]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-4"
+        >
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500">
+            <Wallet className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Unable to Load Expense Data</h2>
+          <p className="text-sm text-slate-500 dark:text-zinc-400">
+            {error || 'An error occurred while loading your weekly expense predictions.'}
+          </p>
+          <div className="pt-2 flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              data-testid="weekly-retry-btn"
+              onClick={() => refetch()}
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              Retry
+            </button>
+            <button
+              type="button"
+              data-testid="weekly-error-profile-btn"
+              onClick={() => navigate('/master-data?target=expenses')}
+              className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider transition-all border border-slate-200 dark:border-white/10 cursor-pointer"
+            >
+              Update Expense Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isEmpty || (!loading && weeks.length === 0)) {
+    return (
+      <div className="w-full max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+        <div
+          data-testid="weekly-empty-state"
+          className="p-8 rounded-3xl bg-white dark:bg-[#0B0D1B]/95 border border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-xl space-y-4"
+        >
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500">
+            <Target className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">No Expense Predictions Yet</h2>
+          <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
+            Weekly targets require an active monthly income in your financial profile or calculated fitness scores.
+          </p>
+          <div className="pt-2">
+            <button
+              type="button"
+              data-testid="setup-expenses-btn"
+              onClick={() => navigate('/master-data?target=expenses')}
+              className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              Complete Expense Profile →
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -305,7 +374,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
             <div className="min-w-0">
               <h3 className="text-base font-bold text-slate-900 dark:text-white truncate">Current Week</h3>
               <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 truncate">
-                Week {currentWeek?.index ?? 1} · {currentWeek ? `${formatDateShort(currentWeek.start)} - ${formatDateShort(currentWeek.end)}` : ''}
+                Week {currentWeek?.index ?? 1} · {currentWeek?.start && currentWeek?.end ? `${formatDateShort(currentWeek.start)} - ${formatDateShort(currentWeek.end)}` : ''}
               </p>
             </div>
           </div>
@@ -383,10 +452,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                   <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0" />
                   <div>
                     <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                      <span className="text-[#0284c7] dark:text-[#38BDF8]">Week {currentWeek.index}</span> Target Overview
+                      <span className="text-[#0284c7] dark:text-[#38BDF8]">Week {currentWeek?.index ?? 1}</span> Target Overview
                     </h2>
                     <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                      {formatDateShort(currentWeek.start)} - {formatDateShort(currentWeek.end)}
+                      {currentWeek?.start && currentWeek?.end ? `${formatDateShort(currentWeek.start)} - ${formatDateShort(currentWeek.end)}` : ''}
                     </p>
                   </div>
                 </div>
@@ -399,7 +468,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                     <span>Fixed Expenses</span>
                   </div>
                   <span className="text-slate-500 dark:text-zinc-400">
-                    Range: {formatRupees(currentWeek.range_fixed[0])} – {formatRupees(currentWeek.range_fixed[1])}
+                    Range: {formatRupees(currentWeek?.range_fixed?.[0] ?? 0)} – {formatRupees(currentWeek?.range_fixed?.[1] ?? 0)}
                   </span>
                 </div>
 
@@ -409,7 +478,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                     <span>Flexible Expenses</span>
                   </div>
                   <span className="text-slate-500 dark:text-zinc-400">
-                    Range: {formatRupees(currentWeek.range_flex[0])} – {formatRupees(currentWeek.range_flex[1])}
+                    Range: {formatRupees(currentWeek?.range_flex?.[0] ?? 0)} – {formatRupees(currentWeek?.range_flex?.[1] ?? 0)}
                   </span>
                 </div>
 
@@ -419,7 +488,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                     <span>Savings Goal</span>
                   </div>
                   <span className="text-slate-500 dark:text-zinc-400">
-                    Range: {formatRupees(currentWeek.range_save[0])} – {formatRupees(currentWeek.range_save[1])}
+                    Range: {formatRupees(currentWeek?.range_save?.[0] ?? 0)} – {formatRupees(currentWeek?.range_save?.[1] ?? 0)}
                   </span>
                 </div>
               </div>
@@ -476,10 +545,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <Target className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0" />
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                    Week {activeReportingWeek.index} Target Ranges
+                    Week {activeReportingWeek?.index ?? 1} Target Ranges
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                    {formatDateShort(activeReportingWeek.start)} - {formatDateShort(activeReportingWeek.end)}
+                    {activeReportingWeek?.start && activeReportingWeek?.end ? `${formatDateShort(activeReportingWeek.start)} - ${formatDateShort(activeReportingWeek.end)}` : ''}
                   </p>
                 </div>
               </div>
@@ -497,7 +566,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <span className="text-sm font-bold text-slate-900 dark:text-white">Fixed Expenses</span>
                 <div className="text-right">
                   <span className="text-xs text-slate-500 dark:text-zinc-400">
-                    Range: {formatRupees(activeReportingWeek.range_fixed[0])} – {formatRupees(activeReportingWeek.range_fixed[1])}
+                    Range: {formatRupees(activeReportingWeek?.range_fixed?.[0] ?? 0)} – {formatRupees(activeReportingWeek?.range_fixed?.[1] ?? 0)}
                   </span>
                   {actualFixed > 0 && (
                     <span className="text-xs font-bold text-emerald-600 dark:text-[#10B981] ml-2">
@@ -543,7 +612,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <span className="text-sm font-bold text-slate-900 dark:text-white">Flexible Expenses</span>
                 <div className="text-right">
                   <span className="text-xs text-slate-500 dark:text-zinc-400">
-                    Range: {formatRupees(activeReportingWeek.range_flex[0])} – {formatRupees(activeReportingWeek.range_flex[1])}
+                    Range: {formatRupees(activeReportingWeek?.range_flex?.[0] ?? 0)} – {formatRupees(activeReportingWeek?.range_flex?.[1] ?? 0)}
                   </span>
                   {actualFlex > 0 && (
                     <span className="text-xs font-bold text-emerald-600 dark:text-[#10B981] ml-2">
@@ -589,7 +658,7 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
                 <span className="text-sm font-bold text-slate-900 dark:text-white">Savings Goal</span>
                 <div className="text-right">
                   <span className="text-xs text-slate-500 dark:text-zinc-400">
-                    Range: {formatRupees(activeReportingWeek.range_save[0])} – {formatRupees(activeReportingWeek.range_save[1])}
+                    Range: {formatRupees(activeReportingWeek?.range_save?.[0] ?? 0)} – {formatRupees(activeReportingWeek?.range_save?.[1] ?? 0)}
                   </span>
                   {actualSaved > 0 && (
                     <span className="text-xs font-bold text-emerald-600 dark:text-[#10B981] ml-2">
@@ -644,10 +713,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
               >
                 <span>
                   {isTargetWeekSubmitted
-                    ? `SUBMITTED FOR WEEK ${activeReportingWeek.index}`
+                    ? `SUBMITTED FOR WEEK ${activeReportingWeek?.index ?? 1}`
                     : isSubmitting
                     ? 'Submitting...'
-                    : `SUBMIT REPORT FOR WEEK ${activeReportingWeek.index}`}
+                    : `SUBMIT REPORT FOR WEEK ${activeReportingWeek?.index ?? 1}`}
                 </span>
               </button>
             </div>
@@ -675,10 +744,10 @@ export const WeeklyExpensePredictorPage: React.FC = () => {
           <div className="w-full max-w-md bg-white dark:bg-[#0B0D1B] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Log {getCategoryLabel(modalTarget)} (Week {activeReportingWeek.index})
+                Log {getCategoryLabel(modalTarget)} (Week {activeReportingWeek?.index ?? 1})
               </h3>
               <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
-                Enter the exact amount for {getCategoryLabel(modalTarget)} for Week {activeReportingWeek.index}:
+                Enter the exact amount for {getCategoryLabel(modalTarget)} for Week {activeReportingWeek?.index ?? 1}:
               </p>
             </div>
 

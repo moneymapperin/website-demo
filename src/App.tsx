@@ -55,6 +55,8 @@ const DisclaimerPage = React.lazy(() => import('./pages/legal/DisclaimerPage'));
 const GrievancePage = React.lazy(() => import('./pages/legal/GrievancePage'));
 const DeleteMyDataPage = React.lazy(() => import('./pages/legal/DeleteMyDataPage'));
 const FaqPage = React.lazy(() => import('./pages/FaqPage'));
+const BusinessDetailsPage = React.lazy(() => import('./pages/BusinessDetailsPage'));
+const ScoreStoryPage = React.lazy(() => import('./pages/ScoreStoryPage'));
 
 const SuspenseFallback: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center bg-background text-white">
@@ -121,7 +123,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/corporate-login" element={<CorporateLoginPage />} />
 
-                  {/* FAQ Routes */}
+                  {/* FAQ Route */}
                   <Route
                     path="/faq"
                     element={
@@ -130,25 +132,29 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                       </React.Suspense>
                     }
                   />
+
+                  {/* Business Details Route */}
                   <Route
-                    path="/faq.html"
+                    path="/business-details"
                     element={
                       <React.Suspense fallback={<SuspenseFallback />}>
-                        <FaqPage />
+                        <BusinessDetailsPage />
+                      </React.Suspense>
+                    }
+                  />
+
+                  {/* Score Story Route */}
+                  <Route
+                    path="/score-story"
+                    element={
+                      <React.Suspense fallback={<SuspenseFallback />}>
+                        <ScoreStoryPage />
                       </React.Suspense>
                     }
                   />
 
                   {/* Legal Pages Layout */}
                   <Route element={<LegalLayout />}>
-                    <Route
-                      path="/privacy"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <PrivacyPolicyPage />
-                        </React.Suspense>
-                      }
-                    />
                     <Route
                       path="/privacy-policy"
                       element={
@@ -158,31 +164,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                       }
                     />
                     <Route
-                      path="/privacy-policy.html"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <PrivacyPolicyPage />
-                        </React.Suspense>
-                      }
-                    />
-                    <Route
-                      path="/terms"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <TermsPage />
-                        </React.Suspense>
-                      }
-                    />
-                    <Route
                       path="/terms-and-conditions"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <TermsPage />
-                        </React.Suspense>
-                      }
-                    />
-                    <Route
-                      path="/terms-and-conditions.html"
                       element={
                         <React.Suspense fallback={<SuspenseFallback />}>
                           <TermsPage />
@@ -198,31 +180,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                       }
                     />
                     <Route
-                      path="/cookie-policy.html"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <CookiePolicyPage />
-                        </React.Suspense>
-                      }
-                    />
-                    <Route
-                      path="/disclaimer"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <DisclaimerPage />
-                        </React.Suspense>
-                      }
-                    />
-                    <Route
                       path="/disclaimer-and-data-processing-consent"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <DisclaimerPage />
-                        </React.Suspense>
-                      }
-                    />
-                    <Route
-                      path="/disclaimer-and-data-processing-consent.html"
                       element={
                         <React.Suspense fallback={<SuspenseFallback />}>
                           <DisclaimerPage />
@@ -238,23 +196,7 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                       }
                     />
                     <Route
-                      path="/grievance-redressal-policy.html"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <GrievancePage />
-                        </React.Suspense>
-                      }
-                    />
-                    <Route
                       path="/delete_my_data"
-                      element={
-                        <React.Suspense fallback={<SuspenseFallback />}>
-                          <DeleteMyDataPage />
-                        </React.Suspense>
-                      }
-                    />
-                    <Route
-                      path="/delete_my_data.html"
                       element={
                         <React.Suspense fallback={<SuspenseFallback />}>
                           <DeleteMyDataPage />
@@ -263,8 +205,21 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                     />
                   </Route>
 
-                  <Route path="/data-deletion-request.html" element={<Navigate to="/delete_my_data" replace />} />
+                  {/* SEO & Legacy .html URL Redirects */}
+                  <Route path="/privacy-policy.html" element={<Navigate to="/privacy-policy" replace />} />
+                  <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
+                  <Route path="/terms-and-conditions.html" element={<Navigate to="/terms-and-conditions" replace />} />
+                  <Route path="/terms" element={<Navigate to="/terms-and-conditions" replace />} />
+                  <Route path="/cookie-policy.html" element={<Navigate to="/cookie-policy" replace />} />
+                  <Route path="/grievance-redressal-policy.html" element={<Navigate to="/grievance-redressal-policy" replace />} />
+                  <Route path="/disclaimer" element={<Navigate to="/disclaimer-and-data-processing-consent" replace />} />
+                  <Route path="/disclaimer-and-data-processing-consent.html" element={<Navigate to="/disclaimer-and-data-processing-consent" replace />} />
+                  <Route path="/faq.html" element={<Navigate to="/faq" replace />} />
+                  <Route path="/business-details.html" element={<Navigate to="/business-details" replace />} />
+                  <Route path="/moneymapper-score-story.html" element={<Navigate to="/score-story" replace />} />
+                  <Route path="/delete_my_data.html" element={<Navigate to="/delete_my_data" replace />} />
                   <Route path="/data-deletion-request" element={<Navigate to="/delete_my_data" replace />} />
+                  <Route path="/data-deletion-request.html" element={<Navigate to="/delete_my_data" replace />} />
 
                   {/* 4. Canonical Redirects */}
                   <Route path="/main" element={<Navigate to="/dashboard" replace />} />

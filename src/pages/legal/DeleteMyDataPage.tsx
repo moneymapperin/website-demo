@@ -236,3 +236,4 @@ export const DeleteMyDataPage: React.FC = () => {
 };
 
 export default DeleteMyDataPage;
+

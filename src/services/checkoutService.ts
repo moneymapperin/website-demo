@@ -48,7 +48,7 @@ export async function createCheckout(
   };
 
   if (referralCode && typeof referralCode === 'string' && referralCode.trim() !== '') {
-    body.referral_code = referralCode.trim();
+    body.referral_code = referralCode.trim().toUpperCase();
   }
 
   let response: Response;

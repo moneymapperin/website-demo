@@ -14,7 +14,7 @@ export const Hero: React.FC = () => {
   }, []);
 
   return (
-    <section id="home" className="scroll-mt-24 relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 isolate">
+    <section id="home" className="scroll-mt-20 relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 isolate">
       {/* Dedicated Background Video Wrapper: subtle texture, auto-plays muted, hidden in light mode for readability */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none dark:block hidden bg-[#0b0a14]" aria-hidden="true">
         <video

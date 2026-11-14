@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, User, Phone, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, Phone, CheckCircle2, Gift } from 'lucide-react';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 import { authService } from '../services/authService';
 
@@ -10,6 +10,7 @@ export const RegisterPage: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -44,6 +45,10 @@ export const RegisterPage: React.FC = () => {
         mobile: trimmedMobile,
         plan: 'b2c',
       });
+      const trimmedRef = referralCode.trim().toUpperCase();
+      if (trimmedRef) {
+        localStorage.setItem('saved_referral_code', trimmedRef);
+      }
       setShowSuccessDialog(true);
     } catch (err: any) {
       setErrorMessage(err.message || 'Registration failed. Please try again.');
@@ -148,6 +153,31 @@ export const RegisterPage: React.FC = () => {
                 placeholder="name@example.com"
                 autoComplete="email"
                 className="w-full pl-12 pr-4 py-3 bg-[#070B1F]/90 border border-[#1E2954] rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-[#0084FF] focus:ring-1 focus:ring-[#0084FF] transition-all text-sm disabled:opacity-50"
+              />
+            </div>
+          </div>
+
+          {/* Referral Code (Optional) */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="register-referral"
+              className="block text-sm font-medium text-slate-200"
+            >
+              Referral Code (Optional)
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <Gift className="w-5 h-5" />
+              </div>
+              <input
+                id="register-referral"
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                disabled={loading}
+                placeholder="Enter Referral Code (Optional)"
+                autoCapitalize="characters"
+                className="w-full pl-12 pr-4 py-3 bg-[#070B1F]/90 border border-[#1E2954] rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-[#0084FF] focus:ring-1 focus:ring-[#0084FF] transition-all text-sm uppercase tracking-wider disabled:opacity-50"
               />
             </div>
           </div>

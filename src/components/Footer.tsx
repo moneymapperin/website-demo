@@ -73,24 +73,24 @@ export const Footer: React.FC = () => {
 
   const supportLinks: { label: string; href?: string }[] = [
     { label: 'Help Center' },
-    { label: 'FAQs', href: '/faq.html' },
-    { label: 'Privacy Policy', href: '/privacy-policy.html' },
-    { label: 'Terms of Service', href: '/terms-and-conditions.html' },
-    { label: 'Cookie Policy', href: '/cookie-policy.html' },
-    { label: 'Grievance Redressal Policy', href: '/grievance-redressal-policy.html' },
-    { label: 'Disclaimer & Data Consent', href: '/disclaimer-and-data-processing-consent.html' },
+    { label: 'FAQs', href: '/faq' },
+    { label: 'Privacy Policy', href: '/privacy-policy' },
+    { label: 'Terms of Service', href: '/terms-and-conditions' },
+    { label: 'Cookie Policy', href: '/cookie-policy' },
+    { label: 'Grievance Redressal Policy', href: '/grievance-redressal-policy' },
+    { label: 'Disclaimer & Data Consent', href: '/disclaimer-and-data-processing-consent' },
     { label: 'Data Deletion Request', href: '/delete_my_data' },
   ];
 
   return (
-    <footer className="relative bg-[#06040f] border-t border-white/[0.08] text-white">
+    <footer className="relative bg-[#06040f] border-t border-white/[0.08] text-white text-left">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-14 pb-8">
         
         {/* Main Footer Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 text-left">
           
           {/* Left Column: Brand, Tagline & Socials */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 text-left">
             <div className="flex items-center gap-2.5">
               <img
                 src={logoImg}
@@ -100,7 +100,7 @@ export const Footer: React.FC = () => {
               <span className="text-xl font-bold text-white tracking-tight">MoneyMapper</span>
             </div>
 
-            <p className="text-xs text-white/50 mt-3 mb-5 max-w-xs leading-relaxed">
+            <p className="text-xs text-white/50 mt-3 mb-5 max-w-xs leading-relaxed text-left">
               Your AI-Powered Personal Money Manager
             </p>
 
@@ -140,7 +140,7 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Company Info & Registered Address */}
-            <div className="mt-5 text-xs text-white/50 leading-relaxed max-w-xs sm:max-w-sm">
+            <div className="mt-5 text-xs text-white/50 leading-relaxed max-w-xs sm:max-w-sm text-left">
               <p className="font-semibold text-white/70">MONEZRAMAPPER Private Limited</p>
               <p className="mt-1">
                 Registered Address: Jawahar Nagar, D.S.S Stadium, Shop No. 3, Satna, Raghurajnagar, Madhya Pradesh, India - 485001
@@ -149,11 +149,11 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Three Link Columns */}
-          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8 text-left">
             
             {/* 1. Product */}
             <div>
-              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Product</h3>
+              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide text-left">Product</h3>
               <ul className="space-y-2">
                 {productLinks.map((item) => (
                   <li key={item.label}>
@@ -170,7 +170,7 @@ export const Footer: React.FC = () => {
 
             {/* 2. Company */}
             <div>
-              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Company</h3>
+              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide text-left">Company</h3>
               <ul className="space-y-2">
                 {companyLinks.map((item) => (
                   <li key={item.label}>
@@ -182,7 +182,7 @@ export const Footer: React.FC = () => {
                         {item.label}
                       </Link>
                     ) : (
-                      <span className="text-xs text-white/50 text-left py-0.5 w-full cursor-default">
+                      <span className="text-xs text-white/50 text-left py-0.5 block cursor-default">
                         {item.label}
                       </span>
                     )}
@@ -201,19 +201,30 @@ export const Footer: React.FC = () => {
 
             {/* 3. Support */}
             <div className="col-span-2 sm:col-span-1">
-              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide">Support</h3>
+              <h3 className="text-sm font-semibold text-white mb-3 tracking-wide text-left">Support</h3>
               <ul className="space-y-2">
                 {supportLinks.map((item) => (
                   <li key={item.label}>
                     {item.href ? (
-                      <a
-                        href={item.href}
-                        className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
-                      >
-                        {item.label}
-                      </a>
+                      item.href.startsWith('http') || item.href.startsWith('mailto:') ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link
+                          to={item.href}
+                          className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
+                        >
+                          {item.label}
+                        </Link>
+                      )
                     ) : (
-                      <span className="text-xs text-white/50 text-left py-0.5 w-full cursor-default">
+                      <span className="text-xs text-white/50 text-left py-0.5 block cursor-default">
                         {item.label}
                       </span>
                     )}

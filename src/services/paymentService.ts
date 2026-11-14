@@ -19,6 +19,7 @@ export interface PurchaseError {
 
 export interface StartCheckoutOptions {
   referralCode?: string;
+  isReferralValid?: boolean;
   navigate?: (to: string, options?: any) => void;
   showToast?: (opts: any) => void;
   refreshPlan?: (force?: boolean) => Promise<any>;
@@ -65,8 +66,13 @@ class PaymentService {
       console.debug('[Checkout] Sending plan_code:', planCode);
     }
 
-    // Step 1: Create checkout session via create_checkout Edge Function
-    const checkoutData = await createCheckout(planCode, options?.referralCode);
+    // Step 1: Create checkout session via create_checkout Edge Function (only sending referral_code if valid)
+    const validReferral =
+      options?.referralCode && options?.isReferralValid !== false
+        ? options.referralCode.trim().toUpperCase()
+        : undefined;
+
+    const checkoutData = await createCheckout(planCode, validReferral);
 
     return new Promise<CheckoutResult>(async (resolve, reject) => {
       let overlayEl: HTMLElement | null = null;

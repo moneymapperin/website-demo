@@ -116,25 +116,31 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
       // Score logic matching Flutter lines 201-224:
       let fSc = 0;
       if (fDec === 'achieved') {
+        const minFixed = target?.range_fixed?.[0] ?? 0;
+        const maxFixed = target?.range_fixed?.[1] ?? 0;
         fSc =
           aFixed > 0
-            ? calculateCategoryScore(aFixed, target.range_fixed[0], target.range_fixed[1], 'fixed')
+            ? calculateCategoryScore(aFixed, minFixed, maxFixed, 'fixed')
             : 15;
       }
 
       let flSc = 0;
       if (flDec === 'achieved') {
+        const minFlex = target?.range_flex?.[0] ?? 0;
+        const maxFlex = target?.range_flex?.[1] ?? 0;
         flSc =
           aFlex > 0
-            ? calculateCategoryScore(aFlex, target.range_flex[0], target.range_flex[1], 'flexible')
+            ? calculateCategoryScore(aFlex, minFlex, maxFlex, 'flexible')
             : 15;
       }
 
       let sSc = 0;
       if (sDec === 'achieved') {
+        const minSave = target?.range_save?.[0] ?? 0;
+        const maxSave = target?.range_save?.[1] ?? 0;
         sSc =
           aSaved > 0
-            ? calculateCategoryScore(aSaved, target.range_save[0], target.range_save[1], 'savings')
+            ? calculateCategoryScore(aSaved, minSave, maxSave, 'savings')
             : 10;
       }
 
@@ -319,8 +325,8 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
           newFixedAmt = amt;
           newFixedScore = calculateCategoryScore(
             amt,
-            target.range_fixed[0],
-            target.range_fixed[1],
+            target.range_fixed?.[0] ?? 0,
+            target.range_fixed?.[1] ?? 0,
             'fixed'
           );
         } else if (type === 'flexible') {
@@ -328,8 +334,8 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
           newFlexAmt = amt;
           newFlexScore = calculateCategoryScore(
             amt,
-            target.range_flex[0],
-            target.range_flex[1],
+            target.range_flex?.[0] ?? 0,
+            target.range_flex?.[1] ?? 0,
             'flexible'
           );
         } else if (type === 'savings') {
@@ -337,8 +343,8 @@ export function useWeeklyTracker(): UseWeeklyTrackerResult {
           newSaveAmt = amt;
           newSaveScore = calculateCategoryScore(
             amt,
-            target.range_save[0],
-            target.range_save[1],
+            target.range_save?.[0] ?? 0,
+            target.range_save?.[1] ?? 0,
             'savings'
           );
         }

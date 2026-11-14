@@ -93,3 +93,4 @@ export const FaqPage: React.FC = () => {
 };
 
 export default FaqPage;
+

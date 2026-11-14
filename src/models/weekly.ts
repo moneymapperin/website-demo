@@ -143,22 +143,26 @@ export function calculateCategoryScore(
   const basePoints = type === 'savings' ? 10 : 15;
   let rangePoints = 0;
 
+  const safeActual = Number(actual) || 0;
+  const safeMin = Number(min) || 0;
+  const safeMax = Number(max) || 0;
+
   if (type === 'fixed' || type === 'flexible') {
-    if (actual <= min) {
+    if (safeActual <= safeMin) {
       rangePoints = 20;
-    } else if (actual >= max) {
+    } else if (safeActual >= safeMax) {
       rangePoints = 0;
-    } else if (max > min) {
-      rangePoints = 20 * (1 - (actual - min) / (max - min));
+    } else if (safeMax > safeMin) {
+      rangePoints = 20 * (1 - (safeActual - safeMin) / (safeMax - safeMin));
     }
   } else {
     // Savings: higher is better
-    if (actual >= max) {
+    if (safeActual >= safeMax) {
       rangePoints = 20;
-    } else if (actual <= min) {
+    } else if (safeActual <= safeMin) {
       rangePoints = 0;
-    } else if (max > min) {
-      rangePoints = 20 * ((actual - min) / (max - min));
+    } else if (safeMax > safeMin) {
+      rangePoints = 20 * ((safeActual - safeMin) / (safeMax - safeMin));
     }
   }
 
