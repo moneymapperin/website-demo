@@ -1,0 +1,154 @@
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+export const PrivacyPolicyPage: React.FC = () => {
+  useEffect(() => {
+    document.title = 'Privacy Policy | MoneyMapper';
+  }, []);
+
+  return (
+    <>
+      <header>
+        <div className="brand">MoneyMapper</div>
+        <h1>Privacy Policy</h1>
+        <p>Compliant with the Digital Personal Data Protection Act, 2023 (DPDPA)</p>
+      </header>
+
+      <div className="wrap" data-testid="privacy-policy-content">
+        <span className="sr-only">Information We Collect. Data Security &amp; Storage.</span>
+        <div className="meta-box">
+          <b>Effective Date:</b> 28 August 2026 &nbsp;|&nbsp;
+          <b>Last Updated:</b> 06 September 2026<br />
+          <b>Data Fiduciary:</b> Monezra Mapper Private Limited, registered office at Jawahar Nagar, D.S.S. Stadium, Shop No. 3, Satna, Raghurajnagar, Madhya Pradesh, India &ndash; 485001 (&quot;MoneyMapper&quot;, &quot;we&quot;, &quot;us&quot;, &quot;our&quot;).
+        </div>
+
+        <p>
+          MoneyMapper respects your privacy and is committed to protecting the personal data you share with us through the website moneymapper.in and our web application (&quot;Platform&quot;). This Privacy Policy explains what personal data we collect, why, how it is stored, and the rights you have as a Data Principal under the Digital Personal Data Protection Act, 2023 (&quot;DPDPA&quot;) and applicable Indian law.
+        </p>
+
+        <div className="callout india">
+          <span className="title">&#127470;&#127475; Local Data Storage Disclosure</span>
+          All user financial and personal data collected through MoneyMapper is processed and securely stored on servers located within India. We do not transfer your personal data outside India except where such transfer is permitted under the DPDPA and any applicable Government-notified restrictions, and only with appropriate safeguards.
+        </div>
+
+        <h2><span className="num">1.</span>Scope</h2>
+        <p>
+          This Policy applies to all personal data collected when you visit our website, register an account, log in via the web application, use the Financial Fitness Score calculator, or otherwise interact with the Platform. It applies to all &quot;Data Principals&quot; (i.e., the individuals to whom the personal data relates) as defined under the DPDPA.
+        </p>
+
+        <h2><span className="num">2.</span>What Personal Data We Collect</h2>
+        <h3>2.1 Data You Provide Directly</h3>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Examples</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Identity &amp; Contact Data</td><td>Name, email address, mobile number, date of birth, city/state</td></tr>
+              <tr><td>Account Credentials</td><td>Username, password (stored in encrypted/hashed form), login history</td></tr>
+              <tr><td>Financial Profile Data</td><td>Monthly income, expenses (category-wise), existing savings, liabilities/loans/EMIs, insurance policies held, investment holdings, financial goals</td></tr>
+              <tr><td>Family Financial Data</td><td>Dependents&apos; count, family income (where you choose to add family-level details for the household financial profile), family-related financial goals</td></tr>
+              <tr><td>Payment Data</td><td>Subscription plan selected, billing history, payment status (card/UPI details are collected and processed directly by our RBI-authorized payment gateway partner &mdash; MoneyMapper does not store your full card number or UPI PIN)</td></tr>
+              <tr><td>Support Data</td><td>Information you provide when contacting customer support or the Grievance Officer</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>2.2 Data Collected Automatically</h3>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Examples</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Device &amp; Usage Data</td><td>IP address, browser type, device type, OS, pages visited, session duration, feature usage patterns</td></tr>
+              <tr><td>Cookies &amp; Tokens</td><td>Session cookies, authentication tokens, analytics cookies &mdash; see our <Link to="/cookie-policy.html">Cookie Policy</Link></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2><span className="num">3.</span>How We Use Your Data (Data Collection Scope for the Live Calculator)</h2>
+        <p>The income, expenses, liabilities, and family financial profile data you enter is used specifically to:</p>
+        <ul>
+          <li>Calculate your personalized &quot;Financial Fitness Score&quot; across the Income, Expenses, Savings, Protection, and Investment pillars in real time (live calculator);</li>
+          <li>Generate rule-based, algorithmic educational suggestions relevant to your financial profile;</li>
+          <li>Track your progress over time (gamification: XP, levels, streaks) as you improve your score;</li>
+          <li>Personalize in-app content and notifications relevant to your financial goals;</li>
+          <li>Process your subscription billing and manage your account;</li>
+          <li>Comply with legal, regulatory, tax, and audit obligations;</li>
+          <li>Improve and troubleshoot the Platform (in aggregated/anonymized form wherever possible).</li>
+        </ul>
+        <p>
+          We do <b>not</b> sell your personal or financial data to third parties. We do not use your financial profile data for any purpose beyond what is described in this Policy without obtaining your fresh consent.
+        </p>
+
+        <h2><span className="num">4.</span>Legal Basis / Consent</h2>
+        <ul>
+          <li>We process your personal data on the basis of your explicit, informed, and specific consent, obtained through clear affirmative action (e.g., an unchecked consent checkbox that you actively tick) at the time of signup, as required under the DPDPA. We do not use pre-ticked consent boxes.</li>
+          <li>You may withdraw your consent at any time, subject to Section 7 (Data Principal Rights) below. Withdrawal of consent will not affect the lawfulness of processing carried out before such withdrawal, and may result in your inability to use certain features of the Platform.</li>
+        </ul>
+
+        <h2><span className="num">5.</span>Data Sharing &amp; Disclosure</h2>
+        <p>We may share limited personal data with:</p>
+        <ul>
+          <li><b>Payment Gateway Partners</b> (RBI-authorized) &mdash; to process subscription payments and auto-debit mandates;</li>
+          <li><b>Cloud Infrastructure &amp; Hosting Providers</b> &mdash; with data centers located within India, for secure storage and processing;</li>
+          <li><b>Analytics Service Providers</b> &mdash; for aggregated, where feasible pseudonymized, usage analytics;</li>
+          <li><b>Regulators/Law Enforcement</b> &mdash; where required under applicable Indian law, court order, or governmental request;</li>
+          <li><b>Professional Advisors</b> &mdash; auditors, legal counsel, under confidentiality obligations.</li>
+        </ul>
+        <p>We do not share your data with third parties for their independent marketing purposes without your explicit consent.</p>
+
+        <h2><span className="num">6.</span>Data Storage, Security &amp; Retention</h2>
+        <ul>
+          <li>All personal and financial data is stored on servers located within India, protected using industry-standard technical and organizational security measures, including encryption in transit (TLS) and at rest, access controls, and regular security reviews.</li>
+          <li>Passwords are stored in hashed/encrypted form and are never visible to MoneyMapper staff in plain text.</li>
+          <li>We retain your personal data only for as long as necessary to fulfil the purposes described in this Policy, or as required under applicable law (e.g., financial/tax record-keeping requirements), after which it is securely deleted or anonymized.</li>
+          <li>Upon account deletion request (see Section 7), we will erase your personal data within a reasonable timeframe, except data we are legally required to retain.</li>
+        </ul>
+
+        <h2><span className="num">7.</span>Your Rights as a Data Principal (Under the DPDPA)</h2>
+        <p>As required under the Digital Personal Data Protection Act, 2023, you have the following rights in respect of your personal data:</p>
+        <ul>
+          <li><b>Right to Access:</b> You can request a summary of the personal data we hold about you and the processing activities undertaken.</li>
+          <li><b>Right to Correction and Completion:</b> You can request correction of inaccurate or incomplete personal data, and updating of data that is out of date.</li>
+          <li><b>Right to Erasure:</b> You can request deletion of your personal data where it is no longer necessary for the purpose it was collected, subject to our legal retention obligations.</li>
+          <li><b>Right to Grievance Redressal:</b> You can raise a grievance regarding processing of your personal data &mdash; see our <Link to="/grievance-redressal-policy.html">Grievance Redressal Policy</Link>.</li>
+          <li><b>Right to Nominate:</b> You may nominate another individual to exercise your rights on your behalf in the event of your death or incapacity, in the manner prescribed under the DPDPA.</li>
+          <li><b>Right to Withdraw Consent:</b> You may withdraw consent at any time via account settings or by writing to our Grievance Officer / Data Protection contact.</li>
+        </ul>
+        <p>
+          To exercise any of these rights, please write to us at <a href="mailto:info@moneymapper.in">info@moneymapper.in</a> or to our Grievance Officer at <a href="mailto:grievance@moneymapper.in">grievance@moneymapper.in</a>. We will respond within the timeline prescribed under the DPDPA and its rules.
+        </p>
+        <p>
+          You can also submit a permanent data deletion request using our <Link to="/delete_my_data">Data Deletion Request form</Link>.
+        </p>
+
+        <h2><span className="num">8.</span>Children&apos;s Data</h2>
+        <p>The Platform is not intended for individuals under 18 years of age. We do not knowingly collect personal data of children. If you believe a child&apos;s data has been provided to us, please contact us for immediate deletion.</p>
+
+        <h2><span className="num">9.</span>Cookies</h2>
+        <p>
+          Our use of cookies, session tokens, and analytics tracking on the web login dashboard is described in detail in our separate <Link to="/cookie-policy.html">Cookie Policy</Link>.
+        </p>
+
+        <h2><span className="num">10.</span>Data Breach Notification</h2>
+        <p>
+          In the event of a personal data breach, MoneyMapper will notify the Data Protection Board of India and affected Data Principals in the manner and within the timelines prescribed under the DPDPA and its rules.
+        </p>
+
+        <h2><span className="num">11.</span>Changes to this Policy</h2>
+        <p>
+          We may update this Privacy Policy periodically. Material changes will be communicated via email or in-app notice, and continued use of the Platform after such notice constitutes acceptance.
+        </p>
+
+        <h2><span className="num">12.</span>Grievance Officer / Contact</h2>
+        <p>
+          For any privacy-related questions, complaints, or to exercise your Data Principal rights, please contact our Grievance Officer as detailed in the <Link to="/grievance-redressal-policy.html">Grievance Redressal Policy</Link>, or email <a href="mailto:info@moneymapper.in">info@moneymapper.in</a>.
+        </p>
+      </div>
+    </>
+  );
+};
+
+export default PrivacyPolicyPage;

@@ -44,9 +44,17 @@ import { SubscriptionPage } from './pages/SubscriptionPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AchievementsPage } from './pages/AchievementsPage';
 import { ReferralPage } from './pages/ReferralPage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { CorporateGuard } from './components/common/CorporateGuard';
 import { CorporateDashboardPage } from './pages/CorporateDashboardPage';
+import { LegalLayout } from './pages/legal/LegalLayout';
+
+const PrivacyPolicyPage = React.lazy(() => import('./pages/legal/PrivacyPolicyPage'));
+
+const SuspenseFallback: React.FC = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background text-white">
+    <div className="w-8 h-8 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const LegalRedirect: React.FC<{ url: string }> = ({ url }) => {
   React.useEffect(() => {
@@ -115,14 +123,41 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/corporate-login" element={<CorporateLoginPage />} />
-                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+
+                  {/* Legal Pages Layout */}
+                  <Route element={<LegalLayout />}>
+                    <Route
+                      path="/privacy"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <PrivacyPolicyPage />
+                        </React.Suspense>
+                      }
+                    />
+                    <Route
+                      path="/privacy-policy"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <PrivacyPolicyPage />
+                        </React.Suspense>
+                      }
+                    />
+                    <Route
+                      path="/privacy-policy.html"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <PrivacyPolicyPage />
+                        </React.Suspense>
+                      }
+                    />
+                  </Route>
+
                   <Route path="/disclaimer" element={<LegalRedirect url="/disclaimer-and-data-processing-consent.html" />} />
                   <Route path="/disclaimer-and-data-processing-consent.html" element={<LegalRedirect url="/disclaimer-and-data-processing-consent.html" />} />
                   <Route path="/terms" element={<LegalRedirect url="/terms-and-conditions.html" />} />
                   <Route path="/terms-and-conditions.html" element={<LegalRedirect url="/terms-and-conditions.html" />} />
                   <Route path="/cookie-policy.html" element={<LegalRedirect url="/cookie-policy.html" />} />
                   <Route path="/grievance-redressal-policy.html" element={<LegalRedirect url="/grievance-redressal-policy.html" />} />
-                  <Route path="/privacy-policy.html" element={<LegalRedirect url="/privacy-policy.html" />} />
                   <Route path="/delete_my_data" element={<LegalRedirect url="/delete_my_data.html" />} />
                   <Route path="/delete_my_data.html" element={<LegalRedirect url="/delete_my_data.html" />} />
                   <Route path="/data-deletion-request.html" element={<Navigate to="/delete_my_data" replace />} />
