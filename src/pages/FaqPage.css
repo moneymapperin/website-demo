@@ -1,0 +1,124 @@
+.faq-page-root {
+  --bg: #0b0a14;
+  --card: #131122;
+  --border: #26213d;
+  --text: #ffffff;
+  --muted: #a09cb3;
+  --grad: linear-gradient(90deg, #8b5cf6, #d946ef, #ec4899);
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.faq-page-root * {
+  box-sizing: border-box;
+}
+
+.faq-page-root .wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 64px 20px 80px;
+}
+
+.faq-page-root .eyebrow {
+  text-align: center;
+  color: #b9a6f5;
+  font-size: 13px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+}
+
+.faq-page-root h1 {
+  text-align: center;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 14px 0 40px;
+  padding: 0;
+}
+
+.faq-page-root .grad {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.faq-page-root .item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.faq-page-root summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.faq-page-root summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-page-root .chev {
+  width: 11px;
+  height: 11px;
+  border-right: 2px solid #c4b5fd;
+  border-bottom: 2px solid #c4b5fd;
+  transform: rotate(45deg);
+  margin-top: -5px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.faq-page-root .item[open] .chev {
+  transform: rotate(-135deg);
+  margin-top: 5px;
+}
+
+.faq-page-root .answer {
+  padding: 0 24px 24px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.faq-page-root .back {
+  display: inline-block;
+  margin-top: 32px;
+  color: #c4b5fd;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.faq-page-root .back:hover {
+  text-decoration: underline;
+}
+
+.faq-page-root .center {
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .faq-page-root summary {
+    font-size: 16px;
+    padding: 18px;
+  }
+
+  .faq-page-root .answer {
+    padding: 0 18px 18px;
+    font-size: 15px;
+  }
+}

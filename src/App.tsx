@@ -54,6 +54,7 @@ const CookiePolicyPage = React.lazy(() => import('./pages/legal/CookiePolicyPage
 const DisclaimerPage = React.lazy(() => import('./pages/legal/DisclaimerPage'));
 const GrievancePage = React.lazy(() => import('./pages/legal/GrievancePage'));
 const DeleteMyDataPage = React.lazy(() => import('./pages/legal/DeleteMyDataPage'));
+const FaqPage = React.lazy(() => import('./pages/FaqPage'));
 
 const SuspenseFallback: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center bg-background text-white">
@@ -119,6 +120,24 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/corporate-login" element={<CorporateLoginPage />} />
+
+                  {/* FAQ Routes */}
+                  <Route
+                    path="/faq"
+                    element={
+                      <React.Suspense fallback={<SuspenseFallback />}>
+                        <FaqPage />
+                      </React.Suspense>
+                    }
+                  />
+                  <Route
+                    path="/faq.html"
+                    element={
+                      <React.Suspense fallback={<SuspenseFallback />}>
+                        <FaqPage />
+                      </React.Suspense>
+                    }
+                  />
 
                   {/* Legal Pages Layout */}
                   <Route element={<LegalLayout />}>
