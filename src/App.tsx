@@ -50,6 +50,7 @@ import { LegalLayout } from './pages/legal/LegalLayout';
 
 const PrivacyPolicyPage = React.lazy(() => import('./pages/legal/PrivacyPolicyPage'));
 const TermsPage = React.lazy(() => import('./pages/legal/TermsPage'));
+const CookiePolicyPage = React.lazy(() => import('./pages/legal/CookiePolicyPage'));
 
 const SuspenseFallback: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center bg-background text-white">
@@ -175,11 +176,26 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                         </React.Suspense>
                       }
                     />
+                    <Route
+                      path="/cookie-policy"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <CookiePolicyPage />
+                        </React.Suspense>
+                      }
+                    />
+                    <Route
+                      path="/cookie-policy.html"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <CookiePolicyPage />
+                        </React.Suspense>
+                      }
+                    />
                   </Route>
 
                   <Route path="/disclaimer" element={<LegalRedirect url="/disclaimer-and-data-processing-consent.html" />} />
                   <Route path="/disclaimer-and-data-processing-consent.html" element={<LegalRedirect url="/disclaimer-and-data-processing-consent.html" />} />
-                  <Route path="/cookie-policy.html" element={<LegalRedirect url="/cookie-policy.html" />} />
                   <Route path="/grievance-redressal-policy.html" element={<LegalRedirect url="/grievance-redressal-policy.html" />} />
                   <Route path="/delete_my_data" element={<LegalRedirect url="/delete_my_data.html" />} />
                   <Route path="/delete_my_data.html" element={<LegalRedirect url="/delete_my_data.html" />} />
