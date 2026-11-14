@@ -1,0 +1,121 @@
+.del-form {
+  margin-top: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+.del-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.del-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+.del-field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.del-field label .req {
+  color: #ef4444;
+  margin-left: 2px;
+}
+.del-field input,
+.del-field textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.del-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+.del-field input:focus,
+.del-field textarea:focus {
+  border-color: var(--brand-purple);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+.del-field.invalid input,
+.del-field.invalid textarea {
+  border-color: #ef4444;
+}
+.del-error {
+  display: none;
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 4px;
+}
+.del-field.invalid .del-error {
+  display: block;
+}
+.del-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.del-btn {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--brand-gradient);
+  border-radius: 12px;
+  padding: 14px 20px;
+  transition: opacity .15s, transform .05s;
+}
+.del-btn:hover {
+  background: var(--brand-gradient-hover);
+}
+.del-btn:active {
+  transform: scale(0.99);
+}
+.del-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+.del-status {
+  display: none;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.del-status.success {
+  display: block;
+  background: var(--callout-india-bg);
+  border: 1px solid var(--callout-india-border);
+  color: var(--body-text);
+}
+.del-status.error {
+  display: block;
+  background: var(--callout-crit-bg);
+  border: 1px solid var(--callout-crit-border);
+  color: var(--body-text);
+}
+@media (max-width: 600px) {
+  .del-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .del-form {
+    padding: 18px;
+  }
+}

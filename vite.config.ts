@@ -7,13 +7,14 @@ function deleteDataRewritePlugin(): Plugin {
     if (!req.url) return next();
     const urlObj = new URL(req.url, 'http://localhost');
     const pathname = urlObj.pathname;
-    if (pathname === '/data-deletion-request.html' || pathname === '/data-deletion-request') {
+    if (
+      pathname === '/data-deletion-request.html' ||
+      pathname === '/data-deletion-request' ||
+      pathname === '/delete_my_data.html'
+    ) {
       res.writeHead(301, { Location: `/delete_my_data${urlObj.search}` });
       res.end();
       return;
-    }
-    if (pathname === '/delete_my_data' || pathname === '/delete_my_data/') {
-      req.url = `/delete_my_data.html${urlObj.search}`;
     }
     next();
   };

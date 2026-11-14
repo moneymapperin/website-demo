@@ -53,21 +53,13 @@ const TermsPage = React.lazy(() => import('./pages/legal/TermsPage'));
 const CookiePolicyPage = React.lazy(() => import('./pages/legal/CookiePolicyPage'));
 const DisclaimerPage = React.lazy(() => import('./pages/legal/DisclaimerPage'));
 const GrievancePage = React.lazy(() => import('./pages/legal/GrievancePage'));
+const DeleteMyDataPage = React.lazy(() => import('./pages/legal/DeleteMyDataPage'));
 
 const SuspenseFallback: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center bg-background text-white">
     <div className="w-8 h-8 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
   </div>
 );
-
-const LegalRedirect: React.FC<{ url: string }> = ({ url }) => {
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.location.replace(url);
-    }
-  }, [url]);
-  return null;
-};
 
 export interface AppProps {
   initialEntries?: string[];
@@ -234,10 +226,24 @@ export const App: React.FC<AppProps> = ({ initialEntries }) => {
                         </React.Suspense>
                       }
                     />
+                    <Route
+                      path="/delete_my_data"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <DeleteMyDataPage />
+                        </React.Suspense>
+                      }
+                    />
+                    <Route
+                      path="/delete_my_data.html"
+                      element={
+                        <React.Suspense fallback={<SuspenseFallback />}>
+                          <DeleteMyDataPage />
+                        </React.Suspense>
+                      }
+                    />
                   </Route>
 
-                  <Route path="/delete_my_data" element={<LegalRedirect url="/delete_my_data.html" />} />
-                  <Route path="/delete_my_data.html" element={<LegalRedirect url="/delete_my_data.html" />} />
                   <Route path="/data-deletion-request.html" element={<Navigate to="/delete_my_data" replace />} />
                   <Route path="/data-deletion-request" element={<Navigate to="/delete_my_data" replace />} />
 
