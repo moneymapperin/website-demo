@@ -1,0 +1,133 @@
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+export const TermsPage: React.FC = () => {
+  useEffect(() => {
+    document.title = 'Terms and Conditions | MoneyMapper';
+  }, []);
+
+  return (
+    <>
+      <header>
+        <div className="brand">MoneyMapper</div>
+        <h1>Terms and Conditions / Terms of Use</h1>
+        <p>Governing use of the MoneyMapper website, web application, and all related services</p>
+      </header>
+
+      <div className="wrap" data-testid="terms-content">
+        <div className="meta-box">
+          <b>Effective Date:</b> 28 August 2026 &nbsp;|&nbsp;
+          <b>Last Updated:</b> 06 September 2026<br />
+          <b>Entity:</b> Monezra Mapper Private Limited, a company incorporated under the Companies Act, 2013, having its registered office at Jawahar Nagar, D.S.S. Stadium, Shop No. 3, Satna, Raghurajnagar, Madhya Pradesh, India &ndash; 485001 (CIN: U74909MP2026PTC086568) (referred to as &quot;MoneyMapper&quot;, &quot;Company&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
+        </div>
+
+        <p>
+          These Terms and Conditions (&quot;Terms&quot;) constitute a legally binding agreement between you (&quot;User&quot;, &quot;you&quot;, &quot;your&quot;) and MoneyMapper, governing your access to and use of the website moneymapper.in, our web-based application accessible via login or QR code, and any associated services (collectively, the &quot;Platform&quot;). By creating an account, logging in, clicking &quot;I Agree&quot;, or otherwise using the Platform, you confirm that you have read, understood, and agree to be bound by these Terms, our <Link to="/privacy-policy.html">Privacy Policy</Link>, our <Link to="/disclaimer-and-data-processing-consent.html">Disclaimer &amp; Data Processing Consent</Link>, and our <Link to="/cookie-policy.html">Cookie Policy</Link>. If you do not agree, you must not use the Platform.
+        </p>
+
+        <h2><span className="num">1.</span>Eligibility</h2>
+        <ul>
+          <li>You must be at least 18 (eighteen) years of age and legally competent to contract under the Indian Contract Act, 1872, to register on the Platform.</li>
+          <li>You must provide accurate, current, and complete information during registration and keep such information updated at all times.</li>
+          <li>MoneyMapper reserves the right to refuse registration, suspend, or terminate any account found to contain false, misleading, or fraudulent information.</li>
+        </ul>
+
+        <h2><span className="num">2.</span>Nature of the Service</h2>
+        <p>MoneyMapper is a financial wellness and self-assessment platform. It provides:</p>
+        <ul>
+          <li>A proprietary &quot;Financial Fitness Score&quot; derived from data you provide across the pillars of Income, Expenses, Savings, Protection, and Investment;</li>
+          <li>Algorithmic, rule-based educational suggestions and calculators relating to personal finance, savings, insurance awareness, and investments;</li>
+          <li>Gamified progress tracking (levels, streaks, badges) to encourage healthy financial habits.</li>
+        </ul>
+        <div className="callout critical">
+          <span className="title">Important &mdash; Not Financial Advice</span>
+          The Platform, its calculators, scores, and suggestions are for educational and informational purposes only and do not constitute investment advice, insurance advice, or a recommendation to buy, sell, or hold any financial product. Please read the full <Link to="/disclaimer-and-data-processing-consent.html">Disclaimer &amp; Data Processing Consent</Link>, which forms an integral part of these Terms.
+        </div>
+
+        <h2><span className="num">3.</span>Account Security &amp; Web Login</h2>
+        <h3>3.1 Credentials</h3>
+        <ul>
+          <li>You are solely responsible for maintaining the confidentiality of your login credentials (username, password, OTP, and any authentication tokens) used to access the Platform via web login.</li>
+          <li>You must not share your password, session tokens, or OTPs with any third party, including persons claiming to represent MoneyMapper. MoneyMapper will never ask for your password or OTP over call, email, or chat.</li>
+          <li>You are responsible for all activities that occur under your account, whether or not authorized by you, unless such activity results from a security breach on MoneyMapper&apos;s systems that is not attributable to your negligence.</li>
+        </ul>
+        <h3>3.2 Multi-Device &amp; Session Management</h3>
+        <ul>
+          <li>You may log in to your account from multiple devices/browsers, subject to any concurrent-session limits MoneyMapper may impose from time to time for security purposes.</li>
+          <li>MoneyMapper may use session cookies and authentication tokens to keep you logged in; these are governed by our <Link to="/cookie-policy.html">Cookie Policy</Link>.</li>
+          <li>You may be automatically logged out after a period of inactivity or upon detection of suspicious login activity (e.g., login from a new/unrecognized device or location).</li>
+          <li>You must immediately notify MoneyMapper at <a href="mailto:info@moneymapper.in">info@moneymapper.in</a> if you suspect unauthorized access to your account.</li>
+        </ul>
+        <h3>3.3 Password Requirements</h3>
+        <p>Passwords must meet the minimum complexity requirements prescribed on the Platform. MoneyMapper recommends using a unique password not used on any other website, and enabling any additional verification (such as OTP-based two-factor authentication) offered on the Platform.</p>
+
+        <h2><span className="num">4.</span>Subscription Plans, Pricing &amp; Auto-Renewal</h2>
+        <h3>4.1 Plans</h3>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Plan</th><th>Billing Frequency</th><th>Effective Price</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Quarterly Plan</td><td>Billed every 3 months</td><td>&#8377;499 / month (&#8377;1,497 billed per cycle)</td></tr>
+              <tr><td>Half-Yearly Plan</td><td>Billed every 6 months</td><td>&#8377;399 / month (&#8377;2,394 billed per cycle)</td></tr>
+              <tr><td>Yearly Plan</td><td>Billed every 12 months</td><td>&#8377;299 / month (&#8377;3,588 billed per cycle)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Prices are as displayed on the Platform at the time of purchase. Any corporate/business plan will be governed by a separate written agreement.</p>
+
+        <h3>4.2 Auto-Renewal / Auto-Debit</h3>
+        <ul>
+          <li>By subscribing to a paid plan, you authorize MoneyMapper and its payment gateway partner to set up an auto-debit mandate (e-mandate/UPI Autopay/card-on-file, as applicable) on your chosen payment method for the applicable subscription amount at the end of each billing cycle, in accordance with RBI&apos;s e-mandate framework for recurring payments.</li>
+          <li>You will receive a pre-debit notification (as mandated by RBI, typically at least 24 hours before the debit for e-mandates above the notification threshold) via email, SMS, or in-app notification before each renewal charge.</li>
+          <li>You may cancel the auto-renewal mandate at any time before the next billing cycle through your account settings or your bank/UPI app. <b>Cancelling auto-renewal stops future billing cycles only &mdash; it does not entitle you to a refund for the current or any past billing cycle</b> (see Section 5, No Cancellation &amp; No Refund Policy).</li>
+          <li>If a renewal payment fails, MoneyMapper may retry the charge, downgrade your account to a free/limited tier, or suspend premium features until payment is successfully completed.</li>
+        </ul>
+
+        <h2><span className="num">5.</span>No Cancellation &amp; No Refund Policy</h2>
+        <div className="callout critical">
+          <span className="title">Please read carefully before subscribing</span>
+          <p>All subscription plans on MoneyMapper (&#8377;499/month Quarterly, &#8377;399/month Half-Yearly, and &#8377;299/month Yearly, and any other paid plan introduced from time to time) are <b>strictly non-refundable and non-cancellable for the billing cycle already paid for</b>. Once a payment is successfully processed:</p>
+          <ul>
+            <li>No refund, credit, or reversal will be issued for the current billing cycle under any circumstances, including but not limited to partial usage, non-usage, change of mind, dissatisfaction with the Financial Fitness Score or suggestions, or early account closure by the user.</li>
+            <li>Subscriptions cannot be cancelled mid-cycle for a pro-rated refund. You may choose not to renew for the next cycle by turning off auto-renewal before the next billing date.</li>
+            <li>This No Refund Policy applies irrespective of the payment method used (UPI, card, net banking, wallet).</li>
+          </ul>
+          <p><b>Statutory exceptions:</b> Nothing in this Section limits any non-waivable right you may have under the Consumer Protection Act, 2019, or applicable RBI/NPCI payment-mandate regulations, including in cases of (a) duplicate/erroneous payment debited due to a technical error attributable to MoneyMapper or its payment gateway, or (b) unauthorized transactions not attributable to your negligence, reported within the timelines prescribed under applicable RBI guidelines. Such cases will be assessed on merit and, where established, resolved in accordance with law.</p>
+        </div>
+        <p>By checking the consent box at signup/checkout, you explicitly acknowledge and accept this No Cancellation &amp; No Refund Policy.</p>
+
+        <h2><span className="num">6.</span>User Conduct</h2>
+        <ul>
+          <li>You agree not to misuse the Platform, including attempting unauthorized access, reverse-engineering, scraping, or introducing malware.</li>
+          <li>You agree not to submit false financial data intended to manipulate or misuse the scoring/advisory engine for purposes other than personal financial self-assessment.</li>
+          <li>Accounts found violating these Terms may be suspended or terminated without refund of any subscription fees already paid.</li>
+        </ul>
+
+        <h2><span className="num">7.</span>Intellectual Property</h2>
+        <p>All content on the Platform, including the &quot;Financial Fitness Score&quot; methodology, calculators, algorithms, branding, logos, and design, is the exclusive property of MoneyMapper and is protected under applicable Indian intellectual property laws. You may not copy, reproduce, or create derivative works without prior written consent.</p>
+
+        <h2><span className="num">8.</span>Limitation of Liability</h2>
+        <p>To the maximum extent permitted by law, MoneyMapper shall not be liable for any indirect, incidental, or consequential loss (including financial loss from investment or insurance decisions made based on Platform outputs) arising from your use of the Platform. The Platform is provided on an &quot;as is&quot; and &quot;as available&quot; basis.</p>
+
+        <h2><span className="num">9.</span>Termination</h2>
+        <p>MoneyMapper may suspend or terminate your access to the Platform for breach of these Terms, suspected fraud, or non-payment, without prejudice to fees already accrued and payable under the No Refund Policy in Section 5.</p>
+
+        <h2><span className="num">10.</span>Governing Law &amp; Jurisdiction</h2>
+        <p>These Terms are governed by the laws of India. Courts at Satna, Madhya Pradesh shall have exclusive jurisdiction over any disputes arising out of or in connection with these Terms.</p>
+
+        <h2><span className="num">11.</span>Grievance Redressal</h2>
+        <p>For complaints or concerns, please refer to our <Link to="/grievance-redressal-policy.html">Grievance Redressal Policy</Link>.</p>
+
+        <h2><span className="num">12.</span>Changes to These Terms</h2>
+        <p>MoneyMapper may update these Terms from time to time. Material changes will be notified via email or in-app notice. Continued use of the Platform after such changes constitutes acceptance of the revised Terms.</p>
+
+        <h2><span className="num">13.</span>Contact</h2>
+        <p>For questions about these Terms, contact us at <a href="mailto:info@moneymapper.in">info@moneymapper.in</a>.</p>
+      </div>
+    </>
+  );
+};
+
+export default TermsPage;
