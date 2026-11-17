@@ -94,7 +94,11 @@ describe('TASK 8 — Master Data & Onboarding', () => {
   /* (1) Golden Test: Match _buildDataMap() in Dart exactly                     */
   /* -------------------------------------------------------------------------- */
   describe('(1) Golden Test: Key Parity with Flutter _buildDataMap()', () => {
-    it('web payload key set and types match Flutter master_data_screen.dart _buildDataMap exactly', () => {
+    const REF_DIR = path.resolve(process.cwd(), 'reference/moneymapper_app/lib');
+    const refExists = fs.existsSync(REF_DIR);
+
+    // Requires reference/ (Flutter source). Skipped when folder is removed.
+    it.skipIf(!refExists)('web payload key set and types match Flutter master_data_screen.dart _buildDataMap exactly', () => {
       // 1. Read master_data_screen.dart directly from reference/
       const dartFilePath = path.resolve(
         process.cwd(),

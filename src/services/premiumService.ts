@@ -1,6 +1,6 @@
 /**
  * Premium & Trial Management Service
- * Mirrors logic from reference/moneymapper_app/lib/services/premium_service.dart
+ * Mirrors logic from Flutter mobile app (moneymapper_app)/lib/services/premium_service.dart
  */
 
 import { apiService } from './apiService';

@@ -1,6 +1,6 @@
 /**
  * Income Pillar Calculation Model & Formatter
- * 1:1 port of reference/moneymapper_app/lib/income_pillar.dart
+ * 1:1 port of Flutter mobile app (moneymapper_app)/lib/income_pillar.dart
  * 
  * NOTE: The income pillar score is computed client-side from the master profile,
  * differing from the server's core.financial_fitness_scores.income_pillar_score.

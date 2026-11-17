@@ -1,6 +1,6 @@
 /**
  * Insurance Pillar Calculation Model & Formatter
- * 1:1 port of reference/moneymapper_app/lib/insurance_dashboard.dart
+ * 1:1 port of Flutter mobile app (moneymapper_app)/lib/insurance_dashboard.dart
  */
 
 export interface InsurancePillarData {

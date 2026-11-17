@@ -1,6 +1,6 @@
 /**
  * Investment / Mutual Fund Pillar Calculation Model
- * 1:1 port of reference/moneymapper_app/lib/mutual_fund.dart
+ * 1:1 port of Flutter mobile app (moneymapper_app)/lib/mutual_fund.dart
  */
 
 export interface InvestmentPillarData {

@@ -1,8 +1,8 @@
 /**
  * Weekly Tracker Domain Model & Formulas
  * 
- * Authoritative source: reference/moneymapper_app/lib/weekly_expense_tracker.dart
- * and reference/moneymapper_app/lib/screens/weekly_screen.dart.
+ * Authoritative source: Flutter mobile app (moneymapper_app)/lib/weekly_expense_tracker.dart
+ * and Flutter mobile app (moneymapper_app)/lib/screens/weekly_screen.dart.
  */
 
 export interface TargetRange {

@@ -1,3 +1,4 @@
+-- LEGACY, DO NOT DEPLOY. Kept for history only.
 -- Drop the function if it exists to allow replacement
 DROP FUNCTION IF EXISTS public.finalize_transaction(TEXT);
 

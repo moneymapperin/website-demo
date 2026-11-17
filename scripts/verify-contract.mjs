@@ -198,6 +198,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
   const refDir = path.resolve(ROOT_DIR, 'reference/moneymapper_app/lib');
 
+  if (!fs.existsSync(refDir)) {
+    console.log('reference/ not present, skipping Flutter contract check');
+    process.exit(0);
+  }
+
   console.log(`\n🔍 Verifying Schema Contract against Flutter reference...`);
   console.log(`📁 Reference Path : ${refDir}`);
   console.log(`📜 Contract Path  : ${customContractPath}\n`);

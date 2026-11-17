@@ -1,6 +1,6 @@
 /**
  * MoneyMapper API Service
- * Port of reference/moneymapper_app/lib/services/api_service.dart
+ * Port of Flutter mobile app (moneymapper_app)/lib/services/api_service.dart
  * 
  * NOTE: api.mfapi.in is called directly by getSavingsRecommendations and
  * getMutualFundRecommendations. In local development or production, it must

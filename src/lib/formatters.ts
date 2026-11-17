@@ -1,11 +1,11 @@
 /**
  * MoneyMapper Currency & Number Formatters
- * Ported 1:1 from Flutter Dart sources in reference/moneymapper_app/
+ * Ported 1:1 from Flutter Dart sources in Flutter mobile app (moneymapper_app)/
  * Per Rule 1: The CODE wins. Formatters named explicitly per their source Dart files.
  */
 
 /**
- * Ported 1:1 from reference/moneymapper_app/lib/widgets/live_financial_calculator.dart (lines 33-35)
+ * Ported 1:1 from Flutter mobile app (moneymapper_app)/lib/widgets/live_financial_calculator.dart (lines 33-35)
  * Dart: "₹${amount.round().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}"
  */
 export function formatCurrency_LiveFinancialCalculator(amount: number): string {
@@ -14,7 +14,7 @@ export function formatCurrency_LiveFinancialCalculator(amount: number): string {
 }
 
 /**
- * Ported 1:1 from reference/moneymapper_app/lib/widgets/live_financial_calculator.dart (lines 37-47)
+ * Ported 1:1 from Flutter mobile app (moneymapper_app)/lib/widgets/live_financial_calculator.dart (lines 37-47)
  * Dart:
  *   if (amount >= 10000000) {
  *     double cr = amount / 10000000;
@@ -40,7 +40,7 @@ export function formatCompactCurrency_LiveFinancialCalculator(amount: number): s
 }
 
 /**
- * Ported 1:1 from reference/moneymapper_app/lib/screens/dashboard_screen.dart (line 1337)
+ * Ported 1:1 from Flutter mobile app (moneymapper_app)/lib/screens/dashboard_screen.dart (line 1337)
  * Dart: "₹${price24k.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}"
  */
 export function formatGoldPrice_DashboardScreen(price24k: number): string {
@@ -49,7 +49,7 @@ export function formatGoldPrice_DashboardScreen(price24k: number): string {
 }
 
 /**
- * Ported 1:1 from reference/moneymapper_app/lib/screens/dashboard_screen.dart (line 581)
+ * Ported 1:1 from Flutter mobile app (moneymapper_app)/lib/screens/dashboard_screen.dart (line 581)
  * Dart: "₹${netPosToDisplay.round().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}"
  */
 export function formatNetPosition_DashboardScreen(netPosition: number): string {
@@ -58,7 +58,7 @@ export function formatNetPosition_DashboardScreen(netPosition: number): string {
 }
 
 /**
- * Ported 1:1 from reference/moneymapper_app/lib/screens/dashboard_screen.dart (lines 929-933)
+ * Ported 1:1 from Flutter mobile app (moneymapper_app)/lib/screens/dashboard_screen.dart (lines 929-933)
  * Dart: "₹${amount.round().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}"
  */
 export function formatQuickStatsCurrency_DashboardScreen(amount: number): string {

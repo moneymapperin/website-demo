@@ -40,7 +40,11 @@ describe('TASK 5 — App Theme Tokens & Shell', () => {
   /* -------------------------------------------------------------------------- */
   /* Requirement 4: Non-Self-Referential Token & Config Tests                    */
   /* -------------------------------------------------------------------------- */
-  describe('Requirement 4: Non-self-referential token tests against Flutter source', () => {
+  const REF_DIR = path.resolve(__dirname, '../../reference/moneymapper_app/lib');
+  const refExists = fs.existsSync(REF_DIR);
+
+  // Requires reference/ (Flutter source). Skipped when folder is removed.
+  describe.skipIf(!refExists)('Requirement 4: Non-self-referential token tests against Flutter source', () => {
     it('(a) regex parses reference app_theme.dart and matches APP_COLORS exactly', () => {
       const appThemePath = path.resolve(
         __dirname,

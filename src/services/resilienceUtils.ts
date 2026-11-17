@@ -1,6 +1,6 @@
 /**
  * Principal Engineer's Resilience Toolkit
- * Port of reference/moneymapper_app/lib/services/resilience_utils.dart
+ * Port of Flutter mobile app (moneymapper_app)/lib/services/resilience_utils.dart
  */
 
 export class ApiException extends Error {

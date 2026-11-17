@@ -1,8 +1,8 @@
 /**
  * Gamification Store (XP, Streaks, Badges, Baseline Fitness Score, Local Expense Score)
  * Ported 1:1 from Flutter Dart sources:
- * - reference/moneymapper_app/lib/services/xp_service.dart
- * - reference/moneymapper_app/lib/services/streak_service.dart
+ * - Flutter mobile app (moneymapper_app)/lib/services/xp_service.dart
+ * - Flutter mobile app (moneymapper_app)/lib/services/streak_service.dart
  * 
  * In Flutter, these values are stored in device-local SharedPreferences.
  * On web, they are stored in localStorage via this gamificationStore abstraction.

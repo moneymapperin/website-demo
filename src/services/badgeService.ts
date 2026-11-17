@@ -65,7 +65,7 @@ export interface BadgeEvaluationContext {
 export function evaluateBadgeCriteria(badgeId: string, context: BadgeEvaluationContext): boolean {
   switch (badgeId) {
     case 'debt_free': {
-      // Mobile app rule (reference/moneymapper_app/lib/screens/dashboard_screen.dart lines ~1224-1230):
+      // Mobile app rule (Flutter mobile app (moneymapper_app)/lib/screens/dashboard_screen.dart lines ~1224-1230):
       // final loans = profile['activeLoans']?.toString() ?? '0';
       // if (loans == '0' || loans.isEmpty) -> unlock debt_free
       if (!context.profile) {

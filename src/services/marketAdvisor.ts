@@ -1,7 +1,7 @@
 /**
  * ScoreCardAdvisor and AdvisoryService ported 1:1 from Flutter:
- * - reference/moneymapper_app/lib/services/score_card_advisor.dart
- * - reference/moneymapper_app/lib/services/advisory_service.dart
+ * - Flutter mobile app (moneymapper_app)/lib/services/score_card_advisor.dart
+ * - Flutter mobile app (moneymapper_app)/lib/services/advisory_service.dart
  */
 
 export class ScoreCardAdvisor {

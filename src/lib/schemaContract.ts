@@ -1,7 +1,7 @@
 /**
  * MONEYMAPPER BACKEND SCHEMA CONTRACT
  *
- * Source of Truth: Flutter mobile codebase located at `reference/moneymapper_app/lib/`.
+ * Source of Truth: Flutter mobile codebase located at `Flutter mobile app (moneymapper_app)/lib/`.
  * Per Master Rule 1: Every schema, table, column, RPC, auth metadata key, and profile key
  * MUST match the Flutter code exactly.
  */

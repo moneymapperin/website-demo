@@ -1,6 +1,6 @@
 /**
  * Emergency Fund Pillar Calculation Model & Formatter
- * 1:1 port of reference/moneymapper_app/lib/emergency_fund.dart
+ * 1:1 port of Flutter mobile app (moneymapper_app)/lib/emergency_fund.dart
  */
 
 export interface EmergencyFundPillarData {

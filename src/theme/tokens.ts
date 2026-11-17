@@ -2,8 +2,8 @@
  * MoneyMapper Design Tokens
  * 
  * Source of truth:
- * - reference/moneymapper_app/lib/theme/app_theme.dart (AppColors)
- * - reference/moneymapper_app/lib/screens/main_screen.dart (_pillars)
+ * - Flutter mobile app (moneymapper_app)/lib/theme/app_theme.dart (AppColors)
+ * - Flutter mobile app (moneymapper_app)/lib/screens/main_screen.dart (_pillars)
  */
 
 export const APP_COLORS = {

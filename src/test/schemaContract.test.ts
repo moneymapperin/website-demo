@@ -157,9 +157,13 @@ describe('src/lib/schemaContract export integrity', () => {
   });
 });
 
-describe('scripts/verify-contract verification logic', () => {
-  const rootDir = path.resolve(__dirname, '../..');
-  const refDir = path.join(rootDir, 'reference/moneymapper_app/lib');
+const rootDir = path.resolve(__dirname, '../..');
+const REF_DIR = path.join(rootDir, 'reference/moneymapper_app/lib');
+const refExists = fs.existsSync(REF_DIR);
+
+// Requires reference/ (Flutter source). Skipped when folder is removed.
+describe.skipIf(!refExists)('scripts/verify-contract verification logic', () => {
+  const refDir = REF_DIR;
   const contractPath = path.join(rootDir, 'src/lib/schemaContract.ts');
   const scriptPath = path.join(rootDir, 'scripts/verify-contract.mjs');
 
