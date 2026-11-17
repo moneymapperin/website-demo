@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Lock, Shield } from 'lucide-react';
+import { Lock, Shield, ChevronDown, Mail } from 'lucide-react';
 import logoImg from '../assets/logo.png';
+import playBadge from '../assets/badges/google-play-badge.webp';
+import { APK_FILE_NAME, getApkDownloadHref, PLAY_STORE_URL } from '../config/appDownload';
 
 // Custom Crisp SVGs matching Lucide stroke style for Brand Socials
 const XIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
@@ -32,6 +34,35 @@ const YoutubeIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }
 );
 
 export const Footer: React.FC = () => {
+  const [contactOpen, setContactOpen] = useState(false);
+  const contactRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (!contactOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (contactRef.current && !contactRef.current.contains(event.target as Node)) {
+        setContactOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setContactOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [contactOpen]);
+
   const socialLinks: {
     name: string;
     icon: React.FC<{ className?: string }>;
@@ -66,9 +97,7 @@ export const Footer: React.FC = () => {
 
   const companyLinks: { label: string; path?: string }[] = [
     { label: 'About Us', path: '/about' },
-    { label: 'Careers' },
     { label: 'Blog' },
-    { label: 'Contact Us', path: '/about' },
   ];
 
   const supportLinks: { label: string; href?: string }[] = [
@@ -95,6 +124,8 @@ export const Footer: React.FC = () => {
               <img
                 src={logoImg}
                 alt="MoneyMapper"
+                loading="lazy"
+                decoding="async"
                 className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
               />
               <span className="text-xl font-bold text-white tracking-tight">MoneyMapper</span>
@@ -139,6 +170,31 @@ export const Footer: React.FC = () => {
               })}
             </div>
 
+            {/* Google Play Store Badge & Trademark */}
+            <div className="mt-4 text-left">
+              <a
+                id="footer-google-play-btn"
+                href={PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Get MoneyMapper on Google Play"
+                className="inline-block transition-opacity hover:opacity-90 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple/60 rounded-lg"
+              >
+                <img
+                  src={playBadge}
+                  alt="Get it on Google Play"
+                  width={568}
+                  height={176}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-10 w-auto"
+                />
+              </a>
+              <p className="mt-2 text-[10px] text-white/30 leading-snug">
+                Google Play and the Google Play logo are trademarks of Google LLC.
+              </p>
+            </div>
+
             {/* Company Info & Registered Address */}
             <div className="mt-5 text-xs text-white/50 leading-relaxed max-w-xs sm:max-w-sm text-left">
               <p className="font-semibold text-white/70">MONEZRAMAPPER Private Limited</p>
@@ -165,6 +221,16 @@ export const Footer: React.FC = () => {
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <a
+                    href={getApkDownloadHref()}
+                    download={APK_FILE_NAME}
+                    rel="noopener noreferrer"
+                    className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
+                  >
+                    Download App (APK)
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -188,13 +254,35 @@ export const Footer: React.FC = () => {
                     )}
                   </li>
                 ))}
-                <li>
-                  <a
-                    href="mailto:info@moneymapper.in"
-                    className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 block cursor-pointer"
+                <li ref={contactRef}>
+                  <button
+                    type="button"
+                    onClick={() => setContactOpen((prev) => !prev)}
+                    aria-expanded={contactOpen}
+                    aria-controls="footer-contact-panel"
+                    className="text-xs text-white/50 hover:text-white transition-colors text-left py-0.5 cursor-pointer flex items-center gap-1 w-full"
                   >
-                    Email: info@moneymapper.in
-                  </a>
+                    <span>Contact Us</span>
+                    <ChevronDown
+                      className={`w-3 h-3 transition-transform duration-200 ${
+                        contactOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  {contactOpen && (
+                    <div
+                      id="footer-contact-panel"
+                      className="mt-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 flex items-center gap-2 animate-fade-in"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-white/70 shrink-0" />
+                      <a
+                        href="mailto:info@moneymapper.in"
+                        className="text-xs text-white/70 hover:text-white transition-colors break-all"
+                      >
+                        info@moneymapper.in
+                      </a>
+                    </div>
+                  )}
                 </li>
               </ul>
             </div>

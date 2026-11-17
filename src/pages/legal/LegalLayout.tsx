@@ -31,7 +31,7 @@ export const LegalLayout: React.FC = () => {
       style={{
         backgroundColor: 'var(--bg)',
         color: 'var(--body-text)',
-        minHeight: '100vh',
+        minHeight: '100dvh',
         display: 'flex',
         flexDirection: 'column',
       }}

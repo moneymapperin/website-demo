@@ -108,9 +108,14 @@ export const DashboardPage: React.FC = () => {
             <h1 className="text-xl font-black tracking-tight text-white flex items-center space-x-2">
               <span>MoneyMapper</span>
               {isPro && (
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider bg-gradient-to-r from-[#8B5CF6] to-[#6D28D9] text-white border border-white/20">
+                <button
+                  type="button"
+                  onClick={() => navigate('/subscription')}
+                  aria-label="Open subscription plans"
+                  className="px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider bg-gradient-to-r from-[#8B5CF6] to-[#6D28D9] text-white border border-white/20 cursor-pointer hover:opacity-90 transition-opacity"
+                >
                   👑 PREMIUM
-                </span>
+                </button>
               )}
             </h1>
             <p className="text-[10px] font-semibold text-white/50">

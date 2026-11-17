@@ -2,7 +2,37 @@ import { supabase } from '../lib/supabase';
 
 export type CheckoutResponse =
   | { provider: 'FEDERAL_BANK'; access_key: string; pay_mode: 'test' | 'production'; order_id: string }
-  | { provider: 'CASHFREE'; payment_session_id: string; pay_mode: 'TEST' | 'PROD'; order_id: string };
+  | { provider: 'CASHFREE'; payment_session_id: string; pay_mode: 'TEST' | 'PROD'; order_id: string }
+  | { provider: 'FREE'; granted: boolean; order_id?: string }
+  | { provider: 'FREE_PROMO'; order_id: string };
+
+export const FREE_GRANT_STATUSES = ['SUCCESS', 'FREE', 'ACTIVATED'] as const;
+
+/**
+ * Checks if the edge function response signifies a free plan activation.
+ * Matches when HTTP response is OK, there is no gateway provider (neither FEDERAL_BANK nor CASHFREE),
+ * and the body indicates a free grant via boolean flags or known status strings.
+ */
+export function isFreeActivationResponse(data: any): boolean {
+  if (!data || typeof data !== 'object') return false;
+
+  const provider = typeof data.provider === 'string' ? data.provider.toUpperCase() : '';
+  if (provider === 'FEDERAL_BANK' || provider === 'CASHFREE' || provider === 'FREE_PROMO') {
+    return false;
+  }
+
+  const status = typeof data.status === 'string' ? data.status.toUpperCase() : '';
+  const isStatusMatch = FREE_GRANT_STATUSES.some((s) => s === status);
+
+  return (
+    data.free === true ||
+    provider === 'FREE' ||
+    data.premium_granted === true ||
+    data.granted === true ||
+    data.activated === true ||
+    isStatusMatch
+  );
+}
 
 export class GatewaysUnavailableError extends Error {
   code = 'GATEWAYS_UNAVAILABLE';
@@ -19,6 +49,7 @@ export class GatewaysUnavailableError extends Error {
  * @param referralCode - Optional referral code to apply discounts
  * @returns Typed CheckoutResponse depending on active provider ('FEDERAL_BANK' or 'CASHFREE')
  */
+// FREE_PROMO: backend already granted PRO (referral made the price 0). No gateway, no finalize call.
 export async function createCheckout(
   planCode: string,
   referralCode?: string
@@ -105,6 +136,26 @@ export async function createCheckout(
       order_id: responseData.order_id,
     };
   }
+
+  if (responseData?.provider === 'FREE_PROMO') {
+    return {
+      provider: 'FREE_PROMO',
+      order_id: responseData.order_id,
+    };
+  }
+
+  if (isFreeActivationResponse(responseData)) {
+    return {
+      provider: 'FREE',
+      granted: true,
+      order_id: responseData?.order_id,
+    };
+  }
+
+  console.error(
+    '[Checkout] Unrecognized checkout response keys:',
+    responseData && typeof responseData === 'object' ? Object.keys(responseData) : []
+  );
 
   throw new Error(`Unsupported payment provider: ${responseData?.provider}`);
 }

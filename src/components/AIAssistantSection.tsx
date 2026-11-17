@@ -109,6 +109,8 @@ export const AIAssistantSection: React.FC = () => {
                   <img
                     src={mascotImg}
                     alt="MoneyMapper AI Mascot"
+                    loading="lazy"
+                    decoding="async"
                     className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-[0_10px_20px_rgba(59,130,246,0.3)] transition-transform hover:scale-105 duration-200"
                   />
                 </div>

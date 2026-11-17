@@ -153,9 +153,12 @@ describe('Referral Flow - SubscriptionPage & RegisterPage', () => {
       // Shows referral discount on Quarterly card only
       expect(screen.getByText('₹1497 Referral discount applied')).toBeInTheDocument();
 
-      // CTA button shows final price ₹0 (not negative)
+      // CTA button shows "Activate PRO for free" when final price is ₹0
       const buyBtn = screen.getByTestId('buy-plan-btn');
-      expect(buyBtn).toHaveTextContent('Get Financially Free (₹0)');
+      expect(buyBtn).toHaveTextContent('Activate PRO for free');
+      expect(screen.getByTestId('free-activation-note')).toHaveTextContent(
+        'No payment needed. Your referral code covers this plan.'
+      );
 
       // Other cards (Half-Yearly: 6 months, Yearly: 12 months) show normal prices
       const card6 = screen.getByTestId('sub-plan-card-6');

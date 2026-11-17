@@ -32,6 +32,9 @@ export async function finalizeTransaction(
   let attempts = 0;
 
   while (attempts <= maxRetries) {
+    const attempt = attempts + 1;
+    console.info('Finalizing transaction attempt', { orderId, attempt });
+
     try {
       const { data, error } = await supabase.rpc('finalize_transaction', {
         p_order_id: orderId,
@@ -49,7 +52,15 @@ export async function finalizeTransaction(
         continue;
       }
 
-      console.error('Failed to finalize transaction', error || data);
+      console.error('Failed to finalize transaction', {
+        orderId,
+        attempt,
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint,
+        data,
+      });
       return {
         ok: false,
         error: FALLBACK_ERROR,
@@ -62,7 +73,15 @@ export async function finalizeTransaction(
         continue;
       }
 
-      console.error('Exception finalizing transaction', err);
+      console.error('Exception finalizing transaction', {
+        orderId,
+        attempt,
+        message: err?.message,
+        code: err?.code,
+        details: err?.details,
+        hint: err?.hint,
+        data: undefined,
+      });
       return {
         ok: false,
         error: FALLBACK_ERROR,

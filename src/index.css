@@ -144,4 +144,15 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   }
 }
 
+/* Optimize heavy backdrop-filter blurs on iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}
+
+
 

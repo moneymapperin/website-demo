@@ -7,6 +7,7 @@ import { usePlan } from '../../hooks/usePlan';
 import { useIdleLogout } from '../../hooks/useIdleLogout';
 import { useSubscriptionSync } from '../../hooks/useSubscriptionSync';
 import { authService } from '../../services/authService';
+import { IosInstallBanner } from '../IosInstallGuide';
 import {
   APP_COLORS,
   FINANCIAL_PILLARS,
@@ -614,6 +615,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           );
         })}
       </nav>
+
+      {/* iOS PWA Install Banner */}
+      <IosInstallBanner />
     </div>
   );
 };

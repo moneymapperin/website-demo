@@ -345,7 +345,7 @@ export const SubscriptionPage: React.FC = () => {
 
     try {
       setPaymentLoading(true);
-      await paymentService.startCheckout(selectedPlan, {
+      const result = await paymentService.startCheckout(selectedPlan, {
         referralCode: canSendReferral ? referralCode.trim().toUpperCase() : undefined,
         isReferralValid: canSendReferral,
         navigate,
@@ -353,15 +353,11 @@ export const SubscriptionPage: React.FC = () => {
         refreshPlan,
         onFinalizingChange: setIsFinalizing,
       });
+      void result;
 
       await refreshPlan(true);
       const details = await apiService.getSubscriptionDetails();
       await processSubscriptionDetails(details);
-
-      showToast({
-        message: '🎉 Payment Successful! Welcome to Wealth Select Pro.',
-        backgroundColor: APP_COLORS.success,
-      });
     } catch (err: any) {
       if (err?.isCancelled || err?.message === 'Payment cancelled.') {
         showToast('Payment cancelled.');
@@ -401,6 +397,8 @@ export const SubscriptionPage: React.FC = () => {
   const selectedPriceCalc = isSelectedPlanDiscounted && selectedPlan.rawPrice
     ? calculateDiscountedPrice(selectedPlan.rawPrice, appliedDiscount)
     : { effectiveDiscount: 0, finalPrice: selectedPlan.rawPrice || 0 };
+
+  const isFreeActivation = isSelectedPlanDiscounted && selectedPriceCalc.finalPrice === 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-8">
@@ -655,12 +653,23 @@ export const SubscriptionPage: React.FC = () => {
               <RotateCw className="w-4 h-4 animate-spin" />
               Processing...
             </span>
+          ) : isFreeActivation ? (
+            'Activate PRO for free'
           ) : isSelectedPlanDiscounted && selectedPlan.rawPrice ? (
             `Get Financially Free (₹${Math.round(selectedPriceCalc.finalPrice).toLocaleString('en-IN')})`
           ) : (
             `Get Financially Free (${selectedPlan.totalBilledPrice})`
           )}
         </button>
+
+        {isFreeActivation && (
+          <p
+            data-testid="free-activation-note"
+            className="text-xs text-center text-emerald-600 dark:text-emerald-400 font-medium"
+          >
+            No payment needed. Your referral code covers this plan.
+          </p>
+        )}
 
         {/* Terms and conditions apply note */}
         <div className="flex justify-center pt-2">

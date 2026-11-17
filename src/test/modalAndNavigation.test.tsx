@@ -250,10 +250,6 @@ describe('Task 1: Please Login First Modal & Navigation', () => {
       fireEvent.click(screen.getByRole('button', { name: 'About Us' }));
       expect(scrollSpy).toHaveBeenCalledWith('about');
 
-      const careersLink = screen.getByText('Careers');
-      expect(careersLink.tagName).toBe('SPAN');
-      fireEvent.click(careersLink);
-
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       expect(navigateSpy).not.toHaveBeenCalled();
     });

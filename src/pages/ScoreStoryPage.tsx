@@ -36,7 +36,7 @@ export const ScoreStoryPage: React.FC = () => {
 <section className="hero" style={{ ['--img' as any]: 'url(/images/score-story/img_1.jpg)' }}>
   <div className="wrap r">
     <h1>One number for your <span className="grad">entire financial health.</span></h1>
-    <div className="row"><figure className="fig shot"><img src="/images/score-story/img_2.jpg" alt="MoneyMapper app screenshot" loading="lazy" /></figure><p>Your Financial Fitness Score doesn't appear out of thin air. Let's follow one person's story to see how it really comes together.</p></div>
+    <div className="row"><figure className="fig shot"><img src="/images/score-story/img_2.jpg" alt="MoneyMapper app screenshot" loading="lazy" decoding="async" /></figure><p>Your Financial Fitness Score doesn't appear out of thin air. Let's follow one person's story to see how it really comes together.</p></div>
     <span className="tag">Inspired by real-life money situations</span>
   </div>
 </section>
@@ -51,7 +51,7 @@ export const ScoreStoryPage: React.FC = () => {
 <text x="222" y="86" fontSize="64" fontWeight="700" fill="#ec4899" fontFamily="sans-serif">?</text>
 <circle cx="72" cy="206" r="24" fill="#f59e0b"/>
 <text x="72" y="216" fontSize="28" fontWeight="700" textAnchor="middle" fill="#120f20" fontFamily="sans-serif">₹</text></svg></figure></div>
-    <div className="row"><figure className="fig shot"><img src="/images/score-story/img_4.jpg" alt="MoneyMapper app screenshot" loading="lazy" /></figure><p>His friends say everything's fine. His bank balance says nothing at all. So Aarav opens MoneyMapper, and the app looks at his entire financial life through <b>five pillars</b>.</p></div>
+    <div className="row"><figure className="fig shot"><img src="/images/score-story/img_4.jpg" alt="MoneyMapper app screenshot" loading="lazy" decoding="async" /></figure><p>His friends say everything's fine. His bank balance says nothing at all. So Aarav opens MoneyMapper, and the app looks at his entire financial life through <b>five pillars</b>.</p></div>
     <div className="q">Every pillar gets its own score from 0 to 100. Together, they become one final number.</div>
   </div>
 </section>
@@ -81,7 +81,7 @@ export const ScoreStoryPage: React.FC = () => {
   <div className="wrap r">
     <div className="kicker"><i className="dot" style={{ ['--c' as any]: 'var(--red)' }}></i>Pillar two: Expenses</div>
     <h2>Spending: where the story turns</h2>
-    <div className="row rev"><p>Aarav earns well, yet his wallet is empty by the end of the month. This is where the Expenses pillar steps in. We look at how much of his income goes out the door, and whether that spending is under control.</p><figure className="fig shot"><img src="/images/score-story/img_7.jpg" alt="MoneyMapper app screenshot" loading="lazy" /></figure></div>
+    <div className="row rev"><p>Aarav earns well, yet his wallet is empty by the end of the month. This is where the Expenses pillar steps in. We look at how much of his income goes out the door, and whether that spending is under control.</p><figure className="fig shot"><img src="/images/score-story/img_7.jpg" alt="MoneyMapper app screenshot" loading="lazy" decoding="async" /></figure></div>
     <div className="row"><figure className="fig"><svg viewBox="0 0 300 300" role="img" aria-label="Wallet spending"><rect width="300" height="300" fill="#150f26"/><circle cx="150" cy="150" r="118" fill="#1d1733"/>
 <rect x="60" y="140" width="180" height="120" rx="18" fill="#ec4899"/>
 <rect x="190" y="175" width="70" height="46" rx="12" fill="#f9a8d4"/>
@@ -194,7 +194,7 @@ export const ScoreStoryPage: React.FC = () => {
   <div className="wrap r">
     <div className="kicker"><i className="dot" style={{ ['--c' as any]: 'var(--blue)' }}></i>What comes next</div>
     <h2>Score cards: a companion for smart decisions</h2>
-    <div className="row"><figure className="fig shot"><img src="/images/score-story/img_13.jpg" alt="MoneyMapper app screenshot" loading="lazy" /></figure><p>Aarav's next questions are "Where should I invest?" and "Which insurance should I pick?" So MoneyMapper also scores the options themselves, helping him decide with understanding instead of guesswork.</p></div>
+    <div className="row"><figure className="fig shot"><img src="/images/score-story/img_13.jpg" alt="MoneyMapper app screenshot" loading="lazy" decoding="async" /></figure><p>Aarav's next questions are "Where should I invest?" and "Which insurance should I pick?" So MoneyMapper also scores the options themselves, helping him decide with understanding instead of guesswork.</p></div>
     <div className="cards">
       <div className="sc" style={{ ['--c' as any]: 'var(--green)' }}><h3>Stock Score</h3><p>Judging large companies by how strong they really are.</p></div>
       <div className="sc" style={{ ['--c' as any]: 'var(--blue)' }}><h3>Mutual Fund Score</h3><p>Spotting the better performers among thousands of funds.</p></div>

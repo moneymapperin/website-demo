@@ -8,6 +8,7 @@ import {
   EASEBUZZ_SCRIPT_URL,
   CASHFREE_SCRIPT_URL,
 } from '../services/gatewayLoader';
+import * as gatewayLoaderModule from '../services/gatewayLoader';
 import { finalizeTransaction } from '../services/finalizeService';
 import { paymentService } from '../services/paymentService';
 import { apiService } from '../services/apiService';
@@ -666,6 +667,233 @@ describe('Web Payment Flow Tests (PAYMENTS_WEB_GUIDE)', () => {
       );
       expect(mockShowToast).toHaveBeenCalledWith(
         'Payment received but sync delayed. Please contact support if PRO is not active.'
+      );
+    });
+
+    // Test A
+    it('createCheckout returns { provider: "FREE_PROMO", order_id: "MM123" } for mock FREE_PROMO', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'FREE_PROMO',
+            order_id: 'MM123',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      const res = await createCheckout('PRO_YEARLY', 'CODE');
+      expect(res).toEqual({
+        provider: 'FREE_PROMO',
+        order_id: 'MM123',
+      });
+    });
+
+    // Test B
+    it('FREE_PROMO does not call loadCashfreeScript or loadEasebuzzScript', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'FREE_PROMO',
+            order_id: 'MM123',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      const easebuzzSpy = vi.spyOn(gatewayLoaderModule, 'loadEasebuzzScript');
+      const cashfreeSpy = vi.spyOn(gatewayLoaderModule, 'loadCashfreeScript');
+
+      await paymentService.startCheckout(mockQuarterlyPlan, {
+        referralCode: 'FREECODE',
+        isReferralValid: true,
+      });
+
+      expect(easebuzzSpy).not.toHaveBeenCalled();
+      expect(cashfreeSpy).not.toHaveBeenCalled();
+    });
+
+    // Test C
+    it('FREE_PROMO with PRO not confirmed (current_period_end in the past): result is { ok: false, isPro: false, orderId: "MM123" }, and showToast is never called with a message containing "Payment Successful"', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'FREE_PROMO',
+            order_id: 'MM123',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      vi.spyOn(apiService, 'getSubscriptionDetails').mockResolvedValue({
+        current_period_end: new Date(Date.now() - 86400000).toISOString(),
+      } as any);
+
+      vi.useFakeTimers();
+
+      const mockToast = vi.fn();
+      const checkoutPromise = paymentService.startCheckout(mockQuarterlyPlan, {
+        referralCode: 'FREECODE',
+        isReferralValid: true,
+        showToast: mockToast,
+      });
+
+      for (let i = 0; i < 6; i++) {
+        await vi.advanceTimersByTimeAsync(1600);
+      }
+
+      const res = await checkoutPromise;
+      vi.useRealTimers();
+
+      expect(res).toEqual({ ok: false, isPro: false, orderId: 'MM123' });
+      for (const call of mockToast.mock.calls) {
+        const msg = typeof call[0] === 'string' ? call[0] : call[0]?.message || '';
+        expect(msg).not.toContain('Payment Successful');
+      }
+    });
+
+    // Test D
+    it('FREE_PROMO with PRO confirmed (current_period_end in the future): result is { ok: true, isPro: true, orderId: "MM123" }, and showToast is called with "Payment Successful! Welcome to PRO."', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'FREE_PROMO',
+            order_id: 'MM123',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      vi.spyOn(apiService, 'getSubscriptionDetails').mockResolvedValue({
+        current_period_end: new Date(Date.now() + 86400000).toISOString(),
+      } as any);
+
+      const mockToast = vi.fn();
+      const res = await paymentService.startCheckout(mockQuarterlyPlan, {
+        referralCode: 'FREECODE',
+        isReferralValid: true,
+        showToast: mockToast,
+      });
+
+      expect(res).toEqual({ ok: true, isPro: true, orderId: 'MM123' });
+      expect(mockToast).toHaveBeenCalledWith('Payment Successful! Welcome to PRO.');
+    });
+
+    // Test E
+    it('FREE_PROMO never calls supabase.rpc with "finalize_transaction"', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'FREE_PROMO',
+            order_id: 'MM123',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      const rpcSpy = vi.spyOn(supabase, 'rpc');
+
+      await paymentService.startCheckout(mockQuarterlyPlan, {
+        referralCode: 'FREECODE',
+        isReferralValid: true,
+      });
+
+      expect(rpcSpy).not.toHaveBeenCalledWith('finalize_transaction', expect.anything());
+    });
+
+    // Test F
+    it('FREE_PROMO never calls supabase.rpc with "stack_subscription"', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'FREE_PROMO',
+            order_id: 'MM123',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      const rpcSpy = vi.spyOn(supabase, 'rpc');
+
+      await paymentService.startCheckout(mockQuarterlyPlan, {
+        referralCode: 'FREECODE',
+        isReferralValid: true,
+      });
+
+      expect(rpcSpy).not.toHaveBeenCalledWith('stack_subscription', expect.anything());
+    });
+
+    // Test G (regression)
+    it('FEDERAL_BANK success still calls finalize_transaction with { p_order_id: "MM10" }', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'FEDERAL_BANK',
+            access_key: 'key',
+            pay_mode: 'test',
+            order_id: 'MM10',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      const rpcSpy = vi.spyOn(supabase, 'rpc').mockResolvedValue({
+        data: true,
+        error: null,
+      } as any);
+
+      let capturedOptions: any = null;
+      (window as any).EasebuzzCheckout = vi.fn().mockImplementation(() => ({
+        initiatePayment: (options: any) => {
+          capturedOptions = options;
+        },
+      }));
+
+      const checkoutPromise = paymentService.startCheckout(mockYearlyPlan);
+
+      await vi.waitFor(() => {
+        expect(capturedOptions).not.toBeNull();
+      });
+
+      await capturedOptions.onResponse({ status: 'success' });
+      await checkoutPromise;
+
+      expect(rpcSpy).toHaveBeenCalledWith('finalize_transaction', {
+        p_order_id: 'MM10',
+      });
+    });
+
+    // Test H (regression)
+    it('CASHFREE response still returns provider "CASHFREE"', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'CASHFREE',
+            payment_session_id: 'sess',
+            pay_mode: 'TEST',
+            order_id: 'MM9',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      const res = await createCheckout('PRO_YEARLY');
+      expect(res.provider).toBe('CASHFREE');
+    });
+
+    // Test I (regression)
+    it('an unknown provider still throws "Unsupported payment provider"', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            provider: 'SOMETHING_ELSE',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      await expect(createCheckout('PRO_YEARLY')).rejects.toThrow(
+        'Unsupported payment provider'
       );
     });
   });

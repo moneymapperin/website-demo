@@ -131,6 +131,8 @@ export const FeatureCards: React.FC = () => {
             <img
               src={activeFeature.panelIcon}
               alt=""
+              loading="lazy"
+              decoding="async"
               className="w-20 h-20 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] object-contain mx-auto block mb-4 sm:mb-5 transition-all duration-200"
             />
             <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight mb-3">

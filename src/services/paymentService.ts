@@ -4,6 +4,7 @@ import { createCheckout } from './checkoutService';
 import { loadEasebuzzScript, loadCashfreeScript } from './gatewayLoader';
 import { finalizeTransaction } from './finalizeService';
 import { apiService } from './apiService';
+import { premiumService } from './premiumService';
 
 export interface PurchaseResult {
   ok: boolean;
@@ -28,6 +29,7 @@ export interface StartCheckoutOptions {
 
 export interface CheckoutResult {
   ok: boolean;
+  isPro?: boolean;
   orderId?: string;
 }
 
@@ -35,6 +37,41 @@ declare global {
   interface Window {
     Razorpay?: any;
   }
+}
+
+/**
+ * Polls for PRO subscription confirmation up to maxRetries attempts.
+ */
+async function waitForPro(
+  refreshPlan?: (force?: boolean) => Promise<any>,
+  maxRetries = 5,
+  intervalMs = 1500
+): Promise<boolean> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      if (refreshPlan) {
+        await refreshPlan(true);
+      } else {
+        await premiumService.refreshPlan(true);
+      }
+    } catch {}
+
+    const details = await apiService.getSubscriptionDetails().catch(() => null);
+    const periodEnd = details?.current_period_end;
+    const isFuture =
+      periodEnd &&
+      !isNaN(new Date(periodEnd).getTime()) &&
+      new Date(periodEnd).getTime() > Date.now();
+
+    if (isFuture) {
+      return true;
+    }
+
+    if (attempt < maxRetries) {
+      await new Promise((res) => setTimeout(res, intervalMs));
+    }
+  }
+  return false;
 }
 
 class PaymentService {
@@ -73,11 +110,15 @@ class PaymentService {
         : undefined;
 
     const checkoutData = await createCheckout(planCode, validReferral);
+    console.info('[Payment] Checkout created', {
+      provider: checkoutData.provider,
+      orderId: checkoutData.order_id,
+    });
 
     return new Promise<CheckoutResult>(async (resolve, reject) => {
       let overlayEl: HTMLElement | null = null;
 
-      const showOverlay = () => {
+      const showOverlay = (customText?: string) => {
         options?.onFinalizingChange?.(true);
         if (typeof document !== 'undefined') {
           overlayEl = document.getElementById('finalize-blocking-overlay');
@@ -90,7 +131,7 @@ class PaymentService {
             overlayEl.innerHTML = `
               <div class="flex flex-col items-center gap-3 p-6 rounded-3xl bg-[#0E0B1F] border border-indigo-500/30 shadow-2xl text-center max-w-sm mx-4">
                 <div class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                <p class="text-xs font-bold text-white">Confirming your payment, please do not close or refresh this page.</p>
+                <p class="text-xs font-bold text-white">${customText || 'Confirming your payment, please do not close or refresh this page.'}</p>
               </div>
             `;
             document.body.appendChild(overlayEl);
@@ -112,8 +153,63 @@ class PaymentService {
         return '';
       };
 
+      const handleSuccess = (orderId?: string) => {
+        hideOverlay();
+        if (typeof window !== 'undefined') {
+          window.removeEventListener('beforeunload', beforeUnloadHandler);
+        }
+
+        options?.showToast?.('Payment Successful! Welcome to PRO.');
+
+        if (options?.navigate) {
+          options.navigate('/dashboard');
+        } else if (typeof window !== 'undefined') {
+          window.location.href = '/dashboard';
+        }
+
+        resolve({ ok: true, isPro: true, orderId });
+      };
+
+      // FREE_PROMO branch (replace the existing FREE branch)
+      if (checkoutData.provider === 'FREE_PROMO' || checkoutData.provider === 'FREE') {
+        showOverlay('Activating your PRO plan...');
+        if (typeof window !== 'undefined') {
+          window.addEventListener('beforeunload', beforeUnloadHandler);
+        }
+
+        try {
+          const isPro = await waitForPro(options?.refreshPlan);
+          if (isPro) {
+            handleSuccess(checkoutData.order_id);
+          } else {
+            hideOverlay();
+            if (typeof window !== 'undefined') {
+              window.removeEventListener('beforeunload', beforeUnloadHandler);
+            }
+            options?.showToast?.(
+              'Payment received. Your PRO plan is being activated. Tap Refresh status in a minute.'
+            );
+            resolve({ ok: false, isPro: false, orderId: checkoutData.order_id });
+          }
+        } catch (err: any) {
+          hideOverlay();
+          if (typeof window !== 'undefined') {
+            window.removeEventListener('beforeunload', beforeUnloadHandler);
+          }
+          options?.showToast?.(
+            'Payment received. Your PRO plan is being activated. Tap Refresh status in a minute.'
+          );
+          resolve({ ok: false, isPro: false, orderId: checkoutData.order_id });
+        }
+        return;
+      }
+
       // Step 3: Finalize transaction and apply PRO subscription
       const finalize = async (orderId: string): Promise<void> => {
+        console.info('[Payment] finalize() entered', {
+          provider: checkoutData.provider,
+          orderId,
+        });
         showOverlay();
         if (typeof window !== 'undefined') {
           window.addEventListener('beforeunload', beforeUnloadHandler);
@@ -122,46 +218,19 @@ class PaymentService {
         try {
           const result = await finalizeTransaction(orderId);
           if (result.ok) {
-            if (options?.refreshPlan) {
-              try {
-                await options.refreshPlan(true);
-              } catch {
-                // Ignore refresh error
-              }
-            }
-
-            // Confirm via apiService.getSubscriptionDetails() that current_period_end is in the future
-            const details = await apiService.getSubscriptionDetails().catch(() => null);
-            const periodEnd = details?.current_period_end;
-            const isFuture =
-              periodEnd &&
-              !isNaN(new Date(periodEnd).getTime()) &&
-              new Date(periodEnd).getTime() > Date.now();
-
-            if (!isFuture) {
+            const isPro = await waitForPro(options?.refreshPlan);
+            if (isPro) {
+              handleSuccess(orderId);
+            } else {
               hideOverlay();
               if (typeof window !== 'undefined') {
                 window.removeEventListener('beforeunload', beforeUnloadHandler);
               }
-              const errorMsg =
-                'Payment received but sync delayed. Please contact support if PRO is not active.';
-              options?.showToast?.(errorMsg);
-              reject(new Error(errorMsg));
-              return;
+              options?.showToast?.(
+                'Payment received. Your PRO plan is being activated. Tap Refresh status in a minute.'
+              );
+              resolve({ ok: false, isPro: false, orderId });
             }
-
-            hideOverlay();
-            if (typeof window !== 'undefined') {
-              window.removeEventListener('beforeunload', beforeUnloadHandler);
-            }
-
-            if (options?.navigate) {
-              options.navigate('/dashboard');
-            } else if (typeof window !== 'undefined') {
-              window.location.href = '/dashboard';
-            }
-
-            resolve({ ok: true, orderId });
           } else {
             hideOverlay();
             if (typeof window !== 'undefined') {
@@ -210,6 +279,12 @@ class PaymentService {
           const ebOptions = {
             access_key: checkoutData.access_key,
             onResponse: async (response: any) => {
+              console.info('[Payment] Easebuzz callback', {
+                provider: checkoutData.provider,
+                orderId: checkoutData.order_id,
+                status: response?.status,
+                finalizeEntered: response?.status === 'success',
+              });
               if (response?.status === 'success') {
                 await finalize(checkoutData.order_id);
               } else {
@@ -245,6 +320,18 @@ class PaymentService {
           };
 
           cashfree.checkout(checkoutOptions).then(async (result: any) => {
+            console.info('[Payment] Cashfree callback', {
+              provider: checkoutData.provider,
+              orderId: checkoutData.order_id,
+              error: result?.error,
+              redirect: result?.redirect,
+              paymentDetailsKeys:
+                result?.paymentDetails && typeof result.paymentDetails === 'object'
+                  ? Object.keys(result.paymentDetails)
+                  : [],
+              finalizeEntered:
+                !result?.error && !result?.redirect && Boolean(result?.paymentDetails),
+            });
             if (result?.error) {
               console.error('Payment failed', result.error);
               const isCancelled =

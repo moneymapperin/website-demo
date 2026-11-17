@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { IosInstallBanner } from './IosInstallGuide';
 
 const HASH_ROUTE_MAP: Record<string, string> = {
   pricing: '/pricing',
@@ -28,7 +29,7 @@ export const PublicLayout: React.FC = () => {
   }, [location.pathname, location.hash, navigate]);
 
   return (
-    <div className="min-h-screen bg-background text-white flex flex-col selection:bg-brand-purple/30 selection:text-white">
+    <div className="min-h-screen min-h-[100dvh] bg-background text-white flex flex-col selection:bg-brand-purple/30 selection:text-white">
       {/* Sticky Glassmorphic Navbar */}
       <Navbar />
 
@@ -39,6 +40,9 @@ export const PublicLayout: React.FC = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* iOS PWA Install Banner */}
+      <IosInstallBanner />
     </div>
   );
 };

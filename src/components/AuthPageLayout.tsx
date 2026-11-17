@@ -82,7 +82,7 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
       </div>
 
       {/* Top Header / Branding Bar */}
-      <header className="relative z-10 w-full max-w-5xl mx-auto mb-5 sm:mb-6">
+      <header className="relative z-10 w-full max-w-5xl mx-auto mb-5 sm:mb-6 !p-0 !bg-none !bg-transparent !border-b-0">
         <div className="relative flex items-center justify-center">
           {showBack && (
             <button
